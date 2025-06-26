@@ -1,0 +1,139 @@
+<%-include("../../views/partials/user/header.ejs")%>
+
+<div class="container mt-5">
+    <div class="card shadow rounded-4 p-4">
+        <h3 class="mb-4 text-center" style="color: #046963;">Create User Address</h3>
+        <form id="addressForm" method="POST" action="/addAddress">
+            <div class="row mb-3">
+                <div class="form-group col-md-4 mb-3">
+                    <label for="addressType" class="fw-bold">Address Type</label>
+                    <input type="text" class="form-control" id="addressType" name="addressType">
+                </div>
+                <div class="form-group col-md-4 mb-3">
+                    <label for="name" class="fw-bold">Name</label>
+                    <input type="text" class="form-control" id="name" name="name">
+                </div>
+                <div class="form-group col-md-4 mb-3">
+                    <label for="city" class="fw-bold">City</label>
+                    <input type="text" class="form-control" id="city" name="city">
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="form-group col-md-4 mb-3">
+                    <label for="landMark" class="fw-bold">Landmark</label>
+                    <input type="text" class="form-control" id="landMark" name="landMark">
+                </div>
+                <div class="form-group col-md-4 mb-3">
+                    <label for="state" class="fw-bold">State</label>
+                    <input type="text" class="form-control" id="state" name="state">
+                </div>
+                <div class="form-group col-md-4 mb-3">
+                    <label for="pincode" class="fw-bold">Pincode</label>
+                    <input type="number" class="form-control" id="pincode" name="pincode">
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="form-group col-md-4 mb-3">
+                    <label for="phone" class="fw-bold">Phone</label>
+                    <input type="number" class="form-control" id="phone" name="phone">
+                </div>
+                <div class="form-group col-md-4 mb-3">
+                    <label for="altPhone" class="fw-bold">Alternate Phone</label>
+                    <input type="number" class="form-control" id="altPhone" name="altPhone">
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-center mt-4">
+                <button type="submit" id="submitButton" class="btn btn-success px-5 py-2 rounded-pill">
+                    Submit
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.getElementById('addressForm').addEventListener('submit', function(event) {
+        if (!validateForm()) {
+            event.preventDefault();
+        }
+    });
+
+    function validateForm() {
+        let isValid = true;
+        const requiredFields = ["addressType", "name", "city", "landMark", "state", "pincode", "phone", "altPhone"];
+        requiredFields.forEach(function(field) {
+            const input = document.getElementById(field);
+            const inputValue = input.value.trim();
+            const errorElement = document.getElementById(field + '-error');
+
+            if (inputValue === "") {
+                if (!errorElement) {
+                    const errorMessage = "This field is required.";
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = "text-danger";
+                    errorDiv.textContent = errorMessage;
+                    errorDiv.id = field + '-error';
+                    input.parentNode.appendChild(errorDiv);
+                }
+                isValid = false;
+            } else {
+                if (errorElement) {
+                    errorElement.remove();
+                }
+            }
+        });
+
+        const name = document.getElementById('name').value;
+        const city = document.getElementById('city').value;
+        const landMark = document.getElementById('landMark').value;
+        const state = document.getElementById('state').value;
+        const pincode = document.getElementById('pincode').value;
+        const phone = document.getElementById('phone').value;
+        const altPhone = document.getElementById('altPhone').value;
+
+        const namePattern = /^[A-Za-z\s]+$/;
+        const pincodePattern = /^\d{6}$/;
+        const phonePattern = /^\d{10}$/;
+
+        if (!namePattern.test(name)) {
+            Swal.fire({ title: 'Error', text: 'Name should contain alphabets only.', icon: 'error' });
+            isValid = false;
+        }
+        if (!namePattern.test(city)) {
+            Swal.fire({ title: 'Error', text: 'City should contain alphabets only.', icon: 'error' });
+            isValid = false;
+        }
+        if (!namePattern.test(landMark)) {
+            Swal.fire({ title: 'Error', text: 'Landmark should contain alphabets only.', icon: 'error' });
+            isValid = false;
+        }
+        if (!namePattern.test(state)) {
+            Swal.fire({ title: 'Error', text: 'State should contain alphabets only.', icon: 'error' });
+            isValid = false;
+        }
+        if (!pincodePattern.test(pincode)) {
+            Swal.fire({ title: 'Error', text: 'Pincode should be a 6-digit number.', icon: 'error' });
+            isValid = false;
+        }
+        if (!phonePattern.test(phone)) {
+            Swal.fire({ title: 'Error', text: 'Phone number should be a 10-digit number.', icon: 'error' });
+            isValid = false;
+        }
+        if (!phonePattern.test(altPhone)) {
+            Swal.fire({ title: 'Error', text: 'Alternate phone number should be a 10-digit number.', icon: 'error' });
+            isValid = false;
+        }
+        if (phone === altPhone) {
+            Swal.fire({ title: 'Error', text: 'Phone and alternate phone should be different.', icon: 'error' });
+            isValid = false;
+        }
+
+        return isValid;
+    }
+</script>
+
+<%-include("../../views/partials/user/footer.ejs")%>

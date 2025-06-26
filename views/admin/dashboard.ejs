@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Bootstrap CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    body {
+      overflow-x: hidden;
+    }
+
+    .sidebar {
+      height: 100vh;
+      background-color: #343a40;
+      color: white;
+    }
+
+    .sidebar a {
+      color: white;
+      text-decoration: none;
+      display: block;
+      padding: 15px;
+      font-size: 16px;
+    }
+
+    .sidebar a:hover {
+      background-color: #495057;
+    }
+
+    .content {
+      padding: 20px;
+    }
+
+    .topbar {
+      background-color: #f8f9fa;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      border-bottom: 1px solid #dee2e6;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="d-flex">
+    <!-- Sidebar -->
+    <div class="sidebar d-flex flex-column position-fixed p-3" style="width: 200px;">
+      <h4 class="mb-4">baeboo</h4>
+      <a href="/admin/dashboard"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a>
+      <a href="/admin/users"><i class="bi bi-people me-2"></i>Customers</a>
+      <a href="/admin/addCategory"><i class="bi bi-tags me-2"></i>Category</a>
+      <a href="/admin/brands"><i class="bi bi-list-ul me-2"></i>Brands</a>
+      <a href="/admin/addProducts"><i class="bi bi-plus-square me-2"></i>Add Product</a>
+      <a href="/admin/products"><i class="bi bi-box-seam me-2"></i>Products</a>
+      <a href="/admin/adminOrders"><i class="bi bi-cart me-2"></i>Orders</a>
+      <a href="/admin/coupon"><i class="bi bi-ticket-perforated me-2"></i>Coupons</a>
+      <a href="/admin/salesReport"><i class="bi bi-bar-chart-line me-2"></i>Sales Report</a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-grow-1" style="margin-left: 200px;">
+      <!-- Top Bar -->
+      <div class="topbar dropdown" style="position: relative;">
+        <i class="bi bi-person-circle fs-4 dropdown-toggle" id="userDropdown" data-bs-toggle="dropdown"
+          aria-expanded="false" style="cursor:pointer;"></i>
+        <ul class="dropdown-menu" aria-labelledby="userDropdown" style="right: 0; left:auto;">
+          <li><a class="dropdown-item" href="/admin/logout">Logout</a></li>
+        </ul>
+
+      </div>
+
+      <!-- Page Content -->
+      <div class="content">
+        <!-- SALES OVERVIEW FILTER -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h4>Sales Overview</h4>
+          <form class="d-flex" method="get" onsubmit="return validateDates()" id="salesFilterForm">
+            <input type="date" name="startDate" class="form-control me-2" id="startDate" value="<%= startDate || '' %>">
+            <input type="date" name="endDate" class="form-control me-2" id="endDate" value="<%= endDate || '' %>">
+            <select name="range" class="form-select me-2" onchange="this.form.submit()">
+              <option value="">Select Range</option>
+              <option value="7" <%=range==7 ? 'selected' : '' %>>Last 7 Days</option>
+              <option value="30" <%=range==30 ? 'selected' : '' %>>Last 30 Days</option>
+              <option value="year" <%=range=='year' ? 'selected' : '' %>>This Year</option>
+            </select>
+            <button class="btn btn-dark" type="submit">Apply</button>
+          </form>
+        </div>
+        <!-- SUMMARY CARDS -->
+        <div class="row mb-3">
+          <div class="col-md-3">
+            <div class="card text-white bg-primary shadow">
+              <div class="card-body">
+                <h5 class="card-title">Total Orders</h5>
+                <h3>
+                  <%= totalOrders %>
+                </h3>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card text-white bg-success shadow">
+              <div class="card-body">
+                <h5 class="card-title">Total Sales</h5>
+                <h3>₹ <%= totalSales %>
+                </h3>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card text-white bg-danger shadow">
+              <div class="card-body">
+                <h5 class="card-title">Total Discount</h5>
+                <h3>₹ <%= totalDiscount %>
+                </h3>
+              </div>
+            </div>
+          </div>
+           <div class="col-md-3">
+            <div class="card text-white bg-success shadow">
+              <div class="card-body">
+                <h5 class="card-title">Net Revenue</h5>
+                <h3>₹ <%= netRevenue %>
+                </h3>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        
+
+        <!-- CHARTS -->
+        <div class="row mb-4">
+          <div class="col-md-8">
+            <div class="card p-3 shadow">
+              <canvas id="salesChart"></canvas>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card p-3 shadow">
+              <canvas id="categoryPie"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- TOP PRODUCTS / BRANDS / CATEGORIES -->
+        <div class="row">
+          <div class="col-md-6 mb-4">
+            <div class="card shadow p-3">
+              <h5>Top 3 Products</h5>
+              <% topProducts.forEach(product=> { %>
+                <div class="d-flex align-items-center mb-3">
+                  <img src="/uploads/re-image/<%= product.image %>" alt="" class="rounded me-3" width="50" height="50">
+                  <div class="flex-grow-1">
+                    <strong>
+                      <%= product.name %>
+                    </strong><br>
+                    <small>
+                      <%= product.brand %>
+                    </small>
+                  </div>
+                  <span class="badge bg-dark rounded-pill">
+                    <%= product.totalQty %>
+                  </span>
+                </div>
+                <% }) %>
+            </div>
+          </div>
+          <div class="col-md-3 mb-4">
+            <div class="card shadow p-3">
+              <h5>Top 3 Brands</h5>
+              <table class="table table-sm">
+                <% topBrands.forEach(brand=> { %>
+                  <tr>
+                    <td>
+                      <%= brand.name %>
+                    </td>
+                    <td class="text-end">
+                      <%= brand.totalQty %>
+                    </td>
+                  </tr>
+                  <% }) %>
+              </table>
+            </div>
+          </div>
+          <div class="col-md-3 mb-4">
+            <div class="card shadow p-3">
+              <h5>Top 3 Categories</h5>
+              <table class="table table-sm">
+                <% topCategories.forEach(c=> { %>
+                  <tr>
+                    <td>
+                      <%= c.name %>
+                    </td>
+                    <td class="text-end">
+                      <%= c.totalQty %>
+                    </td>
+                  </tr>
+                  <% }) %>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- CHART JS CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+<script>
+  // SALES LINE CHART
+  const salesLabels = JSON.parse('<%- JSON.stringify(salesChart.labels) %>');
+  const salesData = JSON.parse('<%- JSON.stringify(salesChart.data) %>');
+
+  new Chart(document.getElementById("salesChart"), {
+    type: 'line',
+    data: {
+      labels: salesLabels,
+      datasets: [{
+        label: "Sales ₹",
+        data: salesData,
+        fill: true,
+        backgroundColor: "rgba(54, 162, 235, 0.2)",
+        borderColor: "#36a2eb"
+      }]
+    }
+  });
+
+  // CATEGORY PIE CHART
+  const categoryLabels = JSON.parse('<%- JSON.stringify(categoryChart.labels) %>');
+  const categoryData = JSON.parse('<%- JSON.stringify(categoryChart.data) %>');
+
+  new Chart(document.getElementById("categoryPie"), {
+    type: 'doughnut',
+    data: {
+      labels: categoryLabels,
+      datasets: [{
+        data: categoryData,
+        backgroundColor: ["#36a2eb", "#ff6384", "#ffcd56", "#4bc0c0", "#9966ff"]
+      }]
+    }
+  });
+
+  function validateDates(){
+    const start = document.getElementById("startDate").value;
+    const end = document.getElementById("endDate").value;
+    const today = new Date().toISOString().split("T")[0];
+
+    if(!start && !end){
+      Swal.fire({
+        icon:"warning",
+        title:"Invalid date range",
+        text:"Please select a date range"
+      })
+      return false;
+    }
+
+    if((start && !end) || (!start && end)){
+      Swal.fire({
+        icon: "warning",
+        title: "Invalid date range",
+        text: "Please select both start and end dates"
+      })
+      return false;
+    }
+    if(start && end) {
+      if( start > end){
+      Swal.fire({
+        icon: "warning",
+        title:"Invalid date range",
+        text: "Start date cannot be after end date "
+      })
+      return false;
+    }
+    if(start > today || end > today){
+      Swal.fire({
+        icon:"warning",
+        title:"Invalid date Selection",
+        text:"Start and End dates cannot be in future"
+      })
+    }
+    return false;
+  }
+    return true;
+  }
+</script>
+</body>
+
+</html>

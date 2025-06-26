@@ -1,0 +1,318 @@
+<%- include("../../views/partials/user/header.ejs") %>
+
+    <style>
+        .use-button {
+            background-color: #4caf50;
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .use-button:hover {
+            background-color: #45a049;
+        }
+    </style>
+
+    <section>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <h2>Payment Methods</h2>
+                    <p>Choose your preferred payment method:</p>
+                    <ul class="list-group">
+                        <div class="payment_method">
+                            <div class="custome-radio ml-150">
+                                <input class="form-check-input payment" type="radio" value="cod" name="payment_option"
+                                    id="CashOnDelivey" checked>
+                                <label class="form-check-label" for="CashOnDelivey">Cash on Delivery</label>
+                            </div>
+                            <div class="custome-radio ml-150">
+                                <input class="form-check-input payment" type="radio" value="razorpay"
+                                    name="payment_option" id="RazorPay">
+                                <label class="form-check-label" for="RazorPay">RazorPay</label>
+                            </div>
+                        </div>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="container col-6 mt-3">
+                <% let totalAmount=grandTotal - discount; let couponDiscount=coupon ? coupon.Discount : 0; totalAmount
+                    -=couponDiscount; let deliveryCharge=totalAmount < 500 ? 50 : 0; totalAmount +=deliveryCharge; %>
+
+                    <div class="ml-150">
+                        <table class="table mt-45">
+                            <tbody>
+                                <tr>
+                                    <th>Delivery Charge</th>
+                                    <td colspan="2" id="deliveryCharge">₹<%= deliveryCharge.toFixed(2) %>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <th>Discount</th>
+                                    <td colspan="2" id="discount">₹<%= discount.toFixed(2) %>
+                                    </td>
+                                </tr>
+                                <% if (coupon) { %>
+                                    <tr>
+                                        <th>Coupon (<%= coupon.code %>)</th>
+                                        <td colspan="2" id="couponDiscount">₹<%= couponDiscount.toFixed(2) %>
+                                        </td>
+                                    </tr>
+                                    <% } %>
+                                        <tr>
+                                            <th>Total Before Discount</th>
+                                            <td colspan="2">₹<%= grandTotal.toFixed(2) %>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th><strong>Final Payable</strong></th>
+                                            <td colspan="2">
+                                                <span class="font-xl text-brand fw-900" id="totalValue">₹<%=
+                                                        totalAmount.toFixed(2) %></span>
+                                            </td>
+                                        </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="ml-65">
+                            <button type="button" class="btn" onclick="placeOrder('<%= user._id %>')">Place
+                                Order</button>
+                        </div>
+                    </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        async function placeOrder(userId) {
+            const urlParams = new URLSearchParams(window.location.search);
+            let address = urlParams.get("addressId");
+
+            let payment = $("input[name='payment_option']:checked").val();
+            const sum = document.getElementById("totalValue").textContent;
+            const numericValue = parseInt(sum.replace(/[^\d]/g, ''));
+            const discountValue = parseInt(document.getElementById("discount").textContent.replace(/[^\d]/g, '')) || 0;
+            const deliveryValue = parseInt(document.getElementById("deliveryCharge").textContent.replace(/[^\d]/g, '')) || 0;
+
+
+            if (!address) {
+                return Swal.fire({
+                    title: 'No Address Selected!',
+                    text: 'Please select a delivery address.',
+                    icon: 'error',
+                    timer: 3000,
+                });
+            }
+
+            if (!payment) {
+                return Swal.fire({
+                    title: 'No Payment Method Selected!',
+                    text: 'Please choose a payment method.',
+                    icon: 'error',
+                    timer: 3000,
+                });
+            }
+
+            if (payment === "cod") {
+                $.ajax({
+                    url: '/orderPlaced',
+                    method: 'POST',
+                    data: {
+                        totalPrice: numericValue,
+                        createdOn: new Date().getTime(),
+                        date: new Date(),
+                        addressId: address,
+                        payment: payment,
+                        discount: discountValue,
+                        deliveryCharge: deliveryValue
+                    },
+                    success: function (response) {
+                        if (response && response.method === "cod" && response.order) {
+                            Swal.fire({
+                                title: "Order Successful!",
+                                text: "Your order has been placed with Cash on Delivery.",
+                                icon: "success",
+                                confirmButtonText: "Go to Success Page"
+                            }).then(() => {
+                                window.location.href = ` /orderSuccess?id=${response.order._id}`;
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Order Failed!',
+                                text: 'Something went wrong while placing your order.',
+                                icon: 'error',
+                                timer: 3000
+                            });
+                        }
+                    },
+                    error: function () {
+                        Swal.fire({
+                            title: 'Server Error!',
+                            text: 'Please try again later.',
+                            icon: 'error',
+                            timer: 3000
+                        });
+                    }
+                });
+            } else if (payment === "razorpay") {
+                $.ajax({
+                    url: '/orderPlaced',
+                    method: 'POST',
+                    data: {
+                        addressId: address,
+                        payment: payment,
+                        totalPrice: numericValue,
+                        discount: discountValue,
+                        deliveryCharge: deliveryValue
+                    },
+                    success: function (internalOrderResponse) {
+                        if (internalOrderResponse.order && internalOrderResponse.order._id) {
+                            const internalOrderId = internalOrderResponse.order.orderId;
+
+                            // Now create Razorpay order
+                            $.ajax({
+                                url: '/createRazorpayOrder',
+                                method: 'POST',
+                                data: {
+                                    amount: numericValue / 100
+                                },
+                                success: function (razorpayResponse) {
+                                    if (razorpayResponse.order && razorpayResponse.key_id) {
+                                        const options = {
+                                            "key": razorpayResponse.key_id,
+                                            "amount": razorpayResponse.order.amount,
+                                            "currency": "INR",
+                                            "name": "baeboo",
+                                            "description": `Pay ₹${(razorpayResponse.order.amount / 100).toFixed(2)} securely`,
+                                            "image": "https://yourdomain.com/logo.png",
+                                            "order_id": razorpayResponse.order.id,
+                                            "handler": function (response) {
+                                                verifyPayment(response, payment, internalOrderResponse.order.orderId, address);
+                                            },
+                                            "modal": {
+                                                "ondismiss": function () {
+                                                    $.ajax({
+                                                        url: '/markOrderFailed',
+                                                        method: 'POST',
+                                                        data: {
+                                                            orderId: internalOrderResponse.order.orderId
+                                                        },
+                                                        complete: function () {
+                                                            window.location.href = `/orderFailure/${internalOrderResponse.order.orderId}`;
+                                                        }
+                                                    });
+                                                }
+                                            },
+                                            "prefill": {
+                                                "name": "<%= user.name %>",
+                                                "email": "<%= user.email %>",
+                                                "contact": "<%= user.phone %>"
+                                            },
+                                            "theme": {
+                                                "color": "#3399cc"
+                                            }
+                                        };
+                                        const rzp = new Razorpay(options);
+                                        rzp.open();
+                                    }
+                                }
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Order Creation Failed!',
+                                text: 'Could not create order. Try again.',
+                                icon: 'error'
+                            });
+                        }
+                    },
+                    error: function () {
+                        Swal.fire({
+                            title: 'Order Failed!',
+                            text: 'Server error while placing order.',
+                            icon: 'error'
+                        });
+                    }
+                });
+            }
+        }
+
+        window.onload = () => {
+            const totalAmountElement = document.getElementById("totalValue");
+            if (!totalAmountElement) return;
+
+            const totalAmount = parseInt(totalAmountElement.textContent.replace(/[^\d]/g, ''));
+            console.log("Total amount is:", totalAmount); // 👈 ADD THIS LINE
+            const codOption = document.getElementById("CashOnDelivey");
+            const codLabel = codOption?.nextElementSibling;
+
+            if (codOption && totalAmount > 100000) {
+                codOption.disabled = true;
+                codOption.checked = false;
+
+                if (codLabel && !codLabel.innerHTML.includes("Not available")) {
+                    codLabel.innerHTML += " <span style='color:red'>(Not available for orders above ₹1000)</span>";
+                }
+
+                // Optional: auto-select Razorpay if available
+                const razorpayOption = document.getElementById("RazorPay");
+                if (razorpayOption) {
+                    razorpayOption.checked = true;
+                }
+            }
+        };
+
+
+        function verifyPayment(order, paymentMethod, orderId, addressId) {
+            $.ajax({
+                url: '/verifyPayment',
+                method: 'POST',
+                data: {
+                    order,
+                    payment: paymentMethod,
+                    orderId,
+                    addressId
+                },
+                success: function (response) {
+                    if (response.status) {
+                        // Payment verified, now confirm the order
+                        $.ajax({
+                            url: '/paymentConfirm',
+                            method: 'POST',
+                            data: {
+                                status: "Paid",
+                                orderId
+                            },
+                            success: () => {
+                                window.location.href = '/orderSuccess';
+                            },
+                            error: () => {
+                                Swal.fire({
+                                    title: 'Order Confirm Failed!',
+                                    text: 'Could not confirm the order. Please contact support.',
+                                    icon: 'error'
+                                });
+                            }
+                        });
+                    } else {
+                        window.location.href = '/orderFailure';
+                    }
+                },
+                error: () => {
+                    Swal.fire({
+                        title: 'Server Error!',
+                        text: 'Something went wrong during payment verification.',
+                        icon: 'error'
+                    });
+                }
+            });
+        }
+    </script>
+
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+    <%- include("../../views/partials/user/footer.ejs") %>

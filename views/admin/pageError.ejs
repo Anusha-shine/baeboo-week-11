@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Bootstrap CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    body {
+      overflow-x: hidden;
+    }
+    h1 {
+        color: #333;
+    }
+    p {
+        color: #666;
+        margin-bottom: 20px;
+    }
+    button {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+    }
+    button:hover {
+        background-color: #0056b3;
+    }
+    .sidebar {
+      height: 100vh;
+      background-color: #343a40;
+      color: white;
+    }
+    .sidebar a {
+      color: white;
+      text-decoration: none;
+      display: block;
+      padding: 15px;
+      font-size: 16px;
+    }
+    .sidebar a:hover {
+      background-color: #495057;
+    }
+    .content {
+      margin-left: 200px;
+      padding: 20px;
+    }
+    .topbar {
+      background-color: #f8f9fa;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      border-bottom: 1px solid #dee2e6;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="d-flex">
+    <!-- Sidebar -->
+    <div class="sidebar d-flex flex-column position-fixed p-3" style="width: 200px;">
+      <h4>baeboo</h4>
+      <a href="#"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a>
+      <a href="/admin/users"><i class="bi bi-people me-2"></i>Customers</a>
+      <a href="#"><i class="bi bi-people me-2"></i>Category</a>
+      <a href="#"><i class="bi bi-list-ul me-2"></i>Brands</a>
+      <a href="#"><i class="bi bi-plus-square me-2"></i>Add Product</a>
+      <a href="#"><i class="bi bi-plus-square me-2"></i>Products</a>
+      <a href="#"><i class="bi bi-plus-square me-2"></i>Orders</a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-grow-1" style="margin-left: 200px;">
+      <!-- Top Bar -->
+      <div class="topbar">
+        <i class="bi bi-person-circle fs-4"></i>
+      </div>
+
+      <!-- Page Content -->
+      <div class="content">
+        <h1>Error Page Admin</h1>
+        <p>An error occured</p>
+        <button onclick="gohome">Go to Login Page</button>
+      </div>
+    </div>
+  </div>
+  <script>
+    function gohome() {
+      window.location.href = '/admin/login';
+    }
+  </script>
+</body>
+</html>

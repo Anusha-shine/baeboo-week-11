@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Baeboo Login" />
+    <meta name="keywords" content="Baeboo, login, fashion" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Baeboo - Login</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800;900&display=swap" rel="stylesheet" />
+
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="css/bootstrap.min.css" />
+    <link rel="stylesheet" href="css/font-awesome.min.css" />
+    <link rel="stylesheet" href="css/style.css" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" />
+
+    <!-- Custom Styling -->
+    <style>
+      body,
+      html {
+        height: 100%;
+        margin: 0;
+        font-family: 'Nunito Sans', sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #f8f9fa;
+      }
+
+      .container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+      }
+
+      .login-box {
+        background: white;
+        padding: 30px 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 400px;
+      }
+
+      .login-box h2 {
+        text-align: center;
+        margin-bottom: 25px;
+        color: #333;
+        font-weight: 700;
+      }
+
+      label {
+        display: block;
+        margin-top: 15px;
+        font-weight: 600;
+      }
+
+      input {
+        width: 100%;
+        padding: 10px 12px;
+        margin-top: 8px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+      }
+
+      .login-btn {
+        width: 100%;
+        margin-top: 20px;
+        padding: 12px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+
+      .login-btn:hover {
+        background-color: #0056b3;
+      }
+
+      .extra-links {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 20px;
+        text-align: center;
+      }
+
+      .extra-links a {
+        color: #007bff;
+        text-decoration: none;
+        font-size: 14px;
+      }
+
+      .extra-links a:hover {
+        text-decoration: underline;
+      }
+
+      .error-message {
+        color: red;
+        font-size: 0.75rem;
+        display: none;
+      }
+
+      .alert-danger {
+        margin-top: 15px;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <form id="loginform" method="post" action="/login" class="login-box">
+        <h2>Baeboo</h2>
+
+        <label for="email">Email address</label>
+        <input type="email" name="email" id="email" placeholder="Enter email" />
+        <div id="error1" class="error-message"></div>
+
+        <label for="password">Password</label>
+        <input type="password" name="password" id="password" placeholder="Password" />
+        <div id="error2" class="error-message"></div>
+
+        <% if (locals.msg && msg.length > 0) { %>
+          <div class="alert alert-danger text-center"><%= msg %></div>
+        <% } %>
+
+        <button type="submit" class="login-btn">Log In</button>
+
+        <div class="extra-links">
+          <a href="/forgot-password">Forgot Password?</a>
+          <a href="/auth/google">
+            <img src="https://img.icons8.com/color/16/000000/google-logo.png" alt="Google" />
+            Login with Google
+          </a>
+          <a href="/signup">Create new account</a>
+        </div>
+      </form>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+      const emailid = document.getElementById("email");
+      const passid = document.getElementById("password");
+      const error1 = document.getElementById("error1");
+      const error2 = document.getElementById("error2");
+      const loginform = document.getElementById("loginform");
+
+      function emailValidateChecking() {
+        const emailval = emailid.value.trim();
+        const emailpattern = /^[a-zA-Z0-9._-]+@([a-zA-Z0-9.-]+)\.([a-zA-Z]{2,4})$/;
+        if (!emailpattern.test(emailval)) {
+          error1.style.display = "block";
+          error1.innerHTML = "Invalid email format.";
+        } else {
+          error1.style.display = "none";
+          error1.innerHTML = "";
+        }
+      }
+
+      function passValidateChecking() {
+        const passval = passid.value.trim();
+        if (passval.length < 8) {
+          error2.style.display = "block";
+          error2.innerHTML = "Password must be at least 8 characters.";
+        } else {
+          error2.style.display = "none";
+          error2.innerHTML = "";
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        loginform.addEventListener("submit", function (e) {
+          emailValidateChecking();
+          passValidateChecking();
+
+          if (error1.innerHTML || error2.innerHTML) {
+            e.preventDefault();
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

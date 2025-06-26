@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Referral Code</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap CSS & Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+  <style>
+    body {
+      background: #f4f7fc;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .header {
+      background-color: white;
+      padding: 20px 0;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .header__logo h2 {
+      margin: 0;
+      font-size: 28px;
+      font-weight: bold;
+      color: #28a745;
+    }
+
+    .header__menu ul {
+      list-style: none;
+      padding-left: 0;
+      margin: 0;
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .header__menu ul li a {
+      text-decoration: none;
+      color: #333;
+      font-weight: 600;
+      font-size: 16px;
+    }
+
+    .header__menu ul li a:hover,
+    .header__menu ul li.active a {
+      color: #28a745;
+    }
+
+    .referral-container {
+      max-width: 700px;
+      margin: 100px auto 40px;
+    }
+
+    .referral-code {
+      font-size: 1.25rem;
+      background-color: #e9ecef;
+      padding: 8px 12px;
+      border-radius: 6px;
+      display: inline-block;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .card {
+      border: none;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .card-header {
+      font-size: 18px;
+      padding: 16px 20px;
+    }
+
+    .card-body {
+      padding: 20px;
+    }
+
+    .input-group .btn {
+      border-radius: 0 6px 6px 0;
+    }
+
+    .copy-alert {
+      display: none;
+      font-size: 14px;
+    }
+
+    .alert-warning {
+      margin-top: 100px;
+    }
+
+    .badge {
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-3 col-md-3">
+        <div class="header__logo">
+          <h2>baeboo</h2>
+        </div>
+      </div>
+      <div class="col-lg-6 col-md-6">
+        <nav class="header__menu">
+          <ul>
+            <li class="active"><a href="/">Home</a></li>
+            <li><a href="/shop">Shop</a></li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Referral Code Section -->
+<div class="container referral-container">
+  <% if (referral) { %>
+    <div class="card shadow">
+      <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+        <span>Your Referral Code</span>
+        <span class="badge bg-light text-success">Share & Earn</span>
+      </div>
+      <div class="card-body">
+        <p><strong>Referral Code:</strong> 
+          <span class="referral-code"><%= referral.code %></span>
+        </p>
+        <p><strong>Reward:</strong> ₹<%= referral.rewardAmount %></p>
+        <p><strong>Usage:</strong> <%= referral.usedCount %> / <%= referral.usageLimit %></p>
+
+        <hr>
+
+        <label class="form-label">Your Referral Link</label>
+        <div class="input-group mb-3">
+          <input id="referralLink" class="form-control" readonly value="https://yourwebsite.com/signup?ref=<%= referral.code %>">
+          <button class="btn btn-outline-secondary copy-btn" onclick="copyReferralLink()">
+            <i class="bi bi-clipboard"></i>
+          </button>
+        </div>
+        <div id="copyAlert" class="alert alert-success py-2 copy-alert" role="alert">
+          Link copied to clipboard!
+        </div>
+      </div>
+    </div>
+  <% } else { %>
+    <div class="alert alert-warning text-center">
+      You don’t have a referral code yet.
+    </div>
+  <% } %>
+</div>
+
+<!-- Bootstrap JS & Copy Script -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function copyReferralLink() {
+    const linkInput = document.getElementById("referralLink");
+    const copyAlert = document.getElementById("copyAlert");
+
+    linkInput.select();
+    linkInput.setSelectionRange(0, 99999);
+    navigator.clipboard.writeText(linkInput.value).then(() => {
+      copyAlert.style.display = "block";
+      setTimeout(() => copyAlert.style.display = "none", 2000);
+    });
+  }
+</script>
+
+</body>
+</html>

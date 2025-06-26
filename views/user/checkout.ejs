@@ -1,0 +1,310 @@
+<%-include("../../views/partials/user/header.ejs")%>
+
+    <style>
+        .use-button {
+            background-color: #4caf50;
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .use-button:hover {
+            background-color: #45a049;
+        }
+    </style>
+    <section>
+        <div class="container">
+            <div class="row">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="order_review">
+                            <div class="mb-20">
+                                <h4>Products</h4>
+                            </div>
+                            <div class="table-responsive order_table text-center">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Image</th>
+                                            <th>Product</th>
+                                            <th>Quantity</th>
+                                            <th>Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+
+                                        <% if (product && Array.isArray(product) && product.length> 0) { %>
+                                            <% for (let i=0; i < product.length; i++) { %>
+                                                <tr>
+                                                    <td class="image product-thumbnail"><img
+                                                            src="/uploads/re-image/<%= product[i].productDetails[0].productImage[0] %>"
+                                                            alt="#"></td>
+                                                    <td>
+                                                        <h5><a href="shop-product-full.html">
+                                                                <%= product[i].productDetails[0].productName %>
+                                                            </a></h5>
+                                                    </td>
+                                                    <td>
+                                                        <%= product[i].quantity %>
+                                                    </td>
+                                                    <td>
+                                                        <div>
+                                                            <small><s>₹<%= product[i].productDetails[0].salesPrice *
+                                                                        product[i].quantity %></s></small><br>
+                                                            <small>Offer: <%= product[i].productDetails[0].productOffer
+                                                                    %>%</small><br>
+                                                            <small>Discount: ₹<%= product[i].discount.toFixed(2) %>
+                                                            </small><br>
+                                                            <strong>₹<%= product[i].finalAmount.toFixed(2) %></strong>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <% } %>
+                                                    <% } else { %>
+                                                        <tr>
+                                                            <td colspan="4">No products found</td>
+                                                        </tr>
+                                                        <% } %>
+                                    </tbody>
+
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="col-8">
+                        <div class="row align-items-start mt-10 ml-190">
+                            <% if (locals.userAddress) { %>
+                                <% userAddress.address.forEach((address)=> { %>
+                                    <div class="col-lg-6">
+                                        <div class="card">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio"
+                                                    id="addressRadio<%= address._id %>" name="selectedAddress"
+                                                    value="<%= address._id %>">
+                                                <label class="form-check-label"
+                                                    for="addressRadio<%= address._id %>">Select Address</label>
+                                            </div>
+
+                                            <div class="card-header">
+                                                <h5 class="mb-0">
+                                                    <%= address.addressType %>
+                                                </h5>
+                                            </div>
+                                            <div class="card-body">
+                                                <address>
+                                                    <%= address.name %><br />
+                                                        <%= address.city %>,<br />
+                                                            <%= address.landMark %> <br />
+                                                                <%= address.state %>
+                                                </address>
+                                                <p>
+                                                    <%= address.pincode %>
+                                                </p>
+                                                <p>
+                                                    <%= address.phone %>
+                                                </p>
+                                                <p>
+                                                    <%= address.altPhone %>
+                                                </p>
+                                                <div class="d-flex justify-content-between">
+                                                    <a href="/editAddress?id=<%= address._id %>"
+                                                        class="btn-small">Edit</a>
+                                                    <a href="/deleteAddress?id=<%= address._id %>" class="btn-small"
+                                                        onclick="return confirm('Are you sure you want to delete this address?')">Delete</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <% }) %>
+                                        <% } else { %>
+                                            <div class="col-lg-6 mb-3">
+                                                <div class="card">
+                                                    <div class="card-header">
+                                                        <h5 class="mb-0"></h5>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <address>
+                                                            No address
+                                                        </address>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <% } %>
+                                                <div class="col-lg-6 mb-3">
+                                                    <a href="/addAddress">
+                                                        <button class="btn btn-primary w-100">Add address</button>
+                                                    </a>
+                                                </div>
+                        </div>
+                    </div>
+                    <!-- Coupon Section -->
+                    <div class="col-12 mt-4">
+                        <div class="card p-3">
+                            <h5>Apply Coupon</h5>
+                            <div class="d-flex align-items-center">
+                                <input type="text" id="couponCode" class="form-control me-2"
+                                    placeholder="Enter coupon code" style="max-width: 250px;">
+                                <button class="use-button me-2" onclick="applyCoupon()">Apply</button>
+                                <button class="btn btn-danger" onclick="removeCoupon()">Remove</button>
+                            </div>
+                            <div id="couponMessage" class="mt-2 text-success"></div>
+                            <div id="discountInfo" class="mt-2 text-dark"></div>
+                        </div>
+                    </div>
+                    <!-- View Coupons Toggle -->
+                    <div class="mt-2">
+                        <a href="#" onclick="toggleCoupons()" class="text-primary">View Available Coupons</a>
+                    </div>
+
+                    <!-- Coupon List (hidden by default) -->
+                    <div id="availableCoupons" class="mt-2" style="display: none;"></div>
+
+                    <!-- Order Summary with Coupon -->
+                    <div class="col-12 mt-4">
+                        <div class="card p-3">
+                            <h5>Order Summary</h5>
+                            <p><strong>Subtotal:</strong> ₹<%= grandTotal.toFixed(2) %>
+                            </p>
+                            <p><strong>Product Discount:</strong> - ₹<%= discount.toFixed(2) %>
+                            </p>
+
+                            <% if (coupon) { %>
+                                <p><strong>Coupon (<%= coupon.couponName %>):</strong> - ₹<%= coupon.Discount %>
+                                </p>
+                                <% } %>
+
+                                    <% const couponDiscount=coupon?.Discount || 0; const subTotal=grandTotal - discount
+                                        - couponDiscount; const deliveryCharge=subTotal>= 500 ? 0 : 50;
+                                        const finalPayable = subTotal + deliveryCharge;
+                                        %>
+
+                                        <p><strong>Delivery Charges:</strong> ₹<%= deliveryCharge %>
+                                        </p>
+
+                                        <h5><strong>Total Payable:</strong> ₹<%= finalPayable.toFixed(2) %>
+                                        </h5>
+
+                        </div>
+                    </div>
+
+                    <div>
+                        <button class="btn btn-success w-100" onclick="goToPayment()">Continue to Payment</button>
+                    </div>
+                </div>
+    </section>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        function goToPayment() {
+            const selectedAddress = document.querySelector('input[name="selectedAddress"]:checked');
+            if (!selectedAddress) {
+                Swal.fire({
+                    title: 'No Address Selected!',
+                    text: 'Please select a delivery address.',
+                    icon: 'error',
+                    timer: 3000
+                });
+                return;
+            }
+
+            const addressId = selectedAddress.value;
+            window.location.href = `/payment?addressId=${addressId}`;
+        }
+        function toggleCoupons() {
+            const couponListDiv = document.getElementById("availableCoupons");
+            if (couponListDiv.style.display === "none") {
+                fetch('/availableCoupons')
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success && data.coupons.length > 0) {
+                            couponListDiv.innerHTML = data.coupons.map(coupon => `
+                        <div class="card p-2 mb-2">
+                            <strong>${coupon.couponName}</strong><br>
+                            Discount: ₹${coupon.offerPrice}<br>
+                            Min Purchase: ₹${coupon.minimumPrice}<br>
+                            Valid till: ${new Date(coupon.endDate).toLocaleDateString()}
+                            <div class="mt-1">
+                                <button class="btn btn-sm btn-outline-success" onclick="useThisCoupon('${coupon.couponName}')">Use</button>
+                            </div>
+                        </div>
+                    `).join('');
+                        } else {
+                            couponListDiv.innerHTML = "<p>No available coupons</p>";
+                        }
+                        couponListDiv.style.display = "block";
+                    })
+                    .catch(err => {
+                        console.error("Error loading coupons", err);
+                        couponListDiv.innerHTML = "<p>Error loading coupons</p>";
+                        couponListDiv.style.display = "block";
+                    });
+            } else {
+                couponListDiv.style.display = "none";
+            }
+        }
+
+        function useThisCoupon(code) {
+            document.getElementById("couponCode").value = code;
+            applyCoupon();
+        }
+
+
+        function applyCoupon() {
+            const couponCode = document.getElementById('couponCode').value.trim();
+            const finalAmount = Number('<%= (grandTotal - discount).toFixed(2) %>');
+
+            if (!couponCode) {
+                Swal.fire("Enter a coupon code before applying", "", "warning");
+                return;
+            }
+
+            fetch('/applyCoupon', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ couponCode, finalAmount })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire("Coupon Applied!", `You saved ₹${data.discount}`, "success")
+                            .then(() => location.reload());
+                    } else {
+                        Swal.fire("Error", data.message, "error");
+                    }
+                })
+                .catch(err => {
+                    console.error("Apply coupon error:", err);
+                    Swal.fire("Oops!", "Something went wrong while applying the coupon", "error");
+                });
+        }
+
+        function removeCoupon() {
+            fetch('/removeCoupon', {
+                method: 'POST'
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire("Coupon Removed", "", "success")
+                            .then(() => location.reload());
+                    } else {
+                        Swal.fire("Error", data.message || "Could not remove coupon", "error");
+                    }
+                })
+                .catch(err => {
+                    console.error("Remove coupon error:", err);
+                    Swal.fire("Oops!", "Something went wrong while removing the coupon", "error");
+                });
+        }
+    </script>
+
+    <%-include("../../views/partials/user/footer.ejs")%>

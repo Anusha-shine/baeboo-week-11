@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Email Verification</title>
+  <link rel="stylesheet" href="/otp.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css"/>
+</head>
+<body>
+  <div class="container">
+    <div class="box">
+      <h2>Email Verification Page</h2>
+      <form id="otpForm" action="/verify-otp" method="POST" onsubmit="return validateOTPForm()">
+        <label for="otp">Enter OTP:</label>
+        <input type="text" id="otp" name="otp" placeholder="Enter OTP" required>
+
+        <button type="submit" class="verify-btn">Verify Email</button>
+        
+        <div id="timer" class="timer">
+            <span id="timerValue">60</span>
+        </div>
+        <div class="resend">
+            <button 
+                type="button"
+                class="btn btn-secondary"
+                onclick="resendOTP()"
+            >
+             Resend otp
+            </button>
+        </div>
+    <% if(locals.msg) {%>
+    <div class="message"><%=msg%></div>
+    <%}%>
+      </form>
+      <p class="login-link">Already verified? <a href="/login">Login now</a></p>
+    </div>
+  </div>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    document.getElementById("otp").focus();
+
+    let timer = 60;
+    let timeInterval;
+
+    function startTimer(){
+        timeInterval = setInterval(()=> {
+            timer--;
+            document.getElementById("timerValue").textContent= timer;
+            if(timer <=0){
+                clearInterval(timeInterval);
+                document.getElementById("timerValue").classList.add("expired");
+                document.getElementById("timerValue").textContent = "Expired";
+                document.getElementById("otp").disabled = true;
+            }
+        },1000);
+    }
+    startTimer();
+
+    function validateOTPForm(){
+        const otpInput = document.getElementById("otp").value;
+
+        $.ajax({
+            type:"POST",
+            url:"/verify-otp",
+            data:{otp:otpInput},
+            success:function (response){
+                if(response.success){
+                    Swal.fire({
+                        icon:"success",
+                        title:"OTP verified successfully",
+                        showConfirmButton:false,
+                        timer:1500               
+                    }).then (()=> {
+                        window.location.href = response.redirectUrl;
+                    })
+                } else{
+                    Swal.fire({
+                        icon:"error",
+                        title:"Error",
+                        text: response.message
+                    })
+                }
+            },
+            error: function(){
+                Swal.fire({
+                    icon:"error",
+                    title:"Invalid otp",
+                    text:"Please try again"
+                })
+            }
+        })
+        return false;
+    }
+
+    function resendOTP(){
+        clearInterval(timeInterval);
+        timer=60;
+        document.getElementById("otp").disabled=false;
+        document.getElementById("timerValue").classList.remove("expired");
+        startTimer();
+        $.ajax({
+            type:"POST",
+            url:"/resend-otp",
+            success:function (res){
+                if(res.success){
+                   Swal.fire({
+                    icon:"success",
+                    title:"OTP resend successfully",
+                    showConfirmButton:false,
+                    timer:1500,    
+                    })
+                } else {
+                    Swal.fire({
+                        icon:"error",
+                        title:"Error",
+                        text:"An error occured while resending OTP.Please try again"
+                    })
+                }
+            }
+        })
+        return false;
+    }
+
+  </script>
+</body>
+</html>

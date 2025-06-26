@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Coupons - Admin</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f8f9fa;
+      margin: 0;
+    }
+
+    .sidebar {
+      height: 100vh;
+      background-color: #343a40;
+      color: #fff;
+      width: 220px;
+    }
+
+    .sidebar h4 {
+      color: #fff;
+    }
+
+    .sidebar a {
+      color: white;
+      text-decoration: none;
+      margin-bottom: 10px;
+      padding: 8px;
+      border-radius: 6px;
+      display: block;
+    }
+
+    .sidebar a:hover {
+      background-color: #88b0b6;
+    }
+
+    .main-content {
+      margin-left: 220px;
+      padding: 40px;
+    }
+
+    .card {
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .table thead {
+      background-color: #e8f1f3;
+    }
+
+    .btn-green {
+      background-color: #1b7361;
+      color: #fff;
+    }
+
+    .btn-green:hover {
+      background-color: #15594d;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="d-flex">
+    <!-- Sidebar -->
+    <div class="sidebar d-flex flex-column position-fixed p-3">
+      <h4 class="mb-4">baeboo</h4>
+      <a href="/admin/dashboard"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a>
+      <a href="/admin/users"><i class="bi bi-people me-2"></i>Customers</a>
+      <a href="/admin/addCategory"><i class="bi bi-tags me-2"></i>Category</a>
+      <a href="/admin/brands"><i class="bi bi-list-ul me-2"></i>Brands</a>
+      <a href="/admin/addProducts"><i class="bi bi-plus-square me-2"></i>Add Product</a>
+      <a href="/admin/products"><i class="bi bi-box-seam me-2"></i>Products</a>
+      <a href="/admin/adminOrders"><i class="bi bi-cart me-2"></i>Orders</a>
+      <a href="/admin/coupon"><i class="bi bi-ticket-perforated me-2"></i>Coupons</a>
+      <a href="/admin/salesReport"><i class="bi bi-bar-chart-line me-2"></i>Sales Report</a>
+      
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content w-100">
+      <h2 class="mb-4 fw-semibold">Coupons</h2>
+      <div class="row">
+        <!-- Coupon Form -->
+        <div class="col-md-4">
+          <div class="card p-4">
+            <form id="couponForm" action="/admin/createCoupon" method="POST">
+              <div class="mb-3">
+                <label class="form-label">Coupon Name</label>
+                <input type="text" class="form-control" id="couponName" name="couponName" placeholder="Type here">
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Start Date</label>
+                <input type="date" class="form-control" id="startDate" name="startDate">
+              </div>
+              <div class="mb-3">
+                <label class="form-label">End Date</label>
+                <input type="date" class="form-control" id="endDate" name="endDate">
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Offer Price</label>
+                <input type="number" class="form-control" id="offerPrice" name="offerPrice" placeholder="₹">
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Minimum Price</label>
+                <input type="number" class="form-control" id="minimumPrice" name="minimumPrice" placeholder="₹">
+              </div>
+              <button type="submit" class="btn btn-green w-100" onclick="return validateForm(event)">Add Coupon</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Coupon Table -->
+        <div class="col-md-8">
+          <div class="card p-3">
+            <table class="table table-bordered">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Created At</th>
+                  <th>Expire On</th>
+                  <th>Offer Price</th>
+                  <th>Minimum Price</th>
+                  <th>Status</th>
+                  <th>Edit/Delete</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% for(let i=0; i<coupons.length;i++) {%>
+
+                  <tr>
+                    <td class="text-start"><%=coupons[i].couponName%></td>
+                    <td class="text-start"><%=new Date(coupons[i].createdAt).toLocaleDateString('en-US')%></td>
+                    <td class="text-start"><%=new Date(coupons[i].expireOn).toLocaleDateString('en-US')%></td>
+                    <td class="text-start"><%=coupons[i].offerPrice%></td>
+                    <td class="text-start"><%=coupons[i].minimumPrice%></td>
+                    <td class="text-start"><%=coupons[i].isList%></td>
+                    <td class="text-start">
+                      <a href="/admin/editCoupon?id=<%=coupons[i]._id%>" class="btn btn-primary btn-sm">Edit</a>
+
+
+                      <a href="#" onclick="confirmDelete('<%=coupons[i]._id%>')" class="btn btn-danger btn-sm" style="height: 35px;width: 105px;"">Delete</a>
+                         </td>
+                </tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+ <script>
+
+  function validateForm(event) {
+   const form = document.getElementById("couponForm");
+   const name = form.couponName.value.trim();
+   const startDate = form.startDate.value;
+    const endDate = form.endDate.value;
+    const offerPrice = form.offerPrice.value;
+    const minimumPrice = form.minimumPrice.value;
+
+    if (!name || !startDate || !endDate || !offerPrice || !minimumPrice) {
+      Swal.fire({
+        icon: "warning",
+        title: "All fields are required",
+        text: "Please fill in all fields before submitting.",
+      });
+      event.preventDefault();
+      return false;
+    }
+
+    if( !/^[a-zA-Z0-9\s]+$/.test(name)) {
+      Swal.fire({
+        icon: "error",
+        title: "Invalid Coupon Name",
+        text: "Coupon name can only contain letters, numbers, and spaces.",
+      });
+      event.preventDefault();
+      return false;
+    }
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Set time to midnight for comparison
+    const start = new Date(startDate);
+    start.setHours(0, 0, 0, 0); // Set time to midnight for comparison
+   if (start < today) {
+      Swal.fire({
+        icon: "error",
+        title: "Invalid Start Date",
+        text: "Start date cannot be in the past.",
+      });
+      event.preventDefault();
+      return false;
+    }
+
+    if (new Date(startDate) > new Date(endDate)) {
+      Swal.fire({
+        icon: "error",
+        title: "Invalid Date Range",
+        text: "Start date cannot be later than end date.",
+      });
+      event.preventDefault();
+      return false;
+    }
+
+    if (Number(offerPrice) <= 0) {
+      Swal.fire({
+        icon: "error",
+        title: "Invalid Offer Price",
+        text: "Offer price must be greater than 0.",
+      });
+      event.preventDefault();
+      return false;
+    }
+
+    if (Number(minimumPrice) <= 0) {
+      Swal.fire({
+        icon: "error",
+        title: "Invalid Minimum Price",
+        text: "Minimum price must be greater than 0.",
+      });
+      event.preventDefault();
+      return false;
+    }
+
+    if (Number(offerPrice) >= Number(minimumPrice)) {
+      Swal.fire({
+        icon:"error",
+        title: "Invalid Price",
+        text: "Offer price must be less than minimum price.",
+      });
+      event.preventDefault();
+      return false;
+    }
+
+    return true; // allow form submission
+  }
+
+
+  function setDefaultStartDate() {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = (today.getMonth() + 1).toString().padStart(2, "0");
+    const day = today.getDate().toString().padStart(2, "0");
+    const formattedDate = `${year}-${month}-${day}`;
+    const startDateInput = document.querySelector('input[name="startDate"]');
+    if (startDateInput) {
+      startDateInput.value = formattedDate;
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", setDefaultStartDate);
+
+  function confirmDelete(couponId) {
+   Swal.fire({
+     title: "Are you sure?",
+     text: "You won't be able to revert this!",
+     icon: "warning",
+     showCancelButton: true,
+     confirmButtonColor: "#d33",
+     cancelButtonColor: "#3085d6",
+     confirmButtonText: "Yes, delete it!",
+   }).then((result) => {
+     if (result.isConfirmed) {
+       deleteCoupon(couponId);
+     }
+   });
+ }
+ function deleteCoupon(couponId) {
+   $.ajax({
+     url: `/admin/deletecoupon?id=${couponId}`,
+     method: "GET",
+     success: function () {
+       Swal.fire({
+         icon: "success",
+         title: "Deleted!",
+         text: "The coupon has been deleted.",
+         confirmButtonText: "OK",
+       }).then(() => {
+         window.location.reload();
+       });
+     },
+     error: function () {
+       Swal.fire({
+         icon: "error",
+         title: "Error!",
+         text: "Failed to delete the coupon. Please try again.",
+       });
+     },
+   });
+ }
+</script>
+
+<% if (typeof errorMessage !== 'undefined' && errorMessage) { %>
+  <script>
+    Swal.fire({
+      icon: 'error',
+      title: 'Oops!',
+      text: "<%= errorMessage %>"
+    });
+  </script>
+<% } %>
+
+
+</body>
+
+</html>

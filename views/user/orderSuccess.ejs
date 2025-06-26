@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Order Successful</title>
+  <link rel="stylesheet" href="/css/styles.css"> <!-- Your CSS file -->
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      text-align: center;
+      padding: 50px;
+      background-color: #f9f9f9;
+    }
+    .success-container {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    .success-image {
+      width: 200px;
+      margin-bottom: 20px;
+    }
+    h1 {
+      color: #28a745;
+      font-size: 2.5rem;
+    }
+    p {
+      font-size: 1.2rem;
+      margin: 20px 0;
+    }
+    .btn-group {
+      margin-top: 30px;
+    }
+    .btn {
+      padding: 12px 24px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      margin: 10px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn-detail {
+      background-color: #007bff;
+      color: white;
+    }
+    .btn-shop {
+      background-color: #ffc107;
+      color: black;
+    }
+    .btn:hover {
+      opacity: 0.9;
+    }
+  </style>
+</head>
+<body>
+  <div class="success-container">
+    <h1>Thank You!</h1>
+    <p>Your order has been placed successfully.</p>
+    <div class="btn-group">
+      <a href="/orders/<%= orderId %>" class="btn btn-detail">View Order Details</a>
+      <a href="/shop" class="btn btn-shop">Continue Shopping</a>
+    </div>
+  </div>
+</body>
+</html>

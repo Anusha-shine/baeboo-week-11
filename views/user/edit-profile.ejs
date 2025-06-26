@@ -1,0 +1,58 @@
+<%-include("../../views/partials/user/header.ejs")%>
+
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      <div class="card shadow rounded-4 border-0">
+        <div class="card-body p-4">
+          <h3 class="text-center mb-4" style="color: #046963;">Edit User Profile</h3>
+          <form id="editProfileForm" method="POST" action="/edit-profile">
+            <div class="mb-4">
+              <label for="name" class="form-label">Name</label>
+              <input type="text" class="form-control border-2 rounded-3" id="name" name="name" value="<%=user.name%>" required>
+            </div>
+            <div class="mb-4">
+              <label for="phone" class="form-label">Phone</label>
+              <input type="text" class="form-control border-2 rounded-3" id="phone" name="phone" value="<%=user.phone%>" required>
+            </div>
+            <div class="d-grid">
+              <button type="submit" id="submitButton" class="btn btn-primary rounded-pill py-2">Update Profile</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+   document.getElementById('submitButton').addEventListener('click', function (event) {
+       if (!validateForm()) {
+           event.preventDefault();
+       }
+   });
+
+
+   function validateForm() {
+       let isValid = true;
+       const requiredFields = ["name","phone"];
+       requiredFields.forEach(function (field) {
+           const input = document.getElementById(field);
+           if (input.value.trim() === "") {
+               Swal.fire({
+                   title: 'Error',
+                   text: `Please fill all the field.`,
+                   icon: 'error'
+               });
+               isValid = false;
+           }
+       });
+
+
+       return isValid;
+   }
+</script>
+
+
+<%-include("../../views/partials/user/footer.ejs")%>

@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Order Details</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+  <!-- Material Icons CSS -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f9f9f9;
+    }
+
+    .content-main {
+      margin-top: 40px;
+      padding: 30px;
+      background-color: #fff;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .content-header h2 {
+      font-weight: 600;
+      color: #333;
+    }
+
+    .background-info {
+      background-color: #f0f4f8;
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .icontext {
+      display: flex;
+      align-items: flex-start;
+    }
+
+    .icontext .icon {
+      font-size: 30px;
+      margin-right: 12px;
+      background: #e9f0f9;
+      padding: 10px;
+      border-radius: 50%;
+    }
+
+    .icontext .text h6 {
+      font-size: 16px;
+      font-weight: 500;
+      color: #333;
+    }
+
+    .icontext .text p {
+      font-size: 14px;
+      color: #666;
+    }
+
+    table.table {
+      background-color: white;
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 20px;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    table thead {
+      background-color: #007bff;
+      color: white;
+    }
+
+    table th,
+    table td {
+      padding: 12px 16px;
+      vertical-align: middle;
+      border: 1px solid #dee2e6;
+    }
+
+    table tbody tr:hover {
+      background-color: #f1f1f1;
+    }
+
+    select {
+      padding: 6px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    .btn-sm {
+      font-size: 14px;
+      padding: 5px 10px;
+      background-color: #28a745;
+      color: white;
+      border-radius: 5px;
+      text-decoration: none;
+      margin-top: 5px;
+      display: inline-block;
+    }
+
+    .btn-sm:hover {
+      background-color: #218838;
+      color: white;
+    }
+
+    .img-xs {
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      height: 7rem;
+      width: 7rem;
+      object-fit: cover;
+    }
+
+    .ml-130 {
+      margin-left: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .row .col-md-4 {
+        margin-bottom: 20px;
+      }
+
+      .table-responsive {
+        overflow-x: auto;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="container">
+    <section class="content-main">
+      <div class="content-header">
+        <div class="mt-10">
+          <h2 class="content-title card-title">Order Detail</h2>
+          <p>Details for Order ID: <%= order.orderId %>
+          </p>
+        </div>
+      </div>
+
+      <div class="card-body">
+        <!-- Customer and Order Info -->
+        <div class="row mb-10 mt-10 order-info-wrap background-info">
+          <!-- Customer -->
+          <div class="col-md-4">
+            <article class="icontext align-items-start ml-130">
+              <span class="icon icon-sm rounded-circle bg-primary-light">
+                <i class="material-icons text-primary">person</i>
+              </span>
+              <div class="text">
+                <h6 class="mb-1">Customer</h6>
+                <p class="mb-1">
+                  <%= order.address.name %><br />
+                    <%= order.address.phone %>
+                </p>
+              </div>
+            </article>
+          </div>
+
+          <!-- Order Info -->
+          <div class="col-md-4">
+            <article class="icontext align-items-start ml-130">
+              <span class="icon icon-sm rounded-circle bg-primary-light">
+                <i class="material-icons text-primary">local_shipping</i>
+              </span>
+              <div class="text">
+                <h6 class="mb-1">Order Info</h6>
+                <p class="mb-1">
+                  Placed on: <%= new Date(order.createdAt).toLocaleDateString() %>
+                </p>
+
+                <form action="/admin/order/<%= order.orderId %>/status" method="POST">
+                  <label for="status">Status:</label>
+                  <select name="status" id="status" onchange="this.form.submit()"
+                    class="form-select form-select-sm mt-1">
+                    <% const statusFlow=['pending', 'shipped' , 'out for delivery' , 'delivered' , 'cancelled' ]; const
+                      currentIndex=statusFlow.indexOf(order.status); statusFlow.forEach((option, index)=> {
+                      %>
+                      <option value="<%= option %>" <%=order.status===option ? 'selected' : '' %>
+                        <%= index < currentIndex ? 'disabled' : '' %>>
+                          <%= option.charAt(0).toUpperCase() + option.slice(1) %>
+                      </option>
+                      <% }); %>
+                  </select>
+                </form>
+
+              </div>
+            </article>
+          </div>
+
+          <!-- Delivery Info -->
+          <div class="col-md-4">
+            <article class="icontext align-items-start ml-130">
+              <span class="icon icon-sm rounded-circle bg-primary-light">
+                <i class="material-icons text-primary">place</i>
+              </span>
+              <div class="text">
+                <h6 class="mb-1">Deliver To</h6>
+                <p class="mb-1">
+                  <%= order.address.street %>, <%= order.address.city %>, <%= order.address.state %> -
+                        <%= order.address.pincode %>
+                </p>
+                <a href="/invoice/<%= order._id %>" class="btn btn-sm">Download Invoice</a>
+
+                <% if (order.returnStatus==='requested' ) { %>
+                  <button type="button" class="btn btn-warning btn-sm mt-2" data-bs-toggle="modal"
+                    data-bs-target="#returnModal">
+                    Handle Return Request
+                  </button>
+                  <% } %>
+
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <!-- Product Table -->
+        <div class="row">
+          <div class="col-lg">
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr class="text-center">
+                    <th width="30%">Product</th>
+                    <th width="20%">Name</th>
+                    <th width="10%">Unit Price</th>
+                    <th width="10%">Quantity</th>
+                    <th width="10%">Total</th>
+                    <th width="10%">Final Price</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% order.orderedItems.forEach((item, index)=> { %>
+                    <tr>
+                      <td class="text-center">
+                        <img src="/uploads/re-image/<%= item.product.productImage[0] %>" class="img-xs" alt="Item" />
+                      </td>
+                      <td class="text-center">
+                        <%= item.product.productName %>
+                      </td>
+                      <td class="text-center">₹<%= item.price %>
+                      </td>
+                      <td class="text-center">
+                        <%= item.quantity %>
+                      </td>
+                      <td class="text-center">₹<%= item.totalPrice %>
+                      </td>
+                      <td class="text-center">₹<%= item.finalAmount %>
+                      </td>
+                      <td class="text-center">
+                        <% if (item.returnStatus==='requested' ) { %>
+                          <!-- Buttons to approve/reject per item -->
+                          <form action="/admin/approveReturnItem/<%= order._id %>/<%= index %>" method="POST"
+                            style="display:inline;">
+                            <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                          </form>
+                          <form action="/admin/rejectReturnItem/<%= order._id %>/<%= index %>" method="POST"
+                            style="display:inline;">
+                            <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+                          </form>
+                          <p><small>Reason: <%= item.returnReason %></small></p>
+                          <% } else if (item.returnStatus==='approved' ) { %>
+                            <span class="badge bg-success">Return Approved</span>
+                            <% } else if (item.returnStatus==='rejected' ) { %>
+                              <span class="badge bg-danger">Return Rejected</span>
+                              <% } %>
+                      </td>
+                    </tr>
+                    <% }); %>
+                </tbody>
+              </table>
+              <div class="text-end mt-4">
+                <p><strong>Total Amount:</strong> ₹<%= order.totalAmount %>
+                </p>
+                <% if (order.coupenApplied) { %>
+                  <p><strong>Coupon Applied:</strong> -₹<%= order.totalAmount - order.finalAmount %>
+                  </p>
+                  <% } %>
+                    <p><strong>Final Paid Amount:</strong> ₹<%= order.finalAmount %>
+                    </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Return Request Modal -->
+    <div class="modal fade" id="returnModal" tabindex="-1" aria-labelledby="returnModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+
+          <div class="modal-header">
+            <h5 class="modal-title" id="returnModalLabel">Return Requests</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+
+          <div class="modal-body">
+            <% let hasRequests=false; %>
+              <% order.orderedItems.forEach((item, index)=> { %>
+                <% if(item.returnStatus==='requested' ) { %>
+                  <% hasRequests=true; %>
+                    <div class="mb-3 border-bottom pb-2">
+                      <h6>
+                        <%= item.product.productName %> (Qty: <%= item.quantity %>)
+                      </h6>
+                      <p><strong>Reason:</strong>
+                        <%= item.returnReason %>
+                      </p>
+                      <form action="/admin/approveReturn/<%= order._id %>/<%= index %>" method="POST"
+                        style="display:inline;">
+                        <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                      </form>
+                      <form action="/admin/rejectReturn/<%= order._id %>/<%= index %>" method="POST"
+                        style="display:inline;">
+                        <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+                      </form>
+                    </div>
+                    <% } %>
+                      <% }); %>
+                        <% if(!hasRequests) { %>
+                          <p>No return requests pending.</p>
+                          <% } %>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </main>
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script src="assets/js/vendors/jquery-3.6.0.min.js"></script>
+  <script src="assets/js/vendors/bootstrap.bundle.min.js"></script>
+  <script src="assets/js/vendors/select2.min.js"></script>
+  <script src="assets/js/vendors/perfect-scrollbar.js"></script>
+  <script src="assets/js/vendors/jquery.fullscreen.min.js"></script>
+  <script src="assets/js/main.js" type="text/javascript"></script>
+  <script src="https://cdn.jsdelivr.net/npm/easyinvoice/dist/easyinvoice.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+</body>
+
+</html>

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Retry Payment | BabyCare</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f4f7fa;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .retry-container {
+            background: #fff;
+            padding: 40px 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .retry-container h2 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .retry-container p {
+            font-size: 18px;
+            color: #555;
+            margin: 20px 0;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #218838;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+
+        .note {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #888;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="retry-container">
+        <h2>Retry Payment for Order</h2>
+        <p><strong>Order ID:</strong>
+            <%= order.orderId %>
+        </p>
+        <p><strong>Amount:</strong> ₹<%= order.finalAmount %>
+        </p>
+
+        <button id="payNowBtn" class="btn btn-success">Pay Now</button>
+        <p class="note">You can retry if your payment failed earlier.</p>
+    </div>
+
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script>
+        document.getElementById('payNowBtn').addEventListener('click', function () {
+            fetch('/createRazorpayOrder', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ amount: Number('<%= order.finalAmount * 100 %>') })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    const options = {
+                        key: data.key_id,
+                        amount: data.order.amount,
+                        currency: 'INR',
+                        name: 'baeboo',
+                        description: 'Retry Payment',
+                        order_id: data.order.id,
+                        handler: function (response) {
+                            // Payment successful
+                            fetch('/verifyPayment', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    order: response,
+                                    payment: 'razorpay',
+                                    orderId: '<%= order.orderId %>',
+                                    addressId: '<%= order.addressId %>'
+                                })
+                            })
+                                .then(res => res.json())
+                                .then(result => {
+                                    if (result.status) {
+                                        fetch('/paymentConfirm', {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({ status: 'Paid', orderId: '<%= order.orderId %>' })
+                                        }).then(() => {
+                                            window.location.href = '/orderSuccess?id=' + '<%= order._id %>';
+                                        });
+                                    } else {
+                                        window.location.href = '/orderFailure/' + '<%= order._id %>';
+                                    }
+                                });
+                        },
+                        modal: {
+                            ondismiss: function () {
+                                // If user closes the Razorpay modal
+                                window.location.href = '/orderFailure/' + '<%= order._id %>';
+                            }
+                        },
+                        theme: { color: "#3399cc" }
+                    };
+
+                    const rzp = new Razorpay(options);
+                    rzp.open(); //  Opens Razorpay modal
+                });
+        });
+    </script>
+</body>
+
+</html>
