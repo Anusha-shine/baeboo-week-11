@@ -252,48 +252,56 @@
     }
   });
 
-  function validateDates(){
-    const start = document.getElementById("startDate").value;
-    const end = document.getElementById("endDate").value;
-    const today = new Date().toISOString().split("T")[0];
+function validateDates(){
+  const start = document.getElementById("startDate").value;
+  const end = document.getElementById("endDate").value;
+  const today = new Date().toISOString().split("T")[0];
 
-    if(!start && !end){
-      Swal.fire({
-        icon:"warning",
-        title:"Invalid date range",
-        text:"Please select a date range"
-      })
-      return false;
-    }
+  if(!start && !end){
+    Swal.fire({
+      icon:"warning",
+      title:"Invalid date range",
+      text:"Please select a date range"
+    });
+    return false;
+  }
 
-    if((start && !end) || (!start && end)){
+  if((start && !end) || (!start && end)){
+    Swal.fire({
+      icon: "warning",
+      title: "Invalid date range",
+      text: "Please select both start and end dates"
+    });
+    return false;
+  }
+
+  if(start && end) {
+    if(start > end){
       Swal.fire({
         icon: "warning",
-        title: "Invalid date range",
-        text: "Please select both start and end dates"
-      })
-      return false;
-    }
-    if(start && end) {
-      if( start > end){
-      Swal.fire({
-        icon: "warning",
         title:"Invalid date range",
-        text: "Start date cannot be after end date "
-      })
+        text: "Start date cannot be after end date"
+      });
       return false;
     }
+
     if(start > today || end > today){
       Swal.fire({
         icon:"warning",
-        title:"Invalid date Selection",
-        text:"Start and End dates cannot be in future"
-      })
+        title:"Invalid date selection",
+        text:"Start and End dates cannot be in the future"
+      });
+      return false;
     }
-    return false;
-  }
+
+    // Valid dates, allow form submission
     return true;
   }
+
+  // fallback
+  return true;
+}
+
 </script>
 </body>
 

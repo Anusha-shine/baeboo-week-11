@@ -450,7 +450,7 @@ const retryPayment = async (req, res) => {
     const orderId = req.params.orderId;
     console.log("Retrying order for ID:", req.params.orderId);
     const order = await Order.findOne({ orderId });
-    if (!order && order.status !== 'failed') {
+    if (!order || order.status !== 'failed') {
       return res.status(404).json({ message: "Order not found or not eligible for retry." });
     };
 
