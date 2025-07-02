@@ -84,7 +84,7 @@
     <!-- Sidebar -->
     <div class="sidebar d-flex flex-column position-fixed p-3">
       <h4>baeboo</h4>
-      <a href="#"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a>
+      <a href="/admin/dashboard"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a>
       <a href="/admin/users"><i class="bi bi-people me-2"></i>Customers</a>
       <a href="/admin/addCategory"><i class="bi bi-tags me-2"></i>Category</a>
       <a href="/admin/brands"><i class="bi bi-list-ul me-2"></i>Brands</a>
@@ -92,6 +92,7 @@
       <a href="/admin/products"><i class="bi bi-box-seam me-2"></i>Products</a>
       <a href="/admin/adminOrders"><i class="bi bi-cart me-2"></i>Orders</a>
       <a href="/admin/coupon"><i class="bi bi-ticket-perforated me-2"></i>Coupons</a>
+      <a href="/admin/salesReport"><i class="bi bi-bar-chart-line me-2"></i>Sales Report</a>
     </div>
 
     <!-- Main Content -->
@@ -228,58 +229,87 @@
 
   <script>
     function handleFormSubmit(event) {
-      event.preventDefault();
-      if (!validateForm()) return false;
+  event.preventDefault();
+  const isValid = validateForm();
+  if (!isValid) return;
 
-      const name = document.getElementsByName("name")[0].value;
-      const description = document.getElementById("descriptionId").value;
+  const name = document.getElementsByName("name")[0].value;
+  const description = document.getElementById("descriptionId").value;
 
-      fetch("/admin/addCategory", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ name, description })
-      })
-      .then(res => {
-        if (!res.ok) {
-          return res.json().then(err => {
-            throw new Error(err.error);
-          });
-        }
-        return res.json();
-      })
-      .then(() => location.reload())
-      .catch(error => {
-        Swal.fire({
-          icon: 'error',
-          title: 'Oops...',
-          text: error.message === "Category already exists"
-            ? 'Category already exists!'
-            : 'An error occurred while adding the category'
-        });
+  fetch("/admin/addCategory", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ name, description })
+  })
+  .then(res => {
+    if (!res.ok) {
+      return res.json().then(err => {
+        throw new Error(err.error);
       });
     }
+    return res.json();
+  })
+  .then(() => location.reload())
+  .catch(error => {
+    Swal.fire({
+      icon: 'error',
+      title: 'Oops...',
+      text: error.message === "Category already exists"
+        ? 'Category already exists!'
+        : 'An error occurred while adding the category'
+    });
+  });
+}
+
 
     function validateForm() {
-      clearErrorMessages();
-      const name = document.getElementsByName("name")[0].value.trim();
-      const description = document.getElementById("descriptionId").value.trim();
-      let isValid = true;
+  clearErrorMessages();
+  const name = document.getElementsByName("name")[0].value.trim();
+  const description = document.getElementById("descriptionId").value.trim();
+  let isValid = true;
 
-      if (!name) {
-        displayErrorMessage("name-error", "Name is required");
-        isValid = false;
-      } else if (!/^[a-zA-Z\s]+$/.test(name)) {
-        displayErrorMessage("name-error", "Category name should only contain letters and spaces");
-        isValid = false;
-      }
-      if (!description) {
-        displayErrorMessage("description-error", "Description is required");
-        isValid = false;
-      }
-      return isValid;
-    }
+  if (!name && !description) {
+    Swal.fire({
+      icon: "error",
+      title: "All fields required",
+      text: "Please fill in all fields"
+    });
+    return false;
+  }
+
+  if (!name) {
+    Swal.fire({
+      icon: "error",
+      title: "Name Required",
+      text: "Please enter a category name"
+    });
+    isValid = false;
+    return false;
+  } else if (!/^[a-zA-Z\s]+$/.test(name)) {
+    Swal.fire({
+      icon: "error",
+      title: "Invalid Name",
+      text: "Name should only contain letters and spaces"
+    });
+    isValid = false;
+    return false;
+  }
+
+  if (!description) {
+    Swal.fire({
+      icon: "error",
+      title: "Description Required",
+      text: "Please enter a description"
+    });
+    isValid = false;
+    return false;
+  }
+
+  return isValid;
+}
+
 
     function displayErrorMessage(elementId, message) {
       const el = document.getElementById(elementId);

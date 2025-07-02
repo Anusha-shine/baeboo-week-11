@@ -294,8 +294,9 @@ const verifyChangePassOtp = async (req,res) => {
 const addAddress = async(req,res) => {
     try{
         const user = req.session.user;
+        const userData = await User.findOne({ _id: user });
         res.render("user/add-address",{
-            user: user
+            user: userData
         });
     }catch(error){
         res.redirect("/user/pageNotFound");

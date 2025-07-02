@@ -299,11 +299,9 @@ const Logout = async (req, res) => {
 const getSalesReport = async (req, res) => {
   const filters = req.query;
 
-  // 1. Paginated Orders
-  const { orders, totalOrders, page, limit } = await getFilteredOrders(filters);
+  // 1. Construct match condition for both orders and summary
+  const match = { status: "delivered" };
 
-  // 2. Match condition (duplicate logic for summary calc)
-  const match = {status : "delivered"};
   if (filters.filter === 'daily') {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -319,13 +317,16 @@ const getSalesReport = async (req, res) => {
   }
 
   if (filters.fromDate && filters.toDate) {
-    match.createdAt = {
-      $gte: new Date(filters.fromDate),
-      $lte: new Date(filters.toDate),
-    };
+    const from = new Date(filters.fromDate);
+    const to = new Date(filters.toDate);
+    to.setHours(23, 59, 59, 999);
+    match.createdAt = { $gte: from, $lte: to };
   }
 
-  // 3. Fetch all matched (unpaginated) orders for summary
+  // 2. Get paginated filtered orders using the match
+  const { orders, totalOrders, page, limit } = await getFilteredOrders(match, req.query.page);
+
+  // 3. Fetch unpaginated orders for summary
   const allOrders = await Order.find(match);
 
   let totalAmount = 0;
@@ -335,6 +336,7 @@ const getSalesReport = async (req, res) => {
     totalAmount += order.totalAmount || 0;
     finalAmount += Math.round(order.finalAmount || 0);
   });
+
   const totalDiscount = Math.round(totalAmount - finalAmount);
   const summary = {
     totalOrderCount: allOrders.length,
@@ -355,6 +357,7 @@ const getSalesReport = async (req, res) => {
     }
   });
 };
+
 const downloadSalesReport = async (req, res) => {
   try {
     const { type } = req.params;

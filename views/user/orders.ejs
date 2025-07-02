@@ -129,6 +129,81 @@
       border-color: #046963;
       color: #fff;
     }
+    /* User Navigation in Header */
+.header__nav__option {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.sign-in-link {
+  font-size: 16px;
+  color: #333;
+  font-weight: 600;
+  text-decoration: none;
+  margin-right: 10px;
+}
+
+.sign-in-link:hover {
+  color: #046963;
+}
+
+/* Dropdown style */
+.dropdown {
+  position: relative;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background-color: white;
+  min-width: 160px;
+  border-radius: 8px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  padding: 10px 0;
+}
+
+.dropdown-content a {
+  padding: 10px 16px;
+  display: block;
+  text-decoration: none;
+  color: #333;
+  transition: background 0.2s ease;
+}
+
+.dropdown-content a:hover {
+  background-color: #f1f1f1;
+}
+
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+
+/* Icon images */
+.header__nav__option img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+.header__nav__option a {
+  position: relative;
+}
+
+.header__nav__option a span {
+  position: absolute;
+  top: -8px;
+  right: -10px;
+  background: #046963;
+  color: white;
+  font-size: 12px;
+  border-radius: 50%;
+  padding: 2px 6px;
+}
+
 
     @media (max-width: 768px) {
       .orders-wrapper {
@@ -144,18 +219,41 @@
 </head>
 
 <body>
-  <!-- Header -->
-  <header class="header">
-    <div class="container d-flex justify-content-between align-items-center">
-      <h2>baeboo</h2>
-      <nav class="header__menu">
-        <ul>
-          <li class="active"><a href="/">Home</a></li>
-          <li><a href="/shop">Shop</a></li>
-        </ul>
-      </nav>
+ <!-- Header -->
+<header class="header">
+  <div class="container d-flex justify-content-between align-items-center">
+    <h2>baeboo</h2>
+
+    <nav class="header__menu">
+      <ul class="d-flex gap-4 list-unstyled mb-0">
+        <li class="active"><a href="/">Home</a></li>
+        <li><a href="/shop">Shop</a></li>
+      </ul>
+    </nav>
+
+    <!-- User Section -->
+    <div class="header__nav__option d-flex align-items-center gap-3">
+      <% if (user) { %>
+        <div class="dropdown">
+          <a href="#" class="sign-in-link">
+            <%= user.name %>
+          </a>
+          <div class="dropdown-content">
+            <a href="/userProfile">Profile</a>
+            <a href="/logout">Logout</a>
+          </div>
+        </div>
+      <% } else { %>
+        <a href="/signup" class="sign-in-link">Sign Up</a>
+        <a href="/login" class="sign-in-link">Log in</a>
+      <% } %>
+
+      <a href="/wishlist"><img src="/img/icon/heart.png" alt=""></a>
+      <a href="/cart"><img src="/img/icon/cart.png" alt=""> <span>0</span></a>
     </div>
-  </header>
+  </div>
+</header>
+
 
   <!-- Orders Section -->
   <div class="container">

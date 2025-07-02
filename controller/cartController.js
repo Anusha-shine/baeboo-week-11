@@ -5,6 +5,7 @@ const Cart = require("../models/cartSchema");
 const loadCart = async (req,res) => {
   try {
       const userId = req.session.user;
+      const userData = await User.findById(userId);
       const cart =await Cart.findOne({userId}).populate("items.productId");
 
       let quantity = 0;
@@ -17,7 +18,7 @@ const loadCart = async (req,res) => {
      }
       req.session.grandTotal = grandTotal;
       res.render("user/cart",{
-        user: req.session.user,
+        user: userData,
         quantity,
         cart,
         grandTotal

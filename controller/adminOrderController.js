@@ -169,7 +169,7 @@ const approveReturnItem = async (req, res) => {
       (i) => i.returnStatus === 'approved' || i.returnStatus === 'rejected' || !i.returnStatus
     );
     if (allProcessed) {
-      order.returnStatus = 'completed'; // or 'approved' or whatever fits your logic
+      order.returnStatus = 'completed'; 
       order.status = 'returned';
     }
 
@@ -185,21 +185,21 @@ const approveReturnItem = async (req, res) => {
       });
     }
 
-    // Step 1: Total price for the returned item
+    // Total price for the returned item
 const itemTotal = item.price * item.quantity;
 
-// Step 2: Total order value before discount
+//  Total order value before discount
 const orderTotalBeforeDiscount = order.orderedItems.reduce((sum, i) => {
   return sum + i.price * i.quantity;
 }, 0);
 
-// Step 3: Coupon discount (stored during order placement)
+//  Coupon discount (stored during order placement)
 const couponDiscount = order.couponDiscount || 0;
 
-// Step 4: Calculate proportional share of discount
+//  Calculate proportional share of discount
 const itemDiscountShare = (itemTotal / orderTotalBeforeDiscount) * couponDiscount;
 
-// Step 5: Final refund amount (rounded to 2 decimals)
+// Final refund amount (rounded to 2 decimals)
 const refundAmount = Math.round((itemTotal - itemDiscountShare) * 100) / 100;
 
     wallet.transactions.push({

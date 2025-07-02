@@ -234,19 +234,24 @@
       });
 
       function validateDates() {
-        const from = document.getElementById('fromDate').valueAsDate;
-        const to = document.getElementById('toDate').valueAsDate;
-        const today = new Date(); today.setHours(0, 0, 0, 0);
+        const fromInput = document.getElementById('fromDate');
+        const toInput = document.getElementById('toDate');
+
+        const from = fromInput.value;
+        const to = toInput.value;
+
+        const today = new Date().toISOString().split('T')[0]; // "YYYY-MM-DD"
 
         if (from && from > today) {
           Swal.fire({ icon: 'error', title: 'Invalid Date', text: 'From Date cannot be in the future.' });
-          document.getElementById('fromDate').value = '';
+          fromInput.value = '';
         } else if (to && to > today) {
           Swal.fire({ icon: 'error', title: 'Invalid Date', text: 'To Date cannot be in the future.' });
-          document.getElementById('toDate').value = '';
+          toInput.value = '';
         } else if (from && to && to < from) {
           Swal.fire({ icon: 'error', title: 'Invalid Range', text: 'To Date cannot be before From Date.' });
-          document.getElementById('toDate').value = '';
+          toInput.value = '';
         }
       }
+
     </script>

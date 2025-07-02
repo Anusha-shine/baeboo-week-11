@@ -17,6 +17,7 @@ const Wallet = require("../models/walletSchema");
 const getCheckoutPage = async (req, res) => {
   try {
     const userId = req.session.user;
+    const userData = await User.findById(userId)
     const cart = await Cart.findOne({ userId }).populate('items.productId');
     const userAddress = await Address.findOne({ userId });
 
@@ -59,7 +60,7 @@ const getCheckoutPage = async (req, res) => {
     const totalAfterCoupon = grandTotal - couponDiscount;
 
     res.render('user/checkout', {
-      user: req.session.user,
+      user: userData,
       product: cartItems,
       userAddress,
       grandTotal,
@@ -152,6 +153,7 @@ const removeCoupon = async (req, res) => {
 const getPaymentPage = async (req, res) => {
   try {
     const userId = req.session.user;
+    const userData = await User.findById(userId)
     const cart = await Cart.findOne({ userId }).populate('items.productId');
     if (!cart || cart.items.length === 0) {
       return res.status(400).json({ message: "Cart is empty." });
@@ -184,7 +186,7 @@ const getPaymentPage = async (req, res) => {
     const totalAfterCoupon = grandTotal - couponDiscount;
 
     res.render('user/payment', {
-      user: req.session.user,
+      user: userData,
       grandTotal,
       discount,
       totalAfterCoupon,
@@ -463,6 +465,7 @@ const retryPayment = async (req, res) => {
 const getOrdersPage = async (req, res) => {
   try {
     const userId = req.session.user;
+    const userData = await User.findById(userId);
 
     // Convert userId to ObjectId safely
     const queryUserId = mongoose.Types.ObjectId.isValid(userId)
@@ -497,6 +500,7 @@ const getOrdersPage = async (req, res) => {
       .populate('orderedItems.product'); // Populate product details
 
     res.render('user/orders', {
+      user:userData,
       orders,
       search,
       currentPage: page,
@@ -511,6 +515,8 @@ const getOrdersPage = async (req, res) => {
 const getOrderDetails = async (req, res) => {
   try {
     const { orderId } = req.params;
+    const userId = req.params.user;
+    const userData = await User.findById(userId);
 
     // Find order by orderId and populate products inside orderedItems
     const order = await Order.findOne({ orderId }).populate('orderedItems.product');
@@ -525,7 +531,7 @@ const getOrderDetails = async (req, res) => {
     }
 
     // Render order details page with order data
-    res.render('user/orderDetails', { order });
+    res.render('user/orderDetails', { order,user:userData });
   } catch (err) {
     console.error('Error in getOrderDetails:', err);
     res.status(500).send('Server error');
@@ -579,7 +585,7 @@ const orderTotalBeforeDiscount = order.orderedItems.reduce((sum, i) => {
 }, 0);
 
 // Step 3: Total coupon discount used
-const couponDiscount = order.couponDiscount || 0; // Make sure this exists in order schema
+const couponDiscount = order.couponDiscount || 0; 
 
 // Step 4: Calculate proportional discount share
 const itemDiscountShare = (itemTotal / orderTotalBeforeDiscount) * couponDiscount;

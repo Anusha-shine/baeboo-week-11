@@ -14,29 +14,44 @@ const getBrandPage = async (req, res) => {
             data:currentBrand,
             currentPage: page,
             totalPages: totalPages,
-            totalBrands: totalBrands
+            totalBrands: totalBrands,
+            error: req.query.error
         })
     }catch(error){
         res.redirect("/admin/pageError");
     }
 }
 const addBrand = async (req, res) => {
-    try {
-        const brand = req.body.name;
-        const findBrand = await Brand.findOne({brand});
-        if(!findBrand) {
-            const image = req.file.filename;
-            const newBrand = new Brand({
-                brandName : brand,
-                brandImage : image
-            })
-            await newBrand.save();
-            res.redirect("/admin/brands");
-        }
-    }catch(error){
-        res.redirect("/admin/pageError");
+  try {
+    const brand = req.body.name.trim();
+
+    const existingBrand = await Brand.findOne({
+      brandName: { $regex: `^${brand}$`, $options: "i" },
+    });
+
+    if (existingBrand) {
+      return res.redirect("/admin/brands?error=Brand already exists");
     }
-}
+
+    if (!req.file) {
+      return res.redirect("/admin/brands?error=Please upload a valid image");
+    }
+
+    const image = req.file.filename;
+
+    const newBrand = new Brand({
+      brandName: brand,
+      brandImage: image,
+    });
+
+    await newBrand.save();
+    res.redirect("/admin/brands");
+  } catch (error) {
+    console.error("Add Brand Error:", error);
+    res.redirect("/admin/pageError");
+  }
+};
+
 const blockBrand = async (req, res) => {
     try{
         const id = req.query.id;
