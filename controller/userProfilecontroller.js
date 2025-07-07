@@ -250,80 +250,81 @@ const changePassword = async (req,res) => {
         res.redirect("/user/pageNotFound");
     }
 }
-const changePasswordValid = async(req,res) => {
-    try{
-        const {email} = req.body;
-        const userExists = await User.findOne({email});
-        if(userExists){
-          const otp = generateOtp();
-          const emailSent = await sendVerificationEmail(email,otp);
-          if(emailSent){
-            req.session.userOtp = otp;
-            req.session.userData = req.body;
-            req.session.email =email;
-            res.render("user/change-password-otp");
-            console.log("OTP:",otp);
-          }else {
-            res.json({
-                success: false,
-                message : "Failed to send OTP.Please try again"
-            });
-          }
-        }else{
-            res.render("user/change-password",{
-                message:"This email does not exist"
-            });
-        }
-    }catch(error){
-      console.log("Error in change password validation",error);
-      res.redirect("/user/pageNotFound");
+const changePasswordValid = async (req, res) => {
+  try {
+    const userId = req.session.user;
+    const { currentPassword, newPassword, confirmPassword } = req.body;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.render("user/change-password", { error: "User not found" });
     }
-}
-const verifyChangePassOtp = async (req,res) => {
-    try{
-        const enteredOtp = req.body.otp;
-        if(enteredOtp === req.session.userOtp){
-            res.json({success:true,redirectUrl:"/reset-password"});
-        }else{
-            res.json({success:false,message:"OTP not matching"});
-        }
-    }catch(error){
-        res.status(500).json({success:false,message:"An error occured.Please try again later."})
+
+    const passwordMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!passwordMatch) {
+      return res.render("user/change-password", { error: "Current password is incorrect" });
     }
+
+    if (newPassword !== confirmPassword) {
+      return res.render("user/change-password", { error: "Passwords do not match" });
+    }
+    if (await bcrypt.compare(newPassword, user.password)) {
+  return res.render("user/change-password", {
+    error: "New password must be different from the current password",
+  });
 }
-const addAddress = async(req,res) => {
-    try{
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    await user.save();
+
+    res.render("user/change-password", { success: "Password changed successfully" });
+  } catch (err) {
+    console.error("Error in changePassword:", err);
+    res.status(500).send("Internal server error");
+  }
+};
+const addAddress = async (req, res) => {
+    try {
         const user = req.session.user;
         const userData = await User.findOne({ _id: user });
-        res.render("user/add-address",{
-            user: userData
+        const redirect = req.query.redirect || "/userProfile"; // default fallback
+
+        res.render("user/add-address", {
+            user: userData,
+            redirect // pass redirect to EJS
         });
-    }catch(error){
+    } catch (error) {
         res.redirect("/user/pageNotFound");
     }
-}
-const postAddAddress = async(req,res) => {
-    try{
+};
+
+const postAddAddress = async (req, res) => {
+    try {
         const userId = req.session.user;
-        const userData = await User.findOne({_id : userId});
-        const {addressType,name,city,landMark,state,pincode,phone,altPhone} = req.body;
-        const userAddress = await Address.findOne({userId : userData._id});
-        if(!userAddress){
+        const userData = await User.findOne({ _id: userId });
+
+        const { addressType, name, city, landMark, state, pincode, phone, altPhone } = req.body;
+        const userAddress = await Address.findOne({ userId: userData._id });
+
+        if (!userAddress) {
             const newAddress = new Address({
-                userId : userData._id,
-                address : [{addressType,name,city,landMark,state,pincode,phone,altPhone}]
+                userId: userData._id,
+                address: [{ addressType, name, city, landMark, state, pincode, phone, altPhone }]
             });
             await newAddress.save();
-        }else {
-        userAddress.address.push({addressType,name,city,landMark,state,pincode,phone,altPhone});
-        await userAddress.save();
+        } else {
+            userAddress.address.push({ addressType, name, city, landMark, state, pincode, phone, altPhone });
+            await userAddress.save();
         }
-        res.redirect("/userProfile");
-    }catch(error){
-        console.error("Error adding address",error);
+
+        const redirectUrl = req.query.redirect || "/userProfile"; // Use the redirect param if present
+        res.redirect(redirectUrl);
+    } catch (error) {
+        console.error("Error adding address", error);
         res.redirect("/user/pageNotFound");
     }
-}
+};
+
 const editAddress = async (req,res) => {
     try{
        const addressId = req.query.id;
@@ -474,7 +475,7 @@ const editProfile = async (req,res) => {
 module.exports = {getForgotPassPage,
     forgotPassPage, verifyForgotPassOtp,resendForgotPassOtp,getResetPassPage,
     postNewPassword,userProfile,changeEmail,changeEmailValid,verifyEmailOtp,
-    updateEmail,changePassword,changePasswordValid,verifyChangePassOtp,
+    updateEmail,changePassword,changePasswordValid,
     addAddress,postAddAddress,editAddress,postEditAddress,
     deleteAddress,uploadProfileImage,loadProfile,loadEditProfile,editProfile};
 

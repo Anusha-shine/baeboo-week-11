@@ -3,7 +3,7 @@
 <div class="container mt-5">
     <div class="card shadow rounded-4 p-4">
         <h3 class="mb-4 text-center" style="color: #046963;">Create User Address</h3>
-        <form id="addressForm" method="POST" action="/addAddress">
+        <form id="addressForm" method="POST" action="/addAddress?redirect=<%= redirect %>">
             <div class="row mb-3">
                 <div class="form-group col-md-4 mb-3">
                     <label for="addressType" class="fw-bold">Address Type</label>
@@ -56,84 +56,91 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    document.getElementById('addressForm').addEventListener('submit', function(event) {
-        if (!validateForm()) {
-            event.preventDefault();
-        }
+  document.getElementById('addressForm').addEventListener('submit', async function (event) {
+    event.preventDefault(); // Stop form immediately
+    const isValid = await validateForm();
+    if (isValid) {
+      this.submit(); // Submit only if valid
+    }
+  });
+
+  async function validateForm() {
+    let isValid = true;
+    const requiredFields = ["addressType", "name", "city", "landMark", "state", "pincode", "phone", "altPhone"];
+
+    // Clear previous errors
+    requiredFields.forEach(field => {
+      const errEl = document.getElementById(field + "-error");
+      if (errEl) errEl.remove();
     });
 
-    function validateForm() {
-        let isValid = true;
-        const requiredFields = ["addressType", "name", "city", "landMark", "state", "pincode", "phone", "altPhone"];
-        requiredFields.forEach(function(field) {
-            const input = document.getElementById(field);
-            const inputValue = input.value.trim();
-            const errorElement = document.getElementById(field + '-error');
+    requiredFields.forEach(field => {
+      const input = document.getElementById(field);
+      if (input.value.trim() === "") {
+        const errorDiv = document.createElement('div');
+        errorDiv.id = field + "-error";
+        errorDiv.className = "text-danger";
+        errorDiv.textContent = "This field is required.";
+        input.parentNode.appendChild(errorDiv);
+        isValid = false;
+      }
+    });
 
-            if (inputValue === "") {
-                if (!errorElement) {
-                    const errorMessage = "This field is required.";
-                    const errorDiv = document.createElement('div');
-                    errorDiv.className = "text-danger";
-                    errorDiv.textContent = errorMessage;
-                    errorDiv.id = field + '-error';
-                    input.parentNode.appendChild(errorDiv);
-                }
-                isValid = false;
-            } else {
-                if (errorElement) {
-                    errorElement.remove();
-                }
-            }
-        });
-
-        const name = document.getElementById('name').value;
-        const city = document.getElementById('city').value;
-        const landMark = document.getElementById('landMark').value;
-        const state = document.getElementById('state').value;
-        const pincode = document.getElementById('pincode').value;
-        const phone = document.getElementById('phone').value;
-        const altPhone = document.getElementById('altPhone').value;
-
-        const namePattern = /^[A-Za-z\s]+$/;
-        const pincodePattern = /^\d{6}$/;
-        const phonePattern = /^\d{10}$/;
-
-        if (!namePattern.test(name)) {
-            Swal.fire({ title: 'Error', text: 'Name should contain alphabets only.', icon: 'error' });
-            isValid = false;
-        }
-        if (!namePattern.test(city)) {
-            Swal.fire({ title: 'Error', text: 'City should contain alphabets only.', icon: 'error' });
-            isValid = false;
-        }
-        if (!namePattern.test(landMark)) {
-            Swal.fire({ title: 'Error', text: 'Landmark should contain alphabets only.', icon: 'error' });
-            isValid = false;
-        }
-        if (!namePattern.test(state)) {
-            Swal.fire({ title: 'Error', text: 'State should contain alphabets only.', icon: 'error' });
-            isValid = false;
-        }
-        if (!pincodePattern.test(pincode)) {
-            Swal.fire({ title: 'Error', text: 'Pincode should be a 6-digit number.', icon: 'error' });
-            isValid = false;
-        }
-        if (!phonePattern.test(phone)) {
-            Swal.fire({ title: 'Error', text: 'Phone number should be a 10-digit number.', icon: 'error' });
-            isValid = false;
-        }
-        if (!phonePattern.test(altPhone)) {
-            Swal.fire({ title: 'Error', text: 'Alternate phone number should be a 10-digit number.', icon: 'error' });
-            isValid = false;
-        }
-        if (phone === altPhone) {
-            Swal.fire({ title: 'Error', text: 'Phone and alternate phone should be different.', icon: 'error' });
-            isValid = false;
-        }
-
-        return isValid;
+    if (!isValid) {
+      await Swal.fire("Missing Fields", "Please fill in all required fields.", "error");
+      return false;
     }
+
+    // Pattern validations
+    const namePattern = /^[A-Za-z\s]+$/;
+    const pincodePattern = /^\d{6}$/;
+    const phonePattern = /^\d{10}$/;
+
+    const name = document.getElementById('name').value.trim();
+    const city = document.getElementById('city').value.trim();
+    const landMark = document.getElementById('landMark').value.trim();
+    const state = document.getElementById('state').value.trim();
+    const pincode = document.getElementById('pincode').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const altPhone = document.getElementById('altPhone').value.trim();
+
+    if (!namePattern.test(name)) {
+      await Swal.fire("Invalid Name", "Name should contain alphabets only.", "error");
+      return false;
+    }
+    if (!namePattern.test(city)) {
+      await Swal.fire("Invalid City", "City should contain alphabets only.", "error");
+      return false;
+    }
+    if (!namePattern.test(landMark)) {
+      await Swal.fire("Invalid Landmark", "Landmark should contain alphabets only.", "error");
+      return false;
+    }
+    if (!namePattern.test(state)) {
+      await Swal.fire("Invalid State", "State should contain alphabets only.", "error");
+      return false;
+    }
+    if (!pincodePattern.test(pincode)) {
+      await Swal.fire("Invalid Pincode", "Pincode should be a 6-digit number.", "error");
+      return false;
+    }
+    if (!phonePattern.test(phone)) {
+      await Swal.fire("Invalid Phone", "Phone number should be a 10-digit number.", "error");
+      return false;
+    }
+    if (!phonePattern.test(altPhone)) {
+      await Swal.fire("Invalid Alt Phone", "Alternate phone should be a 10-digit number.", "error");
+      return false;
+    }
+    if (phone === altPhone) {
+      await Swal.fire("Phone Conflict", "Phone and alternate phone must be different.", "error");
+      return false;
+    }
+
+    return true;
+  }
 </script>
+
+
 
 <%-include("../../views/partials/user/footer.ejs")%>

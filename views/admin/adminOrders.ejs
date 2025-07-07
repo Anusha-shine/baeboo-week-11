@@ -1,16 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <title>Admin Orders</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
 
   <style>
     body {
       background-color: #f8f9fa;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
+
     .sidebar {
       height: 100vh;
       background-color: #343a40;
@@ -20,7 +22,7 @@
     .sidebar a {
       display: block;
       padding: 10px 15px;
-      color:white;
+      color: white;
       text-decoration: none;
       font-weight: 500;
     }
@@ -32,7 +34,8 @@
 
     .orders-container {
       padding: 40px 20px;
-      margin-left: 200px; /* Matches the sidebar width */
+      margin-left: 200px;
+      /* Matches the sidebar width */
       width: 100%;
     }
 
@@ -40,6 +43,7 @@
       color: #343a40;
       font-weight: 600;
     }
+
     h4 {
       color: white;
     }
@@ -71,7 +75,7 @@
     }
 
     .no-orders {
-       background-color: #fff3cd;
+      background-color: #fff3cd;
       border: 1px solid #ffeeba;
       padding: 20px;
       border-radius: 6px;
@@ -94,6 +98,7 @@
     }
   </style>
 </head>
+
 <body>
   <div class="d-flex">
     <!-- Sidebar -->
@@ -108,46 +113,65 @@
       <a href="/admin/adminOrders"><i class="bi bi-cart me-2"></i>Orders</a>
       <a href="/admin/coupon"><i class="bi bi-ticket-perforated me-2"></i>Coupons</a>
       <a href="/admin/salesReport"><i class="bi bi-bar-chart-line me-2"></i>Sales Report</a>
-      
+
     </div>
-     <!-- Main Content -->
-  <div class="container orders-container">
-    <h2 class="mb-4">Admin Orders</h2>
+    <!-- Main Content -->
+    <div class="container orders-container">
+      <h2 class="mb-4">Admin Orders</h2>
 
-    <!-- Search form -->
-    <form method="GET" action="/adminOrders" class="mb-4" role="search">
-      <input
-        type="text"
-        name="search"
-        placeholder="Search orders by ID, status or name"
-        value="<%= typeof search !== 'undefined' ? search : '' %>"
-        class="form-control"
-      />
-    </form>
+      <!-- Search form -->
+<form method="GET" action="/admin/adminOrders" role="search" class="mb-4 d-flex flex-wrap align-items-center gap-2">
+  <input 
+    type="text" 
+    name="search" 
+    placeholder="Search orders by ID, status or name"
+    value="<%= typeof search !== 'undefined' ? search : '' %>" 
+    class="form-control" 
+    style="max-width: 300px;"
+  />
 
-    <% if (orders.length === 0) { %>
-      <div class="no-orders">You have no orders yet.</div>
-    <% } else { %>
-      <div class="table-responsive">
-        <table class="table table-bordered table-hover shadow-sm">
-          <thead class="table-light">
-            <tr>
-              <th>Order ID</th>
-              <th>User Name</th>
-              <th>Placed On</th>
-              <th>Status</th>
-              <th>Final Price (₹)</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% orders.forEach(order => { %>
-              <tr>
-                <td><%= order.orderId %></td>
-                <td><%= order.user?.name || 'N/A' %></td>
-                <td><%= order.createdAt.toLocaleDateString() %></td>
-                <td>
-                  <span class="badge bg-<%= 
+  <button type="submit" class="btn btn-outline-primary d-flex align-items-center gap-1">
+    <i class="bi bi-search"></i> <span>Search</span>
+  </button>
+
+  <% if (search && search.trim().length > 0) { %>
+    <a href="/admin/adminOrders" class="btn btn-outline-danger d-flex align-items-center gap-1">
+      <i class="bi bi-x-circle"></i> <span>Clear</span>
+    </a>
+  <% } %>
+</form>
+
+
+
+      <% if (orders.length===0) { %>
+        <div class="no-orders">You have no orders yet.</div>
+        <% } else { %>
+          <div class="table-responsive">
+            <table class="table table-bordered table-hover shadow-sm">
+              <thead class="table-light">
+                <tr>
+                  <th>Order ID</th>
+                  <th>User Name</th>
+                  <th>Placed On</th>
+                  <th>Status</th>
+                  <th>Final Price (₹)</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% orders.forEach(order=> { %>
+                  <tr>
+                    <td>
+                      <%= order.orderId %>
+                    </td>
+                    <td>
+                      <%= order.user?.name || 'N/A' %>
+                    </td>
+                    <td>
+                      <%= order.createdAt.toLocaleDateString() %>
+                    </td>
+                    <td>
+                      <span class="badge bg-<%= 
                     order.status === 'pending' ? 'warning' :
                     order.status === 'placed' ? 'info' :
                     order.status === 'shipped' ? 'primary' :
@@ -155,69 +179,65 @@
                     order.status === 'cancelled' ? 'danger' :
                     order.status === 'returned' ? 'danger' : 'secondary' 
                   %>">
-                    <%= order.status %>
-                  </span>
-                </td>
-                <td>₹<%= order.finalAmount.toFixed(2) %></td>
-                <td>
-                  <a href="/admin/order/<%= order.orderId %>" class="btn btn-sm btn-primary">
-                    View Order
-                  </a>
-                </td>
-              </tr>
-            <% }); %>
-          </tbody>
-        </table>
+                        <%= order.status %>
+                      </span>
+                    </td>
+                    <td>₹<%= order.finalAmount.toFixed(2) %>
+                    </td>
+                    <td>
+                      <a href="/admin/order/<%= order.orderId %>" class="btn btn-sm btn-primary">
+                        View Order
+                      </a>
+                    </td>
+                  </tr>
+                  <% }); %>
+              </tbody>
+            </table>
 
-        <!-- Pagination -->
-        <nav aria-label="Page navigation example" class="mt-3">
-          <ul class="pagination justify-content-center">
-            <% if (currentPage > 1) { %>
-              <li class="page-item">
-                <a
-                  class="page-link"
-                  href="?page=<%= currentPage - 1 %><%= search ? '&search=' + encodeURIComponent(search) : '' %>"
-                  aria-label="Previous"
-                >
-                  <span aria-hidden="true">&laquo;</span>
-                </a>
-              </li>
-            <% } else { %>
-              <li class="page-item disabled">
-                <span class="page-link">&laquo;</span>
-              </li>
-            <% } %>
+            <!-- Pagination -->
+            <nav aria-label="Page navigation example" class="mt-3">
+              <ul class="pagination justify-content-center">
+                <% if (currentPage> 1) { %>
+                  <li class="page-item">
+                    <a class="page-link"
+                      href="?page=<%= currentPage - 1 %><%= search ? '&search=' + encodeURIComponent(search) : '' %>"
+                      aria-label="Previous">
+                      <span aria-hidden="true">&laquo;</span>
+                    </a>
+                  </li>
+                  <% } else { %>
+                    <li class="page-item disabled">
+                      <span class="page-link">&laquo;</span>
+                    </li>
+                    <% } %>
 
-            <% for (let i = 1; i <= totalPages; i++) { %>
-              <li class="page-item <%= currentPage === i ? 'active' : '' %>">
-                <a
-                  class="page-link"
-                  href="?page=<%= i %><%= search ? '&search=' + encodeURIComponent(search) : '' %>"
-                >
-                  <%= i %>
-                </a>
-              </li>
-            <% } %>
+                      <% for (let i=1; i <=totalPages; i++) { %>
+                        <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                          <a class="page-link"
+                            href="?page=<%= i %><%= search ? '&search=' + encodeURIComponent(search) : '' %>">
+                            <%= i %>
+                          </a>
+                        </li>
+                        <% } %>
 
-            <% if (currentPage < totalPages) { %>
-              <li class="page-item">
-                <a
-                  class="page-link"
-                  href="?page=<%= currentPage + 1 %><%= search ? '&search=' + encodeURIComponent(search) : '' %>"
-                  aria-label="Next"
-                >
-                  <span aria-hidden="true">&raquo;</span>
-                </a>
-              </li>
-            <% } else { %>
-              <li class="page-item disabled">
-                <span class="page-link">&raquo;</span>
-              </li>
-            <% } %>
-          </ul>
-        </nav>
-      </div>
-    <% } %>
-  </div>
+                          <% if (currentPage < totalPages) { %>
+                            <li class="page-item">
+                              <a class="page-link"
+                                href="?page=<%= currentPage + 1 %><%= search ? '&search=' + encodeURIComponent(search) : '' %>"
+                                aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                              </a>
+                            </li>
+                            <% } else { %>
+                              <li class="page-item disabled">
+                                <span class="page-link">&raquo;</span>
+                              </li>
+                              <% } %>
+              </ul>
+            </nav>
+          </div>
+          <% } %>
+    </div>
 </body>
+
 </html>

@@ -75,7 +75,7 @@ const getCheckoutPage = async (req, res) => {
   }
 };
 
-const getAvailableCoupons = async(req,res) => {
+const getAvailableCoupons = async (req, res) => {
   try {
     const now = new Date();
     const coupons = await Coupon.find({
@@ -184,13 +184,23 @@ const getPaymentPage = async (req, res) => {
       coupon = req.session.coupon;
     }
     const totalAfterCoupon = grandTotal - couponDiscount;
+    const wallet = await Wallet.findOne({ userId });
+    const creditTxns = wallet?.transactions?.filter(txn => txn.type === 'credit') || [];
+    const debitTxns = wallet?.transactions?.filter(txn => txn.type === 'debit') || [];
+
+    const walletCredit = creditTxns.reduce((sum, txn) => sum + (txn.amount || 0), 0);
+    const walletDebit = debitTxns.reduce((sum, txn) => sum + (txn.amount || 0), 0);
+
+    const walletBalance = walletCredit - walletDebit;
+
 
     res.render('user/payment', {
       user: userData,
       grandTotal,
       discount,
       totalAfterCoupon,
-      coupon
+      coupon,
+      walletBalance
     });
 
   } catch (error) {
@@ -198,11 +208,11 @@ const getPaymentPage = async (req, res) => {
     res.status(500).json({ message: "Error loading payment page." });
   }
 }
-
 const orderPlaced = async (req, res) => {
   try {
     const userId = req.session.user;
     const { addressId, payment } = req.body;
+    const wallet = await Wallet.findOne({ userId });
 
     const userCart = await Cart.findOne({ userId }).populate('items.productId');
     if (!userCart || userCart.items.length === 0) {
@@ -231,7 +241,6 @@ const orderPlaced = async (req, res) => {
         return res.status(400).json({ message: `Insufficient stock for product ${product.name}.` });
       }
 
-      // Calculate discount & final amount per unit
       const salesPrice = product.salesPrice;
       const offer = product.productOffer || 0;
 
@@ -244,7 +253,6 @@ const orderPlaced = async (req, res) => {
       totalDiscount += itemDiscount;
       totalFinalAmount += finalAmount;
 
-      // Reduce stock
       product.quantity -= item.quantity;
       await product.save();
 
@@ -258,13 +266,11 @@ const orderPlaced = async (req, res) => {
       });
     }
 
-    //delivery charge
     if (totalFinalAmount > 500) {
       deliveryCharge = 0;
     }
     totalFinalAmount += deliveryCharge;
 
-    // Apply coupon discount if present in session
     let couponDiscount = 0;
     let couponName = null;
     let couponCode = null;
@@ -275,6 +281,40 @@ const orderPlaced = async (req, res) => {
       totalFinalAmount -= couponDiscount;
       totalDiscount += couponDiscount;
     }
+
+    // Declare walletCredit/walletDebit early so they are accessible later
+    let walletCredit = 0;
+    let walletDebit = 0;
+
+    if (payment === "WALLET") {
+      if (!wallet || !wallet.transactions) {
+        return res.status(400).json({ message: "Wallet not found or empty" });
+      }
+
+      const creditTxns = wallet.transactions.filter(txn => txn.type === 'credit');
+      const debitTxns = wallet.transactions.filter(txn => txn.type === 'debit');
+
+      walletCredit = creditTxns.reduce((sum, txn) => sum + (txn.amount || 0), 0);
+      walletDebit = debitTxns.reduce((sum, txn) => sum + (txn.amount || 0), 0);
+
+      const walletBalance = walletCredit - walletDebit;
+
+      if (walletBalance < totalFinalAmount) {
+        return res.status(400).json({ message: "Insufficient wallet balance" });
+      }
+
+      wallet.transactions.push({
+        type: "debit",
+        amount: totalFinalAmount,
+        description: `Purchase - Order`,
+        date: new Date()
+      });
+
+      await wallet.save();
+    }
+
+    const updatedWalletBalance = walletCredit - walletDebit - totalFinalAmount;
+
     const newOrder = new Order({
       user: userId,
       orderedItems,
@@ -288,18 +328,24 @@ const orderPlaced = async (req, res) => {
       coupenApplied: !!couponCode,
       couponName,
       couponDiscount,
+      coupon: req.session.coupon || null,
       paymentMethod: payment
     });
 
     await newOrder.save();
     await Cart.deleteOne({ userId });
-    delete req.session.coupon; // Clear coupon from session
+    delete req.session.coupon;
 
-    res.status(200).json({
+    const responsePayload = {
       method: payment,
       order: newOrder
-    });
+    };
 
+    if (payment === "WALLET") {
+      responsePayload.updatedWalletBalance = updatedWalletBalance;
+    }
+
+    res.status(200).json(responsePayload);
   } catch (error) {
     console.error("Order placement failed:", error);
     res.status(500).json({ message: "Order placement failed." });
@@ -315,7 +361,7 @@ const createRazorpayOrder = async (req, res) => {
     });
 
     const order = await instance.orders.create({
-      amount: Math.round( amount * 100), // Convert to paise
+      amount: Math.round(amount * 100), // Convert to paise
       currency: "INR",
       receipt: `order_rcptid_${Date.now()}`
     });
@@ -358,7 +404,7 @@ const verifyPayment = async (req, res) => {
           razorpayPaymentId: razorpay_payment_id,
           razorpaySignature: razorpay_signature,
           paymentStatus: 'paid',
-          isPaid : true
+          isPaid: true
         },
         { new: true }
       );
@@ -500,7 +546,7 @@ const getOrdersPage = async (req, res) => {
       .populate('orderedItems.product'); // Populate product details
 
     res.render('user/orders', {
-      user:userData,
+      user: userData,
       orders,
       search,
       currentPage: page,
@@ -515,28 +561,28 @@ const getOrdersPage = async (req, res) => {
 const getOrderDetails = async (req, res) => {
   try {
     const { orderId } = req.params;
-    const userId = req.params.user;
+    const userId = req.session.user;
     const userData = await User.findById(userId);
 
-    // Find order by orderId and populate products inside orderedItems
     const order = await Order.findOne({ orderId }).populate('orderedItems.product');
 
-    if (!order) {
-      return res.status(404).send('Order not found');
-    }
+    if (!order) return res.status(404).send('Order not found');
 
-    // Check if the logged-in user owns this order
-    if (!req.session.user || order.user.toString() !== req.session.user.toString()) {
+    if (!userId || order.user.toString() !== userId.toString()) {
       return res.status(403).send('Unauthorized');
     }
 
-    // Render order details page with order data
-    res.render('user/orderDetails', { order,user:userData });
+    res.render('user/orderDetails', {
+      order,
+      user: userData
+    });
+
   } catch (err) {
     console.error('Error in getOrderDetails:', err);
     res.status(500).send('Server error');
   }
 };
+
 
 const cancelOrderItem = async (req, res) => {
   try {
@@ -576,51 +622,51 @@ const cancelOrderItem = async (req, res) => {
     // Wallet Refund Logic (only Razorpay-paid orders)
     if (order.paymentMethod === 'razorpay' && order.isPaid) {
 
-  // Step 1: Total item price
-const itemTotal = item.price * item.quantity;
+      // Step 1: Total item price
+      const itemTotal = item.price * item.quantity;
 
-// Step 2: Total order value before discount (sum of all items)
-const orderTotalBeforeDiscount = order.orderedItems.reduce((sum, i) => {
-  return sum + i.price * i.quantity;
-}, 0);
+      // Step 2: Total order value before discount (sum of all items)
+      const orderTotalBeforeDiscount = order.orderedItems.reduce((sum, i) => {
+        return sum + i.price * i.quantity;
+      }, 0);
 
-// Step 3: Total coupon discount used
-const couponDiscount = order.couponDiscount || 0; 
+      // Step 3: Total coupon discount used
+      const couponDiscount = order.couponDiscount || 0;
 
-// Step 4: Calculate proportional discount share
-const itemDiscountShare = (itemTotal / orderTotalBeforeDiscount) * couponDiscount;
+      // Step 4: Calculate proportional discount share
+      const itemDiscountShare = (itemTotal / orderTotalBeforeDiscount) * couponDiscount;
 
-// Step 5: Final refund amount
-const refundAmount = itemTotal - itemDiscountShare;
+      // Step 5: Final refund amount
+      const refundAmount = itemTotal - itemDiscountShare;
 
-  const userId = order.user;
+      const userId = order.user;
 
-  // Update or create wallet
-  let wallet = await Wallet.findOne({ userId });
+      // Update or create wallet
+      let wallet = await Wallet.findOne({ userId });
 
-  if (!wallet) {
-    // Create new wallet if doesn't exist
-    wallet = new Wallet({
-      userId,
-      balance: refundAmount,
-      transactions: [{
-        type: 'credit',
-        amount: refundAmount,
-        description: `Refund for cancelled item: ${item.product.productName}`,
-      }]
-    });
-  } else {
-    // Add to existing wallet
-    wallet.balance += refundAmount;
-    wallet.transactions.push({
-      type: 'credit',
-      amount: refundAmount,
-      description: `Refund for cancelled item: ${item.product.productName}`,
-    });
-  }
+      if (!wallet) {
+        // Create new wallet if doesn't exist
+        wallet = new Wallet({
+          userId,
+          balance: refundAmount,
+          transactions: [{
+            type: 'credit',
+            amount: refundAmount,
+            description: `Refund for cancelled item: ${item.product.productName}`,
+          }]
+        });
+      } else {
+        // Add to existing wallet
+        wallet.balance += refundAmount;
+        wallet.transactions.push({
+          type: 'credit',
+          amount: refundAmount,
+          description: `Refund for cancelled item: ${item.product.productName}`,
+        });
+      }
 
-  await wallet.save();
-}
+      await wallet.save();
+    }
     // Check if all items are cancelled or returned
     const allItemsCancelled = order.orderedItems.every(i =>
       i.cancelStatus === 'cancelled' || i.returnStatus === 'returned'
@@ -757,20 +803,28 @@ const generateInvoice = async (req, res) => {
     doc.text('Subtotal', tableX + 5, y + 7, { width: colWidths.desc + colWidths.qty + colWidths.price + colWidths.discount - 10, align: 'right' });
     doc.text(`Rs. ${subtotal.toFixed(2)}`, tableX + colWidths.desc + colWidths.qty + colWidths.price + colWidths.discount + 5, y + 7);
     y += rowHeight;
+    // Coupon Discount row (only if applied)
+    if (order.couponDiscount && order.couponDiscount > 0) {
+      doc.rect(tableX, y, rowWidth, rowHeight).stroke();
+      doc.text('Coupon Discount', tableX + 5, y + 7, { width: rowWidth - colWidths.total - 10, align: 'right' });
+      doc.text(`- Rs. ${order.couponDiscount.toFixed(2)}`, tableX + rowWidth - colWidths.total + 5, y + 7);
+      y += rowHeight;
+    }
 
-    // Discount
+    // Delivery Charge row
     doc.rect(tableX, y, rowWidth, rowHeight).stroke();
-    doc.text('Discount', tableX + 5, y + 7, { width: colWidths.desc + colWidths.qty + colWidths.price + colWidths.discount - 10, align: 'right' });
-    doc.text(`- Rs. ${discount.toFixed(2)}`, tableX + colWidths.desc + colWidths.qty + colWidths.price + colWidths.discount + 5, y + 7);
+    doc.text('Delivery Charge', tableX + 5, y + 7, { width: rowWidth - colWidths.total - 10, align: 'right' });
+    doc.text(`Rs. ${order.deliveryCharge.toFixed(2)}`, tableX + rowWidth - colWidths.total + 5, y + 7);
     y += rowHeight;
 
-    // Final Total
+    // Final Payable Total
     doc.font('Helvetica-Bold');
     doc.rect(tableX, y, rowWidth, rowHeight).stroke();
-    doc.text('Total', tableX + 5, y + 7, { width: colWidths.desc + colWidths.qty + colWidths.price + colWidths.discount - 10, align: 'right' });
-    doc.text(`Rs. ${finalTotal.toFixed(2)}`, tableX + colWidths.desc + colWidths.qty + colWidths.price + colWidths.discount + 5, y + 7);
+    doc.text('Final Payable', tableX + 5, y + 7, { width: rowWidth - colWidths.total - 10, align: 'right' });
+    doc.text(`Rs. ${order.finalAmount.toFixed(2)}`, tableX + rowWidth - colWidths.total + 5, y + 7);
     doc.font('Helvetica');
     y += rowHeight;
+
 
     // === Signature Section ===
     doc.moveDown(2);
@@ -863,8 +917,8 @@ const returnOrderRequest = async (req, res) => {
 
 
 module.exports = {
-  getCheckoutPage, getPaymentPage,getAvailableCoupons, applyCoupon, removeCoupon, orderPlaced,
-   createRazorpayOrder, verifyPayment, paymentConfirm, orderSuccess,
+  getCheckoutPage, getPaymentPage, getAvailableCoupons, applyCoupon, removeCoupon, orderPlaced,
+  createRazorpayOrder, verifyPayment, paymentConfirm, orderSuccess,
   orderFailure, markOrderFailed, retryPayment, getOrdersPage, getOrderDetails,
   cancelOrderItem, generateInvoice, returnOrder, returnOrderRequest
 }

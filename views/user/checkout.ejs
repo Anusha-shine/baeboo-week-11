@@ -136,9 +136,10 @@
                                             </div>
                                             <% } %>
                                                 <div class="col-lg-6 mb-3">
-                                                    <a href="/addAddress">
-                                                        <button class="btn btn-primary w-100">Add address</button>
-                                                    </a>
+                                                    <a href="/addAddress?redirect=/checkout">
+  <button class="btn btn-primary w-100">Add address</button>
+</a>
+
                                                 </div>
                         </div>
                     </div>
@@ -229,7 +230,7 @@
                             <strong>${coupon.couponName}</strong><br>
                             Discount: ₹${coupon.offerPrice}<br>
                             Min Purchase: ₹${coupon.minimumPrice}<br>
-                            Valid till: ${new Date(coupon.endDate).toLocaleDateString()}
+                            Valid till: ${new Date(coupon.expireOn).toLocaleDateString()}
                             <div class="mt-1">
                                 <button class="btn btn-sm btn-outline-success" onclick="useThisCoupon('${coupon.couponName}')">Use</button>
                             </div>

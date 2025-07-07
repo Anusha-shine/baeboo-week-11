@@ -79,11 +79,47 @@
             height: auto;
             object-fit: contain;
         }
+        .wallet-section .table {
+    border-radius: 10px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+}
+
+.wallet-section .table th,
+.wallet-section .table td {
+    vertical-align: middle;
+    padding: 14px 12px;
+    font-size: 15px;
+}
+
+.wallet-section .table thead {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+
+.wallet-section .table-striped > tbody > tr:nth-of-type(odd) {
+    background-color: #fdfdfd;
+}
+
+.wallet-section .badge {
+    padding: 0.45em 0.75em;
+    font-size: 0.85em;
+}
+
+.wallet-section .text-success {
+    color: #28a745 !important;
+}
+
+.wallet-section .text-danger {
+    color: #dc3545 !important;
+}
+
     </style>
 </head>
 
 <body>
-    <header class="header">
+   <header class="header">
         <div class="container">
             <div class="row">
                 <div class="col-lg-3 col-md-3">
@@ -98,6 +134,34 @@
                             <li><a href="/shop">Shop</a></li>
                         </ul>
                     </nav>
+                </div>
+                <div class="col-lg-3 col-md-3">
+                    <div class="header__nav__option">
+                        <%if(locals.user){%>
+                            <div class="dropdown">
+                                <a href="#" class="sign-in-link">
+                                    <%=locals.user.name%>
+                                </a>
+                                <div class="dropdown-content">
+
+
+                                    <a href="/userProfile">Profile</a>
+                                    <a href="/logout">Logout</a>
+
+
+                                </div>
+
+
+                            </div>
+                            <%}else {%>
+
+
+                                <a href="/signup" class="sign-in-link">Sign Up</a>
+                                <a href="/login" class="sign-in-link">Log in</a>
+                                <%}%>
+                                    <a href="/wishlist"><img src="img/icon/heart.png" alt=""></a>
+                                    <a href="/cart"><img src="img/icon/cart.png" alt=""> <span>0</span></a>
+                    </div>
                 </div>
             </div>
             <div class="canvas__open"><i class="fa fa-bars"></i></div>
@@ -117,7 +181,7 @@
                                 <div class="card-body contact-from-area">
                                     <div class="text-center">
                                         <label for="walletAmount" class="h5 mb-3 d-block">Available Balance</label>
-                                        <h2 class="text-success mb-4">₹<%= finalAmount.toFixed(2) %>
+                                        <h2 class="text-success mb-4">₹<%= finalAmount %>
                                         </h2>
                                     </div>
                                 </div>
@@ -149,10 +213,14 @@
                                                         <%= new Date(txn.date).toLocaleDateString('en-IN', {
                                                             day: '2-digit' , month: 'short' , year: 'numeric' }) %>
                                                     </td>
-                                                    <td
-                                                        class="<%= txn.type === 'credit' ? 'text-success' : 'text-danger' %>">
-                                                        <%= txn.type.charAt(0).toUpperCase() + txn.type.slice(1) %>
-                                                    </td>
+                                                   <td>
+  <% if (txn.type === 'credit') { %>
+    <span class="badge bg-success">Credit</span>
+  <% } else { %>
+    <span class="badge bg-danger">Debit</span>
+  <% } %>
+</td>
+
                                                     <td>₹<%= txn.amount.toFixed(2) %>
                                                     </td>
                                                     <td>

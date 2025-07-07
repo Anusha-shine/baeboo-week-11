@@ -15,6 +15,10 @@ const userWalletController = require("../controller/userWalletController");
 const {loadUserReferral} = require("../controller/userReferralController");
 //Error management
 router.get('/pageNotFound', userController.pageNotFound);
+router.get('/user/blocked', (req, res) => {
+  res.render('user/blocked');
+});
+
 
 router.get('/',isUserBlocked,userController.loadHome);
 router.get('/signup', userController.loadSignup);
@@ -48,7 +52,6 @@ router.post("/verify-email-otp",userAuth,userProfileController.verifyEmailOtp);
 router.post("/update-email",userAuth,userProfileController.updateEmail);
 router.get("/change-password",userAuth,userProfileController.changePassword);
 router.post("/change-password",userAuth,userProfileController.changePasswordValid);
-router.post("/verify-changepassword-otp",userAuth,userProfileController.verifyChangePassOtp);
 router.post("/upload-profile-pic",upload.single("profileImage"),userProfileController.uploadProfileImage);
 router.get("/profile",userAuth,userProfileController.loadProfile);
 router.get("/edit-profile",userAuth,userProfileController.loadEditProfile);

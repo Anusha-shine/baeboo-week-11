@@ -91,6 +91,7 @@
               <option value="year" <%=range=='year' ? 'selected' : '' %>>This Year</option>
             </select>
             <button class="btn btn-dark" type="submit">Apply</button>
+            <button class="btn btn-secondary ms-2" type="button" onclick="clearSalesFilters()">Clear</button>
           </form>
         </div>
         <!-- SUMMARY CARDS -->
@@ -123,7 +124,7 @@
               </div>
             </div>
           </div>
-           <div class="col-md-3">
+          <div class="col-md-3">
             <div class="card text-white bg-success shadow">
               <div class="card-body">
                 <h5 class="card-title">Net Revenue</h5>
@@ -134,7 +135,7 @@
           </div>
         </div>
 
-        
+
 
         <!-- CHARTS -->
         <div class="row mb-4">
@@ -214,95 +215,106 @@
   </div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <!-- CHART JS CDN -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 
-<script>
-  // SALES LINE CHART
-  const salesLabels = JSON.parse('<%- JSON.stringify(salesChart.labels) %>');
-  const salesData = JSON.parse('<%- JSON.stringify(salesChart.data) %>');
+  <script>
+    // SALES LINE CHART
+    const salesLabels = JSON.parse('<%- JSON.stringify(salesChart.labels) %>');
+    const salesData = JSON.parse('<%- JSON.stringify(salesChart.data) %>');
 
-  new Chart(document.getElementById("salesChart"), {
-    type: 'line',
-    data: {
-      labels: salesLabels,
-      datasets: [{
-        label: "Sales ₹",
-        data: salesData,
-        fill: true,
-        backgroundColor: "rgba(54, 162, 235, 0.2)",
-        borderColor: "#36a2eb"
-      }]
-    }
-  });
-
-  // CATEGORY PIE CHART
-  const categoryLabels = JSON.parse('<%- JSON.stringify(categoryChart.labels) %>');
-  const categoryData = JSON.parse('<%- JSON.stringify(categoryChart.data) %>');
-
-  new Chart(document.getElementById("categoryPie"), {
-    type: 'doughnut',
-    data: {
-      labels: categoryLabels,
-      datasets: [{
-        data: categoryData,
-        backgroundColor: ["#36a2eb", "#ff6384", "#ffcd56", "#4bc0c0", "#9966ff"]
-      }]
-    }
-  });
-
-function validateDates(){
-  const start = document.getElementById("startDate").value;
-  const end = document.getElementById("endDate").value;
-  const today = new Date().toISOString().split("T")[0];
-
-  if(!start && !end){
-    Swal.fire({
-      icon:"warning",
-      title:"Invalid date range",
-      text:"Please select a date range"
+    new Chart(document.getElementById("salesChart"), {
+      type: 'line',
+      data: {
+        labels: salesLabels,
+        datasets: [{
+          label: "Sales ₹",
+          data: salesData,
+          fill: true,
+          backgroundColor: "rgba(54, 162, 235, 0.2)",
+          borderColor: "#36a2eb"
+        }]
+      }
     });
-    return false;
-  }
 
-  if((start && !end) || (!start && end)){
-    Swal.fire({
-      icon: "warning",
-      title: "Invalid date range",
-      text: "Please select both start and end dates"
+    // CATEGORY PIE CHART
+    const categoryLabels = JSON.parse('<%- JSON.stringify(categoryChart.labels) %>');
+    const categoryData = JSON.parse('<%- JSON.stringify(categoryChart.data) %>');
+
+    new Chart(document.getElementById("categoryPie"), {
+      type: 'doughnut',
+      data: {
+        labels: categoryLabels,
+        datasets: [{
+          data: categoryData,
+          backgroundColor: ["#36a2eb", "#ff6384", "#ffcd56", "#4bc0c0", "#9966ff"]
+        }]
+      }
     });
-    return false;
-  }
 
-  if(start && end) {
-    if(start > end){
-      Swal.fire({
-        icon: "warning",
-        title:"Invalid date range",
-        text: "Start date cannot be after end date"
-      });
-      return false;
+    function validateDates() {
+      const start = document.getElementById("startDate").value;
+      const end = document.getElementById("endDate").value;
+      const today = new Date().toISOString().split("T")[0];
+
+      if (!start && !end) {
+        Swal.fire({
+          icon: "warning",
+          title: "Invalid date range",
+          text: "Please select a date range"
+        });
+        return false;
+      }
+
+      if ((start && !end) || (!start && end)) {
+        Swal.fire({
+          icon: "warning",
+          title: "Invalid date range",
+          text: "Please select both start and end dates"
+        });
+        return false;
+      }
+
+      if (start && end) {
+        if (start > end) {
+          Swal.fire({
+            icon: "warning",
+            title: "Invalid date range",
+            text: "Start date cannot be after end date"
+          });
+          return false;
+        }
+
+        if (start > today || end > today) {
+          Swal.fire({
+            icon: "warning",
+            title: "Invalid date selection",
+            text: "Start and End dates cannot be in the future"
+          });
+          return false;
+        }
+
+        // Valid dates, allow form submission
+        return true;
+      }
+
+      // fallback
+      return true;
     }
 
-    if(start > today || end > today){
-      Swal.fire({
-        icon:"warning",
-        title:"Invalid date selection",
-        text:"Start and End dates cannot be in the future"
-      });
-      return false;
+    function clearSalesFilters() {
+      document.getElementById("startDate").value = "";
+      document.getElementById("endDate").value = "";
+      const rangeSelect = document.querySelector("select[name='range']");
+      rangeSelect.selectedIndex = 0;
+
+      // Redirect to the page without any query parameters
+      window.location.href = window.location.pathname;
     }
 
-    // Valid dates, allow form submission
-    return true;
-  }
 
-  // fallback
-  return true;
-}
-
-</script>
+  </script>
 </body>
 
 </html>

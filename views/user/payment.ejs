@@ -34,6 +34,12 @@
                                     name="payment_option" id="RazorPay">
                                 <label class="form-check-label" for="RazorPay">RazorPay</label>
                             </div>
+                            <div class="custome-radio ml-150">
+                                <input class="form-check-input payment" type="radio" value="wallet"
+                                    name="payment_option" id="Wallet">
+                                <label class="form-check-label" for="Wallet">Wallet(Balance: ₹<%=
+                                        walletBalance.toFixed(2) %>)</label>
+                            </div>
                         </div>
                     </ul>
                 </div>
@@ -222,7 +228,8 @@
                                     }
                                 }
                             });
-                        } else {
+                        }
+                        else {
                             Swal.fire({
                                 title: 'Order Creation Failed!',
                                 text: 'Could not create order. Try again.',
@@ -238,7 +245,48 @@
                         });
                     }
                 });
+            } else if (payment === "wallet") {
+                $.ajax({
+                    url: '/orderPlaced',
+                    method: 'POST',
+                    data: {
+                        totalPrice: numericValue,
+                        createdOn: new Date().getTime(),
+                        date: new Date(),
+                        addressId: address,
+                        payment: "WALLET",
+                        discount: discountValue,
+                        deliveryCharge: deliveryValue
+                    },
+                    success: function (response) {
+                        if (response && response.method === "WALLET" && response.order) {
+                            Swal.fire({
+                                title: "Order Successful!",
+                                text: "Your order has been placed using Wallet.",
+                                icon: "success",
+                                confirmButtonText: "Go to Wallet"
+                            }).then(() => {
+                                // Redirect to wallet page after success
+                                window.location.href = `/wallet`;
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Order Creation Failed!',
+                                text: response.message || 'Could not create order. Try again.',
+                                icon: 'error'
+                            });
+                        }
+                    },
+                    error: function (xhr) {
+                        Swal.fire({
+                            title: 'Order Failed!',
+                            text: xhr.responseJSON?.message || 'Server error while placing order.',
+                            icon: 'error'
+                        });
+                    }
+                });
             }
+
         }
 
         window.onload = () => {

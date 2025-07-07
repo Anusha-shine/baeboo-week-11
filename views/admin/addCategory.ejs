@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>Category</title>
@@ -8,18 +9,21 @@
   <!-- Bootstrap CDN -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.css" />
 
   <style>
-    body {
-      overflow-x: hidden;
-    }
-    .sidebar {
+  body {
+  overflow-x: hidden;
+  background-color: #f8f9fa;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.sidebar {
       height: 100vh;
       background-color: #343a40;
       color: white;
-      width: 200px;
     }
+
     .sidebar a {
       color: white;
       text-decoration: none;
@@ -27,55 +31,105 @@
       padding: 15px;
       font-size: 16px;
     }
+
     .sidebar a:hover {
       background-color: #495057;
     }
-    .content-main {
-      margin-left: 200px;
-      padding: 20px;
-    }
-    .form-label {
-      margin-bottom: 8px;
-    }
-    .form-control {
-      width: 100%;
-      padding: 8px;
-      margin-bottom: 10px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      box-sizing: border-box;
-    }
-    .btn-primary {
-      background-color: #007bff;
-      color: #fff;
-      border: 1px solid #007bff;
-      border-radius: 5px;
-      padding: 10px 20px;
-      cursor: pointer;
-    }
-    .btn-primary:hover {
-      background-color: #0056b3;
-      border-color: #0056b3;
-    }
-    .pagination-container {
-      text-align: center;
-      margin-top: 20px;
-    }
-    .pagination a,
-    .pagination .current-page {
-      display: inline-block;
-      padding: 5px 10px;
-      margin: 0 2px;
-      border: 1px solid #ddd;
-      text-decoration: none;
-      color: #333;
-    }
-    .pagination a:hover {
-      background-color: #f5f5f5;
-    }
-    .error-message {
-      color: red;
-    }
+
+.content-main {
+  margin-left: 220px;
+  padding: 30px;
+}
+
+.card {
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  background-color: #fff;
+}
+
+.table th,
+.table td {
+  vertical-align: middle;
+}
+
+.table td a {
+  text-decoration: none;
+}
+
+.btn {
+  border-radius: 8px;
+  font-size: 14px;
+  padding: 6px 12px;
+}
+
+.badge {
+  font-size: 13px;
+  padding: 6px 10px;
+}
+
+.pagination-container {
+  margin-top: 30px;
+  text-align: center;
+}
+
+.pagination-container a,
+.pagination-container .current-page {
+  margin: 0 5px;
+  padding: 8px 14px;
+  font-size: 14px;
+  border-radius: 5px;
+  color: #007bff;
+  text-decoration: none;
+  border: 1px solid #dee2e6;
+}
+
+.pagination-container .current-page {
+  background-color: #007bff;
+  color: white;
+}
+
+.header-bar {
+  padding: 20px;
+  margin-bottom: 20px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+}
+
+.card-header h5 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.input-group input:focus {
+  box-shadow: none;
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    display: none;
+  }
+
+  .content-main {
+    margin-left: 0;
+    padding: 15px;
+  }
+
+  .form-control {
+    font-size: 14px;
+  }
+
+  .btn {
+    font-size: 13px;
+    padding: 5px 10px;
+  }
+
+  .table-responsive {
+    overflow-x: auto;
+  }
+}
+
   </style>
 </head>
 
@@ -102,14 +156,32 @@
       </div>
 
       <!-- Search Bar -->
-      <header class="card-header text-center mb-4">
-        <form action="/admin/category/" method="get" class="d-inline">
-          <div class="input-group input-group-sm border border-1 border-grey rounded-pill mx-auto" style="width: 500px;">
-            <input type="text" class="form-control border-0 rounded-pill mt-3" placeholder="Search categories" name="search"/>
-            <button class="btn" type="submit">Search</button>
-          </div>
-        </form>
-      </header>
+<header class="card-header mb-4">
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <h5 class="mb-0 ms-2"></h5>
+    <form action="/admin/addCategory" method="get" class="d-flex flex-wrap align-items-center gap-2">
+      <div class="input-group" style="min-width: 300px;">
+        <input
+          type="text"
+          class="form-control rounded-start-pill"
+          placeholder="Search categories..."
+          name="search"
+          value="<%= typeof search !== 'undefined' ? search : '' %>"
+        />
+        <button class="btn btn-outline-primary rounded-end-pill px-4" type="submit">
+          <i class="bi bi-search"></i>
+        </button>
+      </div>
+       <% if (search) { %>
+      <a href="/admin/addCategory" class="btn btn-outline-secondary px-4 rounded-pill d-flex align-items-center">
+        <i class="bi bi-x-circle me-2"></i> Clear
+      </a>
+        <% } %>
+    </form>
+  </div>
+</header>
+
+
 
       <!-- Form and Table -->
       <div class="card">
@@ -119,12 +191,14 @@
             <form method="post" action="/admin/addCategory" onsubmit="return handleFormSubmit(event)">
               <div class="mb-4">
                 <label for="product_name" class="form-label">Name</label>
-                <input type="text" name="name" placeholder="Type here" class="form-control" id="product_name" required/>
+                <input type="text" name="name" placeholder="Type here" class="form-control" id="product_name"
+                  required />
                 <div id="name-error" class="error-message"></div>
               </div>
               <div class="mb-4">
                 <label class="form-label">Description</label>
-                <textarea placeholder="Type here" name="description" class="form-control" id="descriptionId" required></textarea>
+                <textarea placeholder="Type here" name="description" class="form-control" id="descriptionId"
+                  required></textarea>
                 <div id="description-error" class="error-message"></div>
               </div>
               <div class="d-grid">
@@ -150,52 +224,56 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <% cat.reverse().forEach((category, index) => { %>
-                  <tr>
-                    <td></td>
-                    <td class="text-start"><%= category.name %></td>
-                    <td class="text-start"><%= category.description %></td>
-                    <td>
-                      <% if(category.categoryOffer) {%>
-                        <%=category.categoryOffer %>
-                        <% } else { %>
-                          0%
-                      <% } %>
-                    </td>
-                    <td class="text-start">
-                      <% if(category.categoryOffer === 0) { %>
-                      <button class="btn btn-info" style="width: 100px">
-                        <a href="#" class="text-white" onclick="addOffer('<%= category._id %>')">Add Offer</a>
-                      </button>
-                      <% } else {%>
-                      <button class="btn btn-info" style="width: 100px">
-                        <a href="#" class="text-white" onclick="removeOffer('<%= category._id %>')">Remove</a>
-                      </button>
-                      <% } %>
-                    </td>
-                    <td class="text-start">
-                      <% if(category.isListed) { %>
-                      <span class="badge rounded-pill alert-success text-black" style="width: 60px">Listed</span>
-                      <% } else { %>
-                      <span class="badge rounded-pill alert-danger text-black" style="width: 60px">Unlisted</span>
-                      <% } %>
-                    </td>
-                    <td class="text-start">
-                      <% if(category.isListed) { %>
-                      <button class="btn btn-danger" style="width: 70px">
-                        <a href="/admin/listCategory?id=<%= category._id%>" class="text-white">Unlist</a>
-                      </button>
-                      <% } else { %>
-                      <button class="btn btn-success" style="width: 70px">
-                        <a href="/admin/unlistCategory?id=<%= category._id%>" class="text-white">List</a>
-                      </button>
-                      <% } %>
-                    </td>
-                    <td class="text-start">
-                      <a href="/admin/editCategory?id=<%=category._id%>" class="btn btn-info text-white">Edit</a>
-                    </td>
-                  </tr>
-                  <% }) %>
+                  <% cat.reverse().forEach((category, index)=> { %>
+                    <tr>
+                      <td></td>
+                      <td class="text-start">
+                        <%= category.name %>
+                      </td>
+                      <td class="text-start">
+                        <%= category.description %>
+                      </td>
+                      <td>
+                        <% if(category.categoryOffer) {%>
+                          <%=category.categoryOffer %>
+                            <% } else { %>
+                              0%
+                              <% } %>
+                      </td>
+                      <td class="text-start">
+                        <% if(category.categoryOffer===0) { %>
+                          <button class="btn btn-info" style="width: 100px">
+                            <a href="#" class="text-white" onclick="addOffer('<%= category._id %>')">Add Offer</a>
+                          </button>
+                          <% } else {%>
+                            <button class="btn btn-info" style="width: 100px">
+                              <a href="#" class="text-white" onclick="removeOffer('<%= category._id %>')">Remove</a>
+                            </button>
+                            <% } %>
+                      </td>
+                      <td class="text-start">
+                        <% if(category.isListed) { %>
+                          <span class="badge rounded-pill alert-success text-black" style="width: 60px">Listed</span>
+                          <% } else { %>
+                            <span class="badge rounded-pill alert-danger text-black" style="width: 60px">Unlisted</span>
+                            <% } %>
+                      </td>
+                      <td class="text-start">
+                        <% if(category.isListed) { %>
+                          <button class="btn btn-danger" style="width: 70px">
+                            <a href="/admin/listCategory?id=<%= category._id%>" class="text-white">Unlist</a>
+                          </button>
+                          <% } else { %>
+                            <button class="btn btn-success" style="width: 70px">
+                              <a href="/admin/unlistCategory?id=<%= category._id%>" class="text-white">List</a>
+                            </button>
+                            <% } %>
+                      </td>
+                      <td class="text-start">
+                        <a href="/admin/editCategory?id=<%=category._id%>" class="btn btn-info text-white">Edit</a>
+                      </td>
+                    </tr>
+                    <% }) %>
                 </tbody>
               </table>
             </div>
@@ -205,20 +283,21 @@
 
       <!-- Pagination -->
       <div class="pagination-container">
-        <% if(currentPage > 1) { %>
-          <a href="?page=<%= currentPage - 1 %>">&laquo; Previous</a>
-        <% } %>
-        <% for(let i = 1; i <= totalPages; i++) { %>
-          <% if(i === currentPage) { %>
-            <span class="current-page"><%= i %></span>
-          <% } else { %>
-            <a href="?page=<%= i %>"><%= i %></a>
-          <% } %>
-        <% } %>
-        <% if(currentPage < totalPages) { %>
-          <a href="?page=<%= currentPage + 1 %>">Next &raquo;</a>
-        <% } %>
-      </div>
+  <% if (currentPage > 1) { %>
+    <a href="?page=<%= currentPage - 1 %><%= search ? '&search=' + search : '' %>">&laquo; Previous</a>
+  <% } %>
+  <% for (let i = 1; i <= totalPages; i++) { %>
+    <% if (i === currentPage) { %>
+      <span class="current-page"><%= i %></span>
+    <% } else { %>
+      <a href="?page=<%= i %><%= search ? '&search=' + search : '' %>"><%= i %></a>
+    <% } %>
+  <% } %>
+  <% if (currentPage < totalPages) { %>
+    <a href="?page=<%= currentPage + 1 %><%= search ? '&search=' + search : '' %>">Next &raquo;</a>
+  <% } %>
+</div>
+
     </section>
   </div>
 
@@ -229,86 +308,86 @@
 
   <script>
     function handleFormSubmit(event) {
-  event.preventDefault();
-  const isValid = validateForm();
-  if (!isValid) return;
+      event.preventDefault();
+      const isValid = validateForm();
+      if (!isValid) return;
 
-  const name = document.getElementsByName("name")[0].value;
-  const description = document.getElementById("descriptionId").value;
+      const name = document.getElementsByName("name")[0].value;
+      const description = document.getElementById("descriptionId").value;
 
-  fetch("/admin/addCategory", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ name, description })
-  })
-  .then(res => {
-    if (!res.ok) {
-      return res.json().then(err => {
-        throw new Error(err.error);
-      });
+      fetch("/admin/addCategory", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ name, description })
+      })
+        .then(res => {
+          if (!res.ok) {
+            return res.json().then(err => {
+              throw new Error(err.error);
+            });
+          }
+          return res.json();
+        })
+        .then(() => location.reload())
+        .catch(error => {
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: error.message === "Category already exists"
+              ? 'Category already exists!'
+              : 'An error occurred while adding the category'
+          });
+        });
     }
-    return res.json();
-  })
-  .then(() => location.reload())
-  .catch(error => {
-    Swal.fire({
-      icon: 'error',
-      title: 'Oops...',
-      text: error.message === "Category already exists"
-        ? 'Category already exists!'
-        : 'An error occurred while adding the category'
-    });
-  });
-}
 
 
     function validateForm() {
-  clearErrorMessages();
-  const name = document.getElementsByName("name")[0].value.trim();
-  const description = document.getElementById("descriptionId").value.trim();
-  let isValid = true;
+      clearErrorMessages();
+      const name = document.getElementsByName("name")[0].value.trim();
+      const description = document.getElementById("descriptionId").value.trim();
+      let isValid = true;
 
-  if (!name && !description) {
-    Swal.fire({
-      icon: "error",
-      title: "All fields required",
-      text: "Please fill in all fields"
-    });
-    return false;
-  }
+      if (!name && !description) {
+        Swal.fire({
+          icon: "error",
+          title: "All fields required",
+          text: "Please fill in all fields"
+        });
+        return false;
+      }
 
-  if (!name) {
-    Swal.fire({
-      icon: "error",
-      title: "Name Required",
-      text: "Please enter a category name"
-    });
-    isValid = false;
-    return false;
-  } else if (!/^[a-zA-Z\s]+$/.test(name)) {
-    Swal.fire({
-      icon: "error",
-      title: "Invalid Name",
-      text: "Name should only contain letters and spaces"
-    });
-    isValid = false;
-    return false;
-  }
+      if (!name) {
+        Swal.fire({
+          icon: "error",
+          title: "Name Required",
+          text: "Please enter a category name"
+        });
+        isValid = false;
+        return false;
+      } else if (!/^[a-zA-Z\s]+$/.test(name)) {
+        Swal.fire({
+          icon: "error",
+          title: "Invalid Name",
+          text: "Name should only contain letters and spaces"
+        });
+        isValid = false;
+        return false;
+      }
 
-  if (!description) {
-    Swal.fire({
-      icon: "error",
-      title: "Description Required",
-      text: "Please enter a description"
-    });
-    isValid = false;
-    return false;
-  }
+      if (!description) {
+        Swal.fire({
+          icon: "error",
+          title: "Description Required",
+          text: "Please enter a description"
+        });
+        isValid = false;
+        return false;
+      }
 
-  return isValid;
-}
+      return isValid;
+    }
 
 
     function displayErrorMessage(elementId, message) {
@@ -325,13 +404,13 @@
     }
 
     async function addOffer(categoryId) {
-      const {value: amount} = await Swal.fire({
+      const { value: amount } = await Swal.fire({
         title: "Offer in percentage",
         input: "number",
         inputLabel: "Percentage",
         inputPlaceholder: "%"
       });
-      if(amount) {
+      if (amount) {
         try {
           const response = await fetch("/admin/addCategoryOffer", {
             method: "POST",
@@ -345,12 +424,12 @@
           });
 
           const data = await response.json();
-          if(response.ok && data.status === true) {
+          if (response.ok && data.status === true) {
             Swal.fire({
               title: "Offer added",
-              content:"The offer has been added successfully",
+              content: "The offer has been added successfully",
               type: "success"
-            }).then(()=> {
+            }).then(() => {
               location.reload();
             })
           } else {
@@ -365,7 +444,7 @@
           console.log("Error adding offer:", error);
         }
       }
-      
+
     }
 
     async function removeOffer(categoryId) {
@@ -380,12 +459,12 @@
           }),
         })
         const data = await response.json();
-        if(response.ok && data.status === true) {
+        if (response.ok && data.status === true) {
           Swal.fire({
             title: "Offer removed",
-            content:"The offer has been removed successfully",
+            content: "The offer has been removed successfully",
             type: "success"
-          }).then(()=> {
+          }).then(() => {
             location.reload();
           })
         } else {
@@ -402,4 +481,5 @@
     }
   </script>
 </body>
+
 </html>

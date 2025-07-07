@@ -46,7 +46,7 @@ const loadHome = async (req, res) => {
 
 const loadSignup = (req, res) => {
     const referralCode = req.query.ref || '';
-    res.render('user/signup', { message: null,referralCode });
+    res.render('user/signup', { message: null, referralCode });
 }
 
 function generateOtp() {
@@ -326,42 +326,64 @@ const loadShoppingPage = async (req, res) => {
         const categoryIds = categories.map((category) => category._id.toString());
         const brands = await Brand.find({ isBlocked: false });
         const brandNames = brands.map((brand) => brand.brandName);
+
+        const selectedCategory = req.query.category || null;
+        const selectedSort = req.query.sort || null;
+
         const page = parseInt(req.query.page) || 1;
         const limit = 6;
         const skip = (page - 1) * limit;
 
-        const products = await Product.find({
+        let filter = {
             isBlocked: false,
-            category: { $in: categoryIds },
             quantity: { $gt: 0 },
-            brand: { $in: brandNames }
-        }).sort({ createdOn: -1 }).skip(skip).limit(limit);
-        const totalProducts = await Product.countDocuments({
-            isBlocked: false,
             category: { $in: categoryIds },
-            brand: { $in: brandNames },
-            quantity: { $gt: 0 }
-        });
+            brand: { $in: brandNames }
+        };
+
+        if (selectedCategory) {
+            filter.category = selectedCategory;
+        }
+
+        let sortOption = { createdOn: -1 }; // Default: newest first
+
+        if (selectedSort === 'priceLowToHigh') {
+            sortOption = { salesPrice: 1 };
+        } else if (selectedSort === 'priceHighToLow') {
+            sortOption = { salesPrice: -1 };
+        }
+
+        const products = await Product.find(filter)
+            .sort(sortOption)
+            .skip(skip)
+            .limit(limit);
+
+        const totalProducts = await Product.countDocuments(filter);
         const totalPages = Math.ceil(totalProducts / limit);
-        const categoriesWithIds = categories.map(category => ({ _id: category._id, name: category.name }));
+
+        const categoriesWithIds = categories.map(category => ({
+            _id: category._id,
+            name: category.name
+        }));
+
         res.render("user/shop", {
             user: userData,
-            products: products,
+            products,
             category: categoriesWithIds,
             brand: brands,
-            totalProducts: totalProducts,
+            totalProducts,
             currentPage: page,
-            totalPages: totalPages,
-            selectedCategory: null,
-            selectedSort: null
-        })
+            totalPages,
+            selectedCategory,
+            selectedSort
+        });
 
     } catch (error) {
         console.error("Error in loading shop", error);
         res.redirect("/pageNotFound");
-
     }
-}
+};
+
 const filterProduct = async (req, res) => {
     try {
         const user = req.session.user;
@@ -481,7 +503,9 @@ const filterByPrice = async (req, res) => {
             category: categories,
             brand: brands,
             totalPages,
-            currentPage
+            currentPage,
+            selectedCategory: null,  // ✅ Prevents EJS ReferenceError
+            selectedSort: null
         })
 
     } catch (error) {
@@ -528,8 +552,11 @@ const searchProducts = async (req, res) => {
             brand: brands,
             totalPages,
             currentPage,
-            count: searchResult.length
-        })
+            count: searchResult.length,
+            selectedCategory: null,  // ✅ Prevents EJS ReferenceError
+            selectedSort: null
+        });
+
     } catch (error) {
         console.log("Error: error");
         res.redirect("/pageNotFound");

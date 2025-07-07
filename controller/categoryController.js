@@ -7,30 +7,37 @@ function calculateSalesPrice(regularPrice, productOffer = 0, categoryOffer = 0) 
 }
 
 const categoryInfo = async (req, res) => {
-    try {
-        const page = parseInt(req.query.page) || 1;
-        const limit = 4;
-        const skip = (page - 1) * limit;
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = 4;
+    const skip = (page - 1) * limit;
+    const search = req.query.search ? req.query.search.trim() : "";
 
-        const categoryData = await Category.find({})
-            .sort({ createdAt: -1 })
-            .skip(skip)
-            .limit(limit);
+    const query = search
+      ? { name: { $regex: new RegExp(search, "i") } }
+      : {};
 
-        const totalCategories = await Category.countDocuments();
-        const totalPages = Math.ceil(totalCategories / limit);
-        res.render('admin/addCategory', {
-            cat: categoryData,
-            currentPage: page,
-            totalPages: totalPages,
-            totalCategories: totalCategories
-        });
-    } catch (error) {
+    const categoryData = await Category.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
 
-        console.error('Error fetching categories:', error);
-        res.redirect('/admin/pageError');
-    }
+    const totalCategories = await Category.countDocuments(query);
+    const totalPages = Math.ceil(totalCategories / limit);
+
+    res.render("admin/addCategory", {
+      cat: categoryData,
+      currentPage: page,
+      totalPages: totalPages,
+      totalCategories: totalCategories,
+      search, // send this to retain search value
+    });
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+    res.redirect("/admin/pageError");
+  }
 };
+
 
 const addCategory = async (req, res) => {
     const { name, description } = req.body;

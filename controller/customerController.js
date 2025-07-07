@@ -34,7 +34,8 @@ const customerInfo = async (req, res) => {
         res.render("admin/customers", {
             data: userData,
             totalPages: Math.ceil(count/limit),
-            currentPage: page
+            currentPage: page,
+            search: req.query.search || ""
         });
     } catch(error){
         console.error("Error fetching customer data:", error);

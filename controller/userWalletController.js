@@ -1,8 +1,10 @@
 const Wallet = require("../models/walletSchema");
+const User = require("../models/userSchema");
 
 const viewWallet = async (req, res) => {
   try {
     const userId = req.session.user;
+    const userData = await User.findById(userId);
     const page = parseInt(req.query.page) || 1;
     const limit = 7;
     const skip = (page - 1) * limit;
@@ -10,43 +12,34 @@ const viewWallet = async (req, res) => {
     const wallet = await Wallet.findOne({ userId });
     const allTxns = wallet?.transactions || [];
 
-    // Filter only credit transactions
-    const creditTxns = allTxns.filter(txn => txn.type === 'credit');
+    // Calculate wallet balance: total credits - total debits
+    const creditTotal = allTxns
+      .filter(txn => txn.type === 'credit')
+      .reduce((sum, txn) => sum + Number(txn.amount || 0), 0);
 
-    // Debug log
-    console.log("Credit Transactions for wallet:", creditTxns);
-    creditTxns.forEach((txn, i) =>
-      console.log(`Txn #${i}: type=${txn.type}, amount=${txn.amount}, desc=${txn.description}`)
-    );
+    const debitTotal = allTxns
+      .filter(txn => txn.type === 'debit')
+      .reduce((sum, txn) => sum + Number(txn.amount || 0), 0);
 
-    // Only sum credit transactions
-    const finalAmount = creditTxns.reduce((sum, txn) => {
-      const amt = Number(txn.amount) || 0;
-      return sum + amt;
-    }, 0);
+    const finalAmount = creditTotal - debitTotal;
 
-    console.log('Computed finalAmount:', finalAmount);
-
-    // Paginate only credit transactions
-    const totalTransactions = creditTxns.length;
-    const transactions = creditTxns
-      .sort((a, b) => b.date - a.date)
-      .slice(skip, skip + limit);
-    const totalPages = Math.ceil(totalTransactions / limit);
+    // Sort all transactions and paginate
+    const sortedTxns = [...allTxns].sort((a, b) => b.date - a.date);
+    const paginatedTxns = sortedTxns.slice(skip, skip + limit);
+    const totalPages = Math.ceil(allTxns.length / limit);
 
     res.render('user/wallet', {
-      finalAmount,
-      transactions,
+      finalAmount: finalAmount.toFixed(2),
+      transactions: paginatedTxns,
       currentPage: page,
-      totalPages
+      totalPages,
+      user: userData
     });
   } catch (err) {
     console.error('Error fetching wallet:', err);
     res.status(500).send('Server Error');
   }
 };
-
-module.exports = { viewWallet };
 
 
 

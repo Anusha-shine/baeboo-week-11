@@ -94,7 +94,7 @@ const orderSchema = new Schema({
         type: String,
         default: null
     },
-    coupenApplied: {
+    couponApplied: {
         type: Boolean,
         default: false
     },

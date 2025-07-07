@@ -42,7 +42,7 @@ const isUserBlocked = async (req,res,next) => {
             const user = await User.findById(req.session.user);
             if(user && user.isBlocked){
                 delete req.session.user;
-                return res.redirect("/login");
+                return res.redirect("/user/blocked");
             }
         }
         next();

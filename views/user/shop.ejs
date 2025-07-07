@@ -554,7 +554,15 @@
              <img src="/uploads/re-image/<%=products[i].productImage[0]%>" alt="<%=products[i].productName%>" />
              <h4><%=products[i].productName%></h4>
              <p>Brand:<%=products[i].brand%></p>
-             <p>Price:₹<%=products[i].salesPrice.toLocaleString('en-IN')%><span class="text-muted"><strike>₹<%=products[i].regularPrice.toLocaleString('en-IN')%></strike></span></p>
+             <p>
+  Price: ₹<%= products[i].salesPrice.toLocaleString('en-IN') %>
+  <% if (products[i].salesPrice < products[i].regularPrice) { %>
+    <span class="text-muted">
+      <strike>₹<%= products[i].regularPrice.toLocaleString('en-IN') %></strike>
+    </span>
+  <% } %>
+</p>
+
            </a>
            <!--Quantity input-->
           
