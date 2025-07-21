@@ -1,0 +1,20 @@
+<% if (products.length === 0) { %>
+  <p style="grid-column: 1 / -1; text-align: center;">No products found.</p>
+<% } %>
+<% products.forEach(product => { %>
+  <div class="product-card">
+    <span class="wishlist-btn" onclick="addToWishlist('<%= product._id %>')">❤️</span>
+    <a href="/productDetails?id=<%= product._id %>">
+      <img src="/uploads/re-image/<%= product.productImage[0] %>" alt="<%= product.productName %>" />
+      <h4><%= product.productName %></h4>
+      <p>Brand: <%= product.brand %></p>
+      <p>
+        Price: ₹<%= product.salesPrice.toLocaleString('en-IN') %>
+        <% if (product.salesPrice < product.regularPrice) { %>
+          <span class="text-muted"><strike>₹<%= product.regularPrice.toLocaleString('en-IN') %></strike></span>
+        <% } %>
+      </p>
+    </a>
+    <button class="add-to-cart-btn" onclick="addToCart('<%= product._id %>')">Add to Cart</button>
+  </div>
+<% }) %>

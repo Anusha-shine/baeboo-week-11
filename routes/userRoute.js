@@ -3,7 +3,7 @@ const router = express.Router();
 const passport = require("passport");
 const userController = require('../controller/userController');
 const userProfileController = require("../controller/userProfilecontroller");
-const {userAuth,adminAuth, isUserBlocked} = require("../middlewares/auth");
+const {userAuth, isUserBlocked} = require("../middlewares/auth");
 const userProductController = require("../controller/userProductController");
 const multer = require("multer");
 const storage = require("../helpers/multer");
@@ -12,7 +12,7 @@ const wishlistController = require("../controller/wishlistController");
 const cartController = require("../controller/cartController");
 const orderController = require("../controller/orderController");
 const userWalletController = require("../controller/userWalletController");
-const {loadUserReferral} = require("../controller/userReferralController");
+const ajaxShopController = require("../controller/ajaxShopController");
 //Error management
 router.get('/pageNotFound', userController.pageNotFound);
 router.get('/user/blocked', (req, res) => {
@@ -37,6 +37,7 @@ router.get("/shop",userAuth,isUserBlocked,userController.loadShoppingPage);
 router.get("/filter",userAuth,isUserBlocked,userController.filterProduct);
 router.get("/filterPrice",userAuth,isUserBlocked,userController.filterByPrice);
 router.post("/search",userAuth,userController.searchProducts);
+router.get("/shop/ajax",ajaxShopController.ajaxLoadProducts);
 
 //profile Management
 router.get("/forgot-password",userProfileController.getForgotPassPage);
@@ -77,6 +78,7 @@ router.post("/remove-from-cart",userAuth,cartController.removeFromCart);
 router.post("/cart/update-quantity",userAuth,cartController.updateCartQuantity);
 router.post("/wishlist/add-to-cart",userAuth,wishlistController.addToCartFromWishlist);
 //order Management
+router.get("/check-cart", userAuth, orderController.checkCart);
 router.get("/checkout",userAuth,orderController.getCheckoutPage);
 router.get("/payment",userAuth,orderController.getPaymentPage);
 router.post("/orderPlaced",userAuth,orderController.orderPlaced);

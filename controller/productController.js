@@ -1,7 +1,6 @@
 const Product = require("../models/productSchema");
 const Category = require("../models/categorySchema");
 const Brand = require("../models/brandSchema");
-const User = require("../models/userSchema");
 const fs = require("fs");
 const path = require("path");
 const sharp = require("sharp");
@@ -21,13 +20,22 @@ const getProductAddPage = async (req, res) => {
             brand: brand
         });
     }catch(error){
+        console.log(error)
         res.redirect("/admin/pageError");
     }
 }
 const addProducts = async (req, res) => {
     try {
+        const products = req.body;
+const name = products.productName.trim();
+const escaped = name.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');  // escape special chars
+const regex = new RegExp(`^${escaped}$`, 'i');
 
-        const productExists = await Product.findOne({ productName: products.productName });
+const productExists = await Product.findOne({ productName: regex });
+
+        if(productExists) {
+            return res.status(400).json({message: "Product already exists. Please try another name"});
+        }
 
         if (!productExists) {
             const images = [];
@@ -69,13 +77,13 @@ const addProducts = async (req, res) => {
             });
 
             await newProduct.save();
-            return res.redirect("/admin/addProducts");
+            return res.json({ success: true, redirect: "/admin/addProducts" });
         } else {
             return res.status(400).json({ message: "Product already exists. Please try another name" });
         }
     } catch (error) {
         console.error("Error saving product:", error);
-        return res.redirect("/admin/pageError");
+        return res.json({success: false,redirect:"/admin/pageError"});
     }
 };
 const getAllProducts = async (req, res) => {
@@ -175,6 +183,7 @@ const blockProduct = async (req, res) => {
         await Product.updateOne({_id:id},{$set:{isBlocked:true}});
         res.redirect("/admin/products");
     }catch(error) {
+        console.log(error);
         res.redirect("/admin/pageError");
     }
 }
@@ -184,6 +193,7 @@ const unblockProduct = async (req, res) => {
         await Product.updateOne({_id:id},{$set:{isBlocked:false}});
         res.redirect("/admin/products");
     }catch(error) {
+        console.log(error);
         res.redirect("/admin/pageError");
     }
 }
@@ -199,6 +209,7 @@ const getEditProduct = async (req, res) => {
             brand: brand
         });
     }catch(error){
+        console.log(error);
         res.redirect("/admin/pageError");
     }
 }
@@ -245,7 +256,7 @@ const editProduct = async (req, res) => {
 const deleteSingleImage = async (req, res) => {
     try {
         const {imageNameToServer, productIdToServer} = req.body;
-        const product = await Product.findByIdAndUpdate(productIdToServer,{$pull:{productImage:imageNameToServer}});
+        await Product.findByIdAndUpdate(productIdToServer,{$pull:{productImage:imageNameToServer}});
         const imagePath = path.join("public","uploads","re-image",imageNameToServer);
         if (fs.existsSync(imagePath)) {
             await fs.unlinkSync(imagePath);
@@ -256,6 +267,7 @@ const deleteSingleImage = async (req, res) => {
         res.send({status:true});
 
 }catch(error){
+    console.log(error);
     res.redirect("/admin/pageError");
 }
 }

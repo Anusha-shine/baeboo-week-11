@@ -28,7 +28,7 @@ const Login = async (req, res) => {
     if (admin) {
       const passwordMatch = await bcrypt.compare(password, admin.password);
       if (passwordMatch) {
-        req.session.admin = true;
+        req.session.admin = admin._id;
         return res.redirect('/admin/dashboard');
       } else {
         return res.redirect('/admin/login');
@@ -138,7 +138,7 @@ const loadDashboard = async (req, res) => {
       data: categoryChartAgg.map(c => c.totalQty)
     };
 
-    // 🟩 Top 10 Products
+    // Top 10 Products
     const topProductsAgg = await Order.aggregate([
       { $match: match },
       { $unwind: "$orderedItems" },
@@ -169,7 +169,7 @@ const loadDashboard = async (req, res) => {
       { $limit: 10 }
     ]);
 
-    // 🟥 Top 10 Brands
+    //  Top 10 Brands
     const topBrandsAgg = await Order.aggregate([
   { $match: match },
   { $unwind: "$orderedItems" },

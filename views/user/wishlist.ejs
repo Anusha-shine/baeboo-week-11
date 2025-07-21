@@ -1,104 +1,144 @@
- <%-include("../../views/partials/user/header.ejs")%>
+<%-include("../../views/partials/user/header.ejs")%>
 
 
-<main class="main">
-   <div class="page-header breadcrumb-wrap">
-       <div class="container">
-           <div class="breadcrumb">
-               <a href="/" rel="nofollow">Home</a>
-               <span></span> Shop
-               <span></span> My Wishlist
-           </div>
-       </div>
-   </div>
+    <main class="main">
+        <div class="page-header breadcrumb-wrap">
+            <div class="container">
+                <div class="breadcrumb">
+                    <a href="/" rel="nofollow">Home</a>
+                    <span></span> Shop
+                    <span></span> My Wishlist
+                </div>
+            </div>
+        </div>
 
 
-   <section class="mt-50 mb-50">
-       <div class="container">
-           <div class="row">
-               <div class="col-12">
-                   <div class="table-responsive">
-                       <table class="table shopping-summery text-center clean">
-                           <thead>
-                               <tr class="main-heading">
-                                   <th scope="col">Image</th>
-                                   <th scope="col">Name</th>
-                                   <th scope="col">Price</th>
-                                   <th scope="col">Add to Cart</th>
-                                   <th scope="col">Remove</th>
-                               </tr>
-                           </thead>
-                           <tbody>
+        <section class="mt-50 mb-50">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="table-responsive">
+                            <table class="table shopping-summery text-center clean">
+                                <thead>
+                                    <tr class="main-heading">
+                                        <th scope="col">Image</th>
+                                        <th scope="col">Name</th>
+                                        <th scope="col">Price</th>
+                                        <th scope="col">Add to Cart</th>
+                                        <th scope="col">Remove</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
 
-                            <% if(wishlist.length>0) {%>
+                                    <% if(wishlist.length>0) {%>
 
-                                <% for(let product of wishlist) { %>
-                             
-                                       <tr>
-                                           <td class="image product-thumbnail">
-                                               <img src="/uploads/re-image/<%=product.productImage[0]%>" />
-                                           </td>
-                                           <td class="product-des product-name">
-                                               <h5 class="product-name">
-                                                   <a href="">
-                                                    <%=product.productName%>
-                                                      
-                                                   </a>
-                                               </h5>
-                                               <p class="font-xs">
-                                                  <%=product.category.name%>
-                                                   <br />
-                                                   <%=product.brand%>
-                                                  
-                                               </p>
-                                           </td>
-                                           <td class="price" data-title="Price">₹<span>
-                                               <%=product.salesPrice%>                                        
-                                           </span></td>
-                                        <td class="text-center" data-title="Add to Cart">
-                                            <form action="/wishlist/add-to-cart" method="POST">
-                                                <input type="hidden" name="productId" value="<%= product._id %>">
-                                                <button type="submit" class="btn btn-sm">Add to Cart</button>
-                                            </form>
-                                        </td>
-                                           <td class="action" data-title="Remove">
-                                               <a class="btn btn-sm" href="#" onclick="confirmRemove('<%=product._id%>')">
-                                                   <i class="fi-rs-trash"></i>
-                                               </a>
-                                           </td>
-                                       </tr>
-                                <% } %>
-                            <% } else { %>
-                                   <tr>
-                                       <td colspan="5" class="text-center">
-                                           <p class="lead mb-4">No items found in Wishlist</p>
-                                       </td>
-                                   </tr>
-                            <% } %>
-                           </tbody>
-                       </table>
-                   </div>
-               </div>
-           </div>
-       </div>
-   </section>
-</main>
-<%-include("../../views/partials/user/footer.ejs")%>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-    function confirmRemove(productId){
-        Swal.fire({
-            title:"Are you sure?",
-            text:"You won't be able to revert this",
-            icon:"warning",
-            showCancelButton:true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText:'Yes, remove it!'
-        }).then((result) => {
-            if(result.isConfirmed) {
-                window.location.href = `/removeFromWishlist?productId=${productId}`
-            }
-        })
-    }
+                                        <% for(let product of wishlist) { %>
+
+                                            <tr>
+                                                <td class="image product-thumbnail">
+                                                    <img src="/uploads/re-image/<%=product.productImage[0]%>" />
+                                                </td>
+                                                <td class="product-des product-name">
+                                                    <h5 class="product-name">
+                                                        <a href="">
+                                                            <%=product.productName%>
+
+                                                        </a>
+                                                    </h5>
+                                                    <p class="font-xs">
+                                                        <%=product.category.name%>
+                                                            <br />
+                                                            <%=product.brand%>
+
+                                                    </p>
+                                                </td>
+                                                <td class="price" data-title="Price">₹<span>
+                                                        <%=product.salesPrice%>
+                                                    </span></td>
+                                                <td class="text-center" data-title="Add to Cart">
+                                                    <form class="add-to-cart-form" data-product-id="<%= product._id %>">
+                                                        <button type="submit" class="btn btn-sm">Add to Cart</button>
+                                                    </form>
+                                                </td>
+                                                <td class="action" data-title="Remove">
+                                                    <button class="btn btn-sm remove-wishlist-btn"
+                                                        data-product-id="<%= product._id %>">
+                                                        <i class="fi-rs-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            <% } %>
+                                                <% } else { %>
+                                                    <tr>
+                                                        <td colspan="5" class="text-center">
+                                                            <p class="lead mb-4">No items found in Wishlist</p>
+                                                        </td>
+                                                    </tr>
+                                                    <% } %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <%-include("../../views/partials/user/footer.ejs")%>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+     <script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Add to Cart
+  document.querySelectorAll('.add-to-cart-form').forEach(form => {
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      const productId = form.dataset.productId;
+
+      Swal.fire({ title: 'Adding...', allowOutsideClick: false });
+      Swal.showLoading();
+
+      try {
+        const res = await fetch('/wishlist/add-to-cart', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({ productId })
+        });
+        if (!res.ok) throw new Error(res.status);
+
+        Swal.close();
+        Swal.fire('Added!', 'Product moved to cart.', 'success');
+        form.closest('tr').remove();
+      } catch (err) {
+        Swal.close();
+        Swal.fire('Oops!', 'Could not add to cart.', 'error');
+      }
+    });
+  });
+
+  // Remove from Wishlist
+  document.querySelectorAll('.remove-wishlist-btn').forEach(btn => {
+    btn.addEventListener('click', async e => {
+      e.preventDefault();
+      const productId = btn.dataset.productId;
+      const result = await Swal.fire({
+        title: 'Are you sure?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, remove it!'
+      });
+      if (!result.isConfirmed) return;
+
+      try {
+        const res = await fetch(`/removeFromWishlist?productId=${encodeURIComponent(productId)}`, {
+          method: 'GET'
+        });
+        if (!res.ok) throw new Error(res.status);
+
+        Swal.fire('Removed!', '', 'success');
+        btn.closest('tr').remove();
+      } catch {
+        Swal.fire('Error', 'Could not remove.', 'error');
+      }
+    });
+  });
+});
 </script>

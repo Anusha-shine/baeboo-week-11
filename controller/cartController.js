@@ -93,6 +93,7 @@ const removeFromCart = async (req, res) => {
     const cart = await Cart.findOne({ userId });
 
     if (!cart) {
+      if(req.xhr) return res.json({succcess: false, message: "Cart not found"});
       return res.redirect("/cart");
     }
 
@@ -102,10 +103,9 @@ const removeFromCart = async (req, res) => {
     );
 
     if (!removedItem) {
+      if(req.xhr) return res.json({success: false, message: "Item not found in cart"});
       return res.redirect("/cart"); // item not found, nothing to remove
     }
-
-    const removedQuantity = removedItem.quantity;
 
     // Remove the item from the cart
     cart.items = cart.items.filter(
@@ -113,10 +113,15 @@ const removeFromCart = async (req, res) => {
     );
 
     await cart.save(); // Save the updated cart
-    return res.redirect("/cart");
-
+    if(req.xhr) {
+      return res.json({success:true});
+    }else {
+      return res.redirect("/cart");
+    }
+    
   } catch (error) {
     console.error("Error removing from cart", error);
+    if(req.xhr) return res.status(500).json({success: false, message: "Server error"});
     res.redirect("/pageNotFound");
   }
 };

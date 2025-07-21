@@ -14,10 +14,11 @@
 
   <style>
     body {
-  overflow-x: hidden;
-  background-color: #f8f9fa;
-}
-   .sidebar {
+      overflow-x: hidden;
+      background-color: #f8f9fa;
+    }
+
+    .sidebar {
       height: 100vh;
       background-color: #343a40;
       color: white;
@@ -35,62 +36,61 @@
       background-color: #495057;
     }
 
-   .content {
-  margin-left: 200px;
-  padding: 20px;
-}
+    .content {
+      margin-left: 200px;
+      padding: 20px;
+    }
 
-.topbar {
-  background-color: #fff;
-  padding: 12px 24px;
-  border-bottom: 1px solid #dee2e6;
-}
+    .topbar {
+      background-color: #fff;
+      padding: 12px 24px;
+      border-bottom: 1px solid #dee2e6;
+    }
 
-.btn-clear {
-  padding: 5px 12px;
-  font-size: 0.85rem;
-  border-radius: 20px;
-  border: 1px solid #ced4da;
-  background-color: #ffffff;
-  color: #6c757d;
-  transition: all 0.2s ease-in-out;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-}
+    .btn-clear {
+      padding: 5px 12px;
+      font-size: 0.85rem;
+      border-radius: 20px;
+      border: 1px solid #ced4da;
+      background-color: #ffffff;
+      color: #6c757d;
+      transition: all 0.2s ease-in-out;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
 
-.btn-clear:hover {
-  background-color: #f8f9fa;
-  color: #000;
-  border-color: #adb5bd;
-  text-decoration: none;
-}
+    .btn-clear:hover {
+      background-color: #f8f9fa;
+      color: #000;
+      border-color: #adb5bd;
+      text-decoration: none;
+    }
 
-.table th,
-.table td {
-  vertical-align: middle !important;
-}
+    .table th,
+    .table td {
+      vertical-align: middle !important;
+    }
 
-.table td button {
-  width: 100%;
-}
+    .table td button {
+      width: 100%;
+    }
 
-.table-hover tbody tr:hover {
-  background-color: #f1f1f1;
-}
+    .table-hover tbody tr:hover {
+      background-color: #f1f1f1;
+    }
 
-.input-group input:focus {
-  box-shadow: none;
-}
+    .input-group input:focus {
+      box-shadow: none;
+    }
 
-@media (max-width: 768px) {
-  .sidebar {
-    display: none;
-  }
+    @media (max-width: 768px) {
+      .sidebar {
+        display: none;
+      }
 
-  .content {
-    margin-left: 0;
-  }
-}
-
+      .content {
+        margin-left: 0;
+      }
+    }
   </style>
 </head>
 
@@ -126,21 +126,21 @@
           <h2 class="content-title card-title">Customers</h2>
         </div>
         <!-- Search Form -->
-<div class="text-center mb-4">
-  <form action="/admin/users/" method="get" class="d-inline">
-    <div class="input-group input-group-sm border border-1 border-grey rounded-pill mx-auto"
-      style="max-width: 500px;">
-      <input type="text" class="form-control border-0 rounded-start-pill" placeholder="Search customers..." name="search"
-        value="<%= typeof search !== 'undefined' ? search : '' %>">
-      <button class="btn border-0 rounded-end-pill bg-light" type="submit">
-        <i class="bi bi-search"></i>
-      </button>
-    </div>
-    <% if (search) { %>
-      <a href="/admin/users" class="btn btn-clear mt-2 ms-2">Clear</a>
-    <% } %>
-  </form>
-</div>
+        <div class="text-center mb-4">
+          <form action="/admin/users/" method="get" class="d-inline">
+            <div class="input-group input-group-sm border border-1 border-grey rounded-pill mx-auto"
+              style="max-width: 500px;">
+              <input type="text" class="form-control border-0 rounded-start-pill" placeholder="Search customers..."
+                name="search" value="<%= typeof search !== 'undefined' ? search : '' %>">
+              <button class="btn border-0 rounded-end-pill bg-light" type="submit">
+                <i class="bi bi-search"></i>
+              </button>
+            </div>
+            <% if (search) { %>
+              <a href="/admin/users" class="btn btn-clear mt-2 ms-2">Clear</a>
+              <% } %>
+          </form>
+        </div>
 
 
         <div class="right mt-5">
@@ -167,17 +167,11 @@
                     <%= data[i].phone %>
                   </td>
                   <td>
-                    <% if (data[i].isBlocked===false) { %>
-                      <button class="btn btn-danger" style="width: 80px;"
-                        onclick="confirmAction('<%= data[i]._id %>', 'block')">
-                        Block
-                      </button>
-                      <% } else { %>
-                        <button class="btn btn-success" style="width: 80px;"
-                          onclick="confirmAction('<%= data[i]._id %>', 'unblock')">
-                          Unblock
-                        </button>
-                        <% } %>
+                    <button class="btn <%= data[i].isBlocked ? 'btn-success' : 'btn-danger' %>" style="width: 80px;"
+                      data-id="<%= data[i]._id %>" data-action="<%= data[i].isBlocked ? 'unblock' : 'block' %>">
+                      <%= data[i].isBlocked ? 'Unblock' : 'Block' %>
+                    </button>
+
                   </td>
                 </tr>
                 <% } %>
@@ -206,23 +200,51 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
-  function confirmAction(userId, actionType) {
-    const actionText = actionType === 'block' ? 'Block' : 'Unblock';
-    const url = `/admin/${actionType}Customer?id=${userId}`;
+  document.querySelectorAll('button[data-id]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const userId = btn.dataset.id;
+      const action = btn.dataset.action;
+      const actionText = action.charAt(0).toUpperCase() + action.slice(1);
 
-    Swal.fire({
-      title: `Are you sure you want to ${actionText} this customer?`,
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: actionType === 'block' ? '#d33' : '#198754',
-      cancelButtonColor: '#6c757d',
-      confirmButtonText: `Yes, ${actionText}`,
-    }).then((result) => {
-      if (result.isConfirmed) {
-        window.location.href = url;
+      const { isConfirmed } = await Swal.fire({
+        title: `Are you sure you want to ${actionText} this customer?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: action === 'block' ? '#d33' : '#198754',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: `Yes, ${actionText}`
+      });
+      if (!isConfirmed) return;
+
+      try {
+        const resp = await fetch(`/admin/${action}Customer`, {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: userId })
+        });
+        const json = await resp.json();
+
+        if (json.success) {
+          // Switch the button
+          btn.classList.toggle('btn-danger');
+          btn.classList.toggle('btn-success');
+          btn.dataset.action = action === 'block' ? 'unblock' : 'block';
+          btn.textContent = action === 'block' ? 'Unblock' : 'Block';
+
+          // Optional: change row background
+          btn.closest('tr').classList.toggle('table-secondary');
+
+          Swal.fire('Success!', `User ${actionText}ed.`, 'success');
+        } else {
+          Swal.fire('Error', json.message || 'Action failed.', 'error');
+        }
+      } catch (err) {
+        console.error(err);
+        Swal.fire('Error', 'Something went wrong', 'error');
       }
     });
-  }
+  });
 </script>
 
 

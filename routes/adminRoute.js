@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const adminController = require('../controller/adminController');
-const {userAuth,adminAuth} = require('../middlewares/auth');
+const {adminAuth} = require('../middlewares/auth');
 const customerController = require('../controller/customerController');
 const categoryController = require('../controller/categoryController');
 const multer = require('multer');
@@ -15,13 +15,14 @@ const couponController = require("../controller/couponController");
 router.get('/pageError',adminController.pageError);
 router.get('/login', adminController.loadLogin);
 router.post('/login',adminController.Login);
-router.get('/dashboard',adminAuth,adminController.loadDashboard);
 router.get('/logout',adminController.Logout);
+router.get('/dashboard',adminAuth,adminController.loadDashboard);
+
 
 //customer management
 router.get("/users",adminAuth,customerController.customerInfo);
-router.get("/blockCustomer",adminAuth,customerController.customerBlocked);
-router.get("/unblockCustomer",adminAuth,customerController.customerUnBlocked);
+router.post("/blockCustomer",adminAuth,customerController.customerBlocked);
+router.post("/unblockCustomer",adminAuth,customerController.customerUnBlocked);
 
 //category management
 router.get('/addCategory',adminAuth,categoryController.categoryInfo);

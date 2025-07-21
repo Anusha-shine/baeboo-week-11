@@ -247,6 +247,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         function validateAndSubmit() {
             if (validateForm()) {
@@ -273,37 +274,72 @@
             let isValid = true;
 
             if (name === "") {
-                displayErrorMessage('productName-error', 'Please enter a product name.');
+                Swal.fire({
+                    icon:"error",
+                    title: "Error",
+                    text: "Please enter a product name.",
+                    confirmButtonText: "OK"
+                });
                 isValid = false;
             }
 
             if (description === "") {
-                displayErrorMessage('description-error', 'Please enter a product description.');
+                Swal.fire({
+                    icon:"error",
+                    title: "Error",
+                    text: "Please enter a product description.",
+                    confirmButtonText: "OK"
+                });
                 isValid = false;
             }
 
             if (quantity.trim() === "" || isNaN(quantity) || parseInt(quantity) < 0) {
-         displayErrorMessage('quantity-error', 'Please enter a valid non-negative quantity.');
+                Swal.fire({
+                    icon:"error",
+                    title: "Error",
+                    text: "Please enter a valid non-negative quantity.",
+                    confirmButtonText: "OK"
+                });
          isValid = false;
             }
 
             if (!/^\d+(\.\d{1,2})?$/.test(price) || parseFloat(price) < 0) {
-                displayErrorMessage('regularPrice-error', 'Please enter a valid non-negative price.');
+                Swal.fire({
+                    icon:"error",
+                    title: "Error",
+                    text: "Please enter a valid non-negative price.",
+                    confirmButtonText: "OK" 
+                });
                 isValid = false;
             }
 
             if (!/^\d+(\.\d{1,2})?$/.test(salesPrice) || parseFloat(salesPrice) < 0) {
-                displayErrorMessage('salesPrice-error', 'Please enter a valid non-negative sale price.');
+                Swal.fire({
+                    icon:"error",
+                    title: "Error",
+                    text: "Please enter a valid non-negative sales price.",
+                    confirmButtonText: "OK"
+                });
                 isValid = false;
             }
 
             if (color === "") {
-                displayErrorMessage('color-error', 'Please enter a color.');
+                Swal.fire({
+                    icon:"error",
+                    title: "Error",
+                    text: "Please enter a color.",
+                    confirmButtonText: "OK"
+                });
                 isValid = false;
             }
 
             if (!imageDatas && (!images || images.files.length === 0)) {
-                displayErrorMessage("images-error", 'Please select at least one image.');
+                Swal.fire({
+                    icon:"error",
+                    title: "Error",
+                    text: "Please upload at least one image.",
+                    confirmButtonText: "OK"
+                });
                 isValid = false;
             }
 

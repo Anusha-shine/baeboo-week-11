@@ -137,8 +137,8 @@
                                             <% } %>
                                                 <div class="col-lg-6 mb-3">
                                                     <a href="/addAddress?redirect=/checkout">
-  <button class="btn btn-primary w-100">Add address</button>
-</a>
+                                                        <button class="btn btn-primary w-100">Add address</button>
+                                                    </a>
 
                                                 </div>
                         </div>
@@ -159,7 +159,7 @@
                     </div>
                     <!-- View Coupons Toggle -->
                     <div class="mt-2">
-                        <a href="#" onclick="toggleCoupons()" class="text-primary">View Available Coupons</a>
+                        <a href="#" onclick="toggleCoupons(event)" class="text-primary">View Available Coupons</a>
                     </div>
 
                     <!-- Coupon List (hidden by default) -->
@@ -175,9 +175,14 @@
                             </p>
 
                             <% if (coupon) { %>
-                                <p><strong>Coupon (<%= coupon.couponName %>):</strong> - ₹<%= coupon.Discount %>
+                                <p class="order-summary-coupon">
+                                    <strong>Coupon (<%= coupon.couponName %>):</strong> - ₹<%= coupon.Discount %>
                                 </p>
-                                <% } %>
+                                <% }else { %>
+                                    <p class="order-summary-coupon">
+                                        <strong>No Coupon Applied</strong>
+                                    </p>
+                                        <% } %>
 
                                     <% const couponDiscount=coupon?.Discount || 0; const subTotal=grandTotal - discount
                                         - couponDiscount; const deliveryCharge=subTotal>= 500 ? 0 : 50;
@@ -187,7 +192,8 @@
                                         <p><strong>Delivery Charges:</strong> ₹<%= deliveryCharge %>
                                         </p>
 
-                                        <h5><strong>Total Payable:</strong> ₹<%= finalPayable.toFixed(2) %>
+                                        <h5 class="order-summary-total">
+                                            <strong>Total Payable:</strong> ₹<%= finalPayable.toFixed(2) %>
                                         </h5>
 
                         </div>
@@ -218,9 +224,17 @@
             const addressId = selectedAddress.value;
             window.location.href = `/payment?addressId=${addressId}`;
         }
-        function toggleCoupons() {
+        function toggleCoupons(event) {
+            event.preventDefault(); // Prevent default link behavior
             const couponListDiv = document.getElementById("availableCoupons");
+
+            // Toggle visibility
             if (couponListDiv.style.display === "none") {
+                // Show a loading spinner or text while fetching
+                couponListDiv.innerHTML = "<p>Loading coupons...</p>";
+                couponListDiv.style.display = "block";
+
+                // Fetch available coupons using AJAX
                 fetch('/availableCoupons')
                     .then(res => res.json())
                     .then(data => {
@@ -239,14 +253,13 @@
                         } else {
                             couponListDiv.innerHTML = "<p>No available coupons</p>";
                         }
-                        couponListDiv.style.display = "block";
                     })
                     .catch(err => {
                         console.error("Error loading coupons", err);
-                        couponListDiv.innerHTML = "<p>Error loading coupons</p>";
-                        couponListDiv.style.display = "block";
+                        couponListDiv.innerHTML = "<p class='text-danger'>Error loading coupons</p>";
                     });
             } else {
+                // If visible, hide it
                 couponListDiv.style.display = "none";
             }
         }
@@ -258,35 +271,44 @@
 
 
         function applyCoupon() {
-            const couponCode = document.getElementById('couponCode').value.trim();
-            const finalAmount = Number('<%= (grandTotal - discount).toFixed(2) %>');
+    const couponCode = document.getElementById('couponCode').value.trim();
+    const finalAmount = Number('<%= (grandTotal - discount).toFixed(2) %>');
 
-            if (!couponCode) {
-                Swal.fire("Enter a coupon code before applying", "", "warning");
-                return;
+    if (!couponCode) {
+        Swal.fire("Enter a coupon code before applying", "", "warning");
+        return;
+    }
+
+    fetch('/applyCoupon', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ couponCode, finalAmount })
+    })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire("Coupon Applied!", `You saved ₹${data.discount}`, "success");
+
+                // Update DOM manually without reload
+                document.getElementById("couponMessage").innerText = `Coupon ${couponCode} applied successfully!`;
+                document.getElementById("discountInfo").innerText = `Discount: ₹${data.discount}`;
+
+                // Optional: update summary values (assumes you have element IDs for them)
+                document.querySelector(".order-summary-coupon").innerHTML = `<strong>Coupon (${couponCode}):</strong> - ₹${data.discount}`;
+                const newTotal = (data.newTotal || 0).toFixed(2);
+                document.querySelector(".order-summary-total").innerHTML = `<strong>Total Payable:</strong> ₹${newTotal}`;
+            } else {
+                Swal.fire("Error", data.message, "error");
             }
+        })
+        .catch(err => {
+            console.error("Apply coupon error:", err);
+            Swal.fire("Oops!", "Something went wrong while applying the coupon", "error");
+        });
+}
 
-            fetch('/applyCoupon', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ couponCode, finalAmount })
-            })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        Swal.fire("Coupon Applied!", `You saved ₹${data.discount}`, "success")
-                            .then(() => location.reload());
-                    } else {
-                        Swal.fire("Error", data.message, "error");
-                    }
-                })
-                .catch(err => {
-                    console.error("Apply coupon error:", err);
-                    Swal.fire("Oops!", "Something went wrong while applying the coupon", "error");
-                });
-        }
 
         function removeCoupon() {
             fetch('/removeCoupon', {

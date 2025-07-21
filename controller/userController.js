@@ -167,7 +167,7 @@ const verifyOtp = async (req, res) => {
             await newUser.save();
 
             const newCode = generateReferralCode();
-            const baseUrl = "http://localhost:3008";
+            const baseUrl = process.env.BASE_URL
             const referralLink = `${baseUrl}/signup?ref=${newCode}`;
 
             const newReferral = new ReferralCode({
@@ -188,7 +188,7 @@ const verifyOtp = async (req, res) => {
 
                     const rewardAmount = referral.rewardAmount || 100;
 
-                    // 🎁 1. Credit the **referrer**
+                    //credit referrer
                     await Wallet.updateOne(
                         { userId: referral.user },
                         {
@@ -287,9 +287,6 @@ const Login = async (req, res) => {
         const findUser = await User.findOne({ email });
         if (!findUser) {
             return res.render('user/login', { msg: "User not found" })
-        }
-        if (findUser.isBlocked) {
-            return res.render('user/login', { msg: "Your account has been blocked" })
         }
         const passwordMatch = await bcrypt.compare(password, findUser.password);
         if (!passwordMatch) {
@@ -504,7 +501,7 @@ const filterByPrice = async (req, res) => {
             brand: brands,
             totalPages,
             currentPage,
-            selectedCategory: null,  // ✅ Prevents EJS ReferenceError
+            selectedCategory: null, 
             selectedSort: null
         })
 

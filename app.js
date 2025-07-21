@@ -2,15 +2,18 @@ const express = require('express');
 const app = express();
 const path = require('path');
 const passport = require("./config/passport");
-const env = require('dotenv').config();
+const process = require('process');
 const session = require("express-session");
 const db = require('./config/db');
 const userRoute = require('./routes/userRoute');
 const adminRoute = require('./routes/adminRoute');
 const cookieParser = require("cookie-parser");
+const morgan = require('morgan');
 db();
 
 app.use(cookieParser());
+
+app.use(morgan('dev'));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

@@ -19,22 +19,26 @@ const userAuth = (req, res, next) => {
     }
 };
 
+const adminAuth = (req, res, next) => {
+  if (!req.session.admin) {
+    return res.redirect('/admin/login');
+  }
+
+  User.findById(req.session.admin)
+    .then(user => {
+      if (user && user.isAdmin) {
+        next();
+      } else {
+        res.redirect('/admin/login');
+      }
+    })
+    .catch(err => {
+      console.error('Error in adminAuth:', err);
+      res.status(500).send('Internal Server Error');
+    });
+};
 
 
-const adminAuth = (req,res,next) => {
-    User.findOne({isAdmin:true})
-        .then(data => {
-            if(data ){
-                next();
-            } else {
-                res.redirect('/admin/login')
-            }
-        })
-        .catch(error =>{
-            console.log("Error in adminauth middleware",error);
-            res.status(500).send("Internal Server Error");  
-        })
-}
 
 const isUserBlocked = async (req,res,next) => {
     try {

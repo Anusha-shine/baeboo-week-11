@@ -3,16 +3,31 @@ const Cart = require("../models/cartSchema");
 const Address = require("../models/addressSchema");
 const Product = require("../models/productSchema");
 const Order = require("../models/orderSchema");
-const { ObjectId } = require('mongodb');
 const mongoose = require("mongoose");
 const PDFDocument = require("pdfkit");
 const path = require("path");
-const env = require('dotenv').config();
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
 const Coupon = require("../models/couponSchema");
 const Wallet = require("../models/walletSchema");
+const process = require('process');
 
+// Route: GET /check-cart
+const checkCart = async (req, res) => {
+  try {
+    const userId = req.session.user;
+    const cart = await Cart.findOne({ userId });
+
+    if (!cart || !cart.items || cart.items.length === 0) {
+      return res.json({ success: false, message: 'Your cart is empty.' });
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Cart check error:", err);
+    res.json({ success: false, message: 'Something went wrong.' });
+  }
+};
 
 const getCheckoutPage = async (req, res) => {
   try {
@@ -377,9 +392,8 @@ const createRazorpayOrder = async (req, res) => {
 }
 const verifyPayment = async (req, res) => {
   try {
-    const userId = req.session.user;
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body.order;
-    const { orderId, addressId } = req.body;
+    const { orderId } = req.body;
 
     console.log("Verifying payment for:", {
       razorpay_order_id,
@@ -632,9 +646,12 @@ const cancelOrderItem = async (req, res) => {
 
       // Step 3: Total coupon discount used
       const couponDiscount = order.couponDiscount || 0;
+      const offer = item.product.productOffer || 0;
+      const itemDiscount = (item.price* offer) /100;
+      const totalDiscount = itemDiscount + couponDiscount;
 
       // Step 4: Calculate proportional discount share
-      const itemDiscountShare = (itemTotal / orderTotalBeforeDiscount) * couponDiscount;
+      const itemDiscountShare = (itemTotal / orderTotalBeforeDiscount) * totalDiscount;
 
       // Step 5: Final refund amount
       const refundAmount = itemTotal - itemDiscountShare;
@@ -796,6 +813,7 @@ const generateInvoice = async (req, res) => {
       discount += itemDiscount;
       finalTotal += itemFinalAmount;
     });
+    console.log(discount, subtotal, finalTotal);
 
     // === Totals Rows ===
     // Subtotal
@@ -916,7 +934,7 @@ const returnOrderRequest = async (req, res) => {
 
 
 
-module.exports = {
+module.exports = {checkCart,
   getCheckoutPage, getPaymentPage, getAvailableCoupons, applyCoupon, removeCoupon, orderPlaced,
   createRazorpayOrder, verifyPayment, paymentConfirm, orderSuccess,
   orderFailure, markOrderFailed, retryPayment, getOrdersPage, getOrderDetails,
