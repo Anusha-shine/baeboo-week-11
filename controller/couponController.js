@@ -6,6 +6,7 @@ const loadCoupon = async(req,res) => {
         const findCoupons =await Coupon.find({});
         return res.render("admin/coupon",{coupons:findCoupons});
     } catch (error) {
+        console.error("Error loading coupons:", error);
         return res.redirect("/pageNotFound");
     }
 }
@@ -53,6 +54,7 @@ const editCoupon = async(req,res) => {
             findCoupon: findCoupon
         });
     } catch (error) {
+        console.error("Error editing coupon:", error);
         res.redirect("/pageNotFound");
     }
 }

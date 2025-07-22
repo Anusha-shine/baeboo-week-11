@@ -1,5 +1,4 @@
 const Product = require("../models/productSchema");
-const Category = require("../models/categorySchema");
 const User = require("../models/userSchema");
 
 
@@ -31,7 +30,7 @@ const productDetails = async (req, res) => {
       relatedProducts
     });
   } catch (error) {
-    conole.error("Error for fetching product details", error);
+    console.error("Error for fetching product details", error);
     res.redirect("/user/pageNotFound");
   }
 }

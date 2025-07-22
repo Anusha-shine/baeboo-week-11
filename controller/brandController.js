@@ -1,5 +1,4 @@
 const Brand = require("../models/brandSchema");
-const Product = require("../models/productSchema");
 
 const getBrandPage = async (req, res) => {
     try {
@@ -18,6 +17,7 @@ const getBrandPage = async (req, res) => {
             error: req.query.error
         })
     }catch(error){
+        console.error("Error fetching brands:", error);
         res.redirect("/admin/pageError");
     }
 }
@@ -58,6 +58,7 @@ const blockBrand = async (req, res) => {
         await Brand.updateOne({_id:id},{$set:{isBlocked:true}});
         res.redirect("/admin/brands");
     }catch(error){
+        console.error("Error blocking brand:", error);
         res.redirect("/admin/pageError");
     }
 }
@@ -68,6 +69,7 @@ const unBlockBrand = async (req, res) => {
         res.redirect("/admin/brands");
 
     }catch(error){
+        console.error("Error unblocking brand:", error);
         res.redirect("/admin/pageError");
     }
 }
