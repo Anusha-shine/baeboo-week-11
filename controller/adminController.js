@@ -1,13 +1,9 @@
 const User = require('../models/userSchema');
-const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const Order = require('../models/orderSchema');
 const ExcelJS = require('exceljs');
 const PDFDocument = require('pdfkit');
 const { getFilteredOrders } = require('../helpers/salesReportHelper');
-const Brand = require('../models/brandSchema');
-const Product = require('../models/productSchema');
-const Category = require('../models/categorySchema');
 
 const pageError = async (req, res) => [
   res.render('admin/pageError')
@@ -74,7 +70,7 @@ const loadDashboard = async (req, res) => {
     const netRevenue = Math.round(orders.reduce((sum,o) => sum + o.finalAmount, 0));
     const totalDiscount = Math.round(totalSales - netRevenue);
 
-    // 🟦 Sales Chart Data (group by day/month)
+    //  Sales Chart Data (group by day/month)
     const salesData = await Order.aggregate([
       { $match: match },
       {
@@ -96,7 +92,7 @@ const loadDashboard = async (req, res) => {
       data: salesData.map(d => d.total)
     };
 
-    // 🟨 Category Pie Chart
+    // Category Pie Chart
     const categoryChartAgg = await Order.aggregate([
       { $match: match },
       { $unwind: "$orderedItems" },
@@ -207,7 +203,7 @@ const loadDashboard = async (req, res) => {
   { $limit: 10 }
 ]);
 
-    // 🟪 Top 10 Categories
+    //  Top 10 Categories
     const topCategoriesAgg = await Order.aggregate([
       { $match: match },
       { $unwind: "$orderedItems" },

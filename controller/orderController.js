@@ -444,27 +444,37 @@ const paymentConfirm = async (req, res) => {
   try {
     const { status, orderId } = req.body;
 
-    const updatedOrder = await Order.findOneAndUpdate(
-      { orderId: orderId },
-      {
-        $set: {
-          status: status === "Paid" ? "placed" : "failed", // Status from Razorpay
-          invoiceDate: new Date()
-        }
-      },
-      { new: true }
-    );
-
-    if (!updatedOrder) {
+    const order = await Order.findOne({ orderId }).populate('orderedItems.product');
+    if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }
 
-    res.status(200).json({ message: "Payment confirmed", order: updatedOrder });
+    if (status !== "Paid") {
+      // Restock products if payment failed
+      for (const item of order.orderedItems) {
+  const productId = item.product._id || item.product;
+  const result = await Product.findByIdAndUpdate(
+    productId,
+    { $inc: { quantity: item.quantity } },
+    { new: true }
+  );
+  console.log(`Restocked ${item.quantity}, new qty: ${result?.quantity}`);
+}
+
+    }
+
+    // Update status
+    order.status = status === "Paid" ? "placed" : "failed";
+    order.invoiceDate = new Date();
+    await order.save();
+
+    res.status(200).json({ message: "Payment confirmed", order });
   } catch (error) {
     console.error("Error confirming payment:", error);
     res.status(500).json({ message: "Server error confirming payment" });
   }
 };
+
 
 const orderSuccess = async (req, res) => {
   try {

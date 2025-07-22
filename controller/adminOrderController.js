@@ -1,5 +1,4 @@
 const Order = require("../models/orderSchema");
-const mongoose = require("mongoose");
 const Product = require("../models/productSchema");
 const Wallet = require("../models/walletSchema");
 
@@ -103,6 +102,7 @@ const getOrderDetails = async (req, res) => {
     }
     res.render('admin/orderDetails', { order });
   } catch (err) {
+    console.log(err);
     res.status(500).send('Server error');
   }
 };
@@ -123,7 +123,7 @@ const updateOrderStatus = async (req, res) => {
     const currentIndex = validStatuses.indexOf(order.status);
     const newIndex = validStatuses.indexOf(newStatus);
 
-    // ✅ Allow only forward progression or cancelation (if needed)
+    //  Allow only forward progression or cancelation (if needed)
     const isForward = newIndex > currentIndex;
     const isCancelAllowed = newStatus === 'cancelled' && order.status !== 'delivered';
 

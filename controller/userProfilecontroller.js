@@ -2,12 +2,9 @@ const User = require("../models/userSchema");
 const Address = require("../models/addressSchema");
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
-const env = require("dotenv").config();
-const session = require("express-session");
-const Order = require("../models/orderSchema");
-const mongoose = require("mongoose");
 const Wallet = require("../models/walletSchema");
 const ReferralCode = require("../models/referralCodeSchema");
+const process = require('process');
 
 function generateOtp(){
     const digits = "1234567890";
@@ -52,7 +49,7 @@ const securePassword = async (password) => {
         const passwordHash = await bcrypt.hash(password,10);
         return passwordHash;
     }catch(error){
-
+        console.error("Error in hashing password",error);
     }
 }
 
@@ -61,6 +58,7 @@ const getForgotPassPage = async (req,res) => {
     try {
          res.render("user/forgot-password");
     }catch(error){
+        console.error("Error in getting forgot password page", error);
         res.redirect("/pageNotFound");
     }
 }
@@ -86,6 +84,7 @@ const forgotPassPage = async (req,res) => {
             })
         }
     }catch(error){
+        console.error("Error in forgot password page", error);
         res.redirect("/pageNotFound");
     }
 }
@@ -99,6 +98,7 @@ const verifyForgotPassOtp = async (req, res) => {
       res.json({success:false,message:"OTP not matching"});
     }
   } catch (error) {
+    console.error("Error in verifying OTP:", error);
     res.status(500).json({success:false,message:"An error occured.Please try again"})
   }
 };
@@ -131,6 +131,7 @@ const getResetPassPage = async(req,res) => {
     try {
         res.render("user/reset-password");
     }catch(error){
+        console.error("Error in getting reset password page", error);
         res.redirect("/pageNotFound");
     }
 }
@@ -149,6 +150,7 @@ const postNewPassword = async (req,res)=> {
             res.render("reset-password",{message:"Passwords do not match"});
         }
     }catch(error){
+        console.error("Error in resetting password", error);
         res.redirect("/pageNotFound");
 
     }
@@ -184,6 +186,7 @@ const changeEmail = async (req,res) => {
     try {
         res.render("user/change-email")
     }catch(error){
+        console.error("Error in getting change email page", error);
         res.redirect("/user/pageNotFound");
     }
 }
@@ -212,6 +215,7 @@ const changeEmailValid = async (req,res)=> {
         }
 
     }catch(error){
+        console.error("Error in change email validation", error);
         res.redirect("/user/pageNotFound");
     }
 }
@@ -230,6 +234,7 @@ const verifyEmailOtp = async(req,res) => {
         })
        }
     }catch(error){
+        console.error("Error in verifying email OTP", error);
         res.redirect("/user/pageNotFound");
     }
 }
@@ -240,6 +245,7 @@ const updateEmail = async (req,res) => {
         await User.findByIdAndUpdate(userId,{email:newEmail});
         res.redirect("/userProfile");
     }catch(error){
+        console.error("Error in updating email", error);
         res.redirect("/user/pageNotFound");
     }
 }
@@ -247,6 +253,7 @@ const changePassword = async (req,res) => {
     try{
         res.render("user/change-password");
     }catch(error){
+        console.error("Error in getting change password page", error);
         res.redirect("/user/pageNotFound");
     }
 }
@@ -294,6 +301,7 @@ const addAddress = async (req, res) => {
             redirect // pass redirect to EJS
         });
     } catch (error) {
+        console.error("Error in getting add address page", error);
         res.redirect("/user/pageNotFound");
     }
 };
@@ -344,7 +352,7 @@ const editAddress = async (req,res) => {
        res.render("user/edit-address",{address : addressData, user : user});
 
     }catch(error){
-        console.error("Error in edit address");
+        console.error("Error in edit address",error);
         res.redirect("/user/pageNotFound");
     }
 }
@@ -352,7 +360,6 @@ const postEditAddress = async (req,res) => {
     try {
         const data = req.body;
         const addressId = req.query.id;
-        const user = req.session.user;
         const findAddress = await Address.findOne({"address._id":addressId});
         if(!findAddress){
             res.redirect("/user/pageNotFound");

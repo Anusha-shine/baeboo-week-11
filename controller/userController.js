@@ -4,17 +4,17 @@ const Product = require("../models/productSchema");
 const Brand = require("../models/brandSchema");
 const bcrypt = require('bcryptjs');
 const nodemailer = require("nodemailer");
-const env = require("dotenv").config();
-const Coupon = require("../models/couponSchema");
 const { generateReferralCode } = require("../helpers/referralGenerate");
 const ReferralCode = require("../models/referralCodeSchema");
 const Wallet = require("../models/walletSchema");
+const process = require('process');
 
 
 const pageNotFound = (req, res) => {
     try {
         return res.render('user/page-404');
     } catch (error) {
+        console.error("Error in pageNotFound:", error);
         res.redirect('/pageNotFound');
     }
 }
@@ -106,7 +106,7 @@ const signup = async (req, res) => {
                 return res.render("user/signup", { message: "Invalid or expired referral code" });
             }
 
-            referredBy = referral.user; // ✅ Correct referrer
+            referredBy = referral.user;
         }
 
 
@@ -204,7 +204,7 @@ const verifyOtp = async (req, res) => {
                         { upsert: true }
                     );
 
-                    // Credit the **referred new user**
+                    // Credit the referred new user
                     await Wallet.updateOne(
                         { userId: newUser._id },
                         {
@@ -276,6 +276,7 @@ const loadLogin = async (req, res) => {
             res.redirect("/")
         }
     } catch (error) {
+        console.error("Error loading login page:", error);
         res.redirect("/pageNotFound")
 
     }
@@ -292,7 +293,6 @@ const Login = async (req, res) => {
         if (!passwordMatch) {
             return res.render('user/login', { msg: "Invalid password" })
         }
-        const name = findUser.name;
         req.session.user = findUser._id;
         res.redirect('/');
     } catch (error) {
@@ -555,7 +555,7 @@ const searchProducts = async (req, res) => {
         });
 
     } catch (error) {
-        console.log("Error: error");
+        console.log("Error:",error);
         res.redirect("/pageNotFound");
     }
 }
