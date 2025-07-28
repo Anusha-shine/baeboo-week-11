@@ -68,9 +68,9 @@ const loadDashboard = async (req, res) => {
     const totalSales = Math.round( orders.reduce((sum, o) => sum + o.totalAmount, 0));
     const netRevenue = Math.round(orders.reduce((sum,o) => sum + o.finalAmount, 0));
     const totalDiscount = Math.round(totalSales - netRevenue);
-
+    
     // Sales Chart Data (group by day/month)
-    const salesData = await Order.aggregate([
+       const salesData = await Order.aggregate([
       { $match: match },
       {
         $group: {

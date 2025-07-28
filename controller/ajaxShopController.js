@@ -1,6 +1,5 @@
 const ejs = require('ejs');
 const path = require('path');
-const User = require('../models/userSchema');
 const Product = require('../models/productSchema');
 const Category = require('../models/categorySchema');
 const Brand = require('../models/brandSchema');
@@ -8,8 +7,6 @@ const Brand = require('../models/brandSchema');
 
 const ajaxLoadProducts = async (req, res) => {
   try {
-    const user = req.session.user;
-    const userData = user ? await User.findById(user) : null;
 
     const categories = await Category.find({ isListed: true }).lean();
     const brands = await Brand.find({ isBlocked: false }).lean();

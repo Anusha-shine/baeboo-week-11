@@ -1,7 +1,6 @@
 const User = require("../models/userSchema");
 const Product = require("../models/productSchema");
 const Cart = require("../models/cartSchema");
-const Wishlist = require("../models/wishlistSchema");
 
 
 const loadWishlist = async(req,res) => {
@@ -24,7 +23,7 @@ const addToWishlist = async (req, res) => {
     const productId = req.body.productId;
     const userId = req.session.user;
 
-    const product = await Product.findById(productId).populate("category");
+    await Product.findById(productId).populate("category");
 
 
     const user = await User.findById(userId);
@@ -100,7 +99,7 @@ const addToCartFromWishlist = async (req, res) => {
 
     await cart.save();
 
-    // ✅ Remove from user's wishlist (since you store it in User model)
+    // Remove from user's wishlist 
     const user = await User.findById(userId);
     user.wishlist = user.wishlist.filter(id => id.toString() !== productId);
     await user.save();

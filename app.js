@@ -8,12 +8,9 @@ const db = require('./config/db');
 const userRoute = require('./routes/userRoute');
 const adminRoute = require('./routes/adminRoute');
 const cookieParser = require("cookie-parser");
-const morgan = require('morgan');
 db();
 
 app.use(cookieParser());
-
-app.use(morgan('dev'));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

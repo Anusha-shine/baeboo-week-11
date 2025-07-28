@@ -106,7 +106,7 @@ const signup = async (req, res) => {
                 return res.render("user/signup", { message: "Invalid or expired referral code" });
             }
 
-            referredBy = referral.user; // ✅ Correct referrer
+            referredBy = referral.user;
         }
 
 
@@ -204,7 +204,7 @@ const verifyOtp = async (req, res) => {
                         { upsert: true }
                     );
 
-                    // Credit the **referred new user**
+                    // Credit the referred new user
                     await Wallet.updateOne(
                         { userId: newUser._id },
                         {

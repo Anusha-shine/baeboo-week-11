@@ -374,8 +374,6 @@ const orderPlaced = async (req, res) => {
     res.status(500).json({ message: "Order placement failed." });
   }
 };
-
-
 const getOrdersPage = async (req, res) => {
   try {
     const userId = req.session.user;

@@ -203,15 +203,24 @@
                                             "modal": {
                                                 "ondismiss": function () {
                                                     $.ajax({
-                                                        url: '/markOrderFailed',
+                                                        url: '/paymentConfirm',
                                                         method: 'POST',
                                                         data: {
+                                                            status: "Failed",
                                                             orderId: internalOrderResponse.order.orderId
                                                         },
-                                                        complete: function () {
+                                                        success: () => {
                                                             window.location.href = `/orderFailure/${internalOrderResponse.order.orderId}`;
+                                                        },
+                                                        error: () => {
+                                                            Swal.fire({
+                                                                title: 'Error!',
+                                                                text: 'Failed to mark order as failed. Please try again.',
+                                                                icon: 'error'
+                                                            });
                                                         }
                                                     });
+
                                                 }
                                             },
                                             "prefill": {

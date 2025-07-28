@@ -200,7 +200,7 @@ const updateOrderStatus = async (req, res) => {
     const currentIndex = validStatuses.indexOf(order.status);
     const newIndex = validStatuses.indexOf(newStatus);
 
-    // ✅ Allow only forward progression or cancelation (if needed)
+    //  Allow only forward progression or cancelation (if needed)
     const isForward = newIndex > currentIndex;
     const isCancelAllowed = newStatus === 'cancelled' && order.status !== 'delivered';
 
