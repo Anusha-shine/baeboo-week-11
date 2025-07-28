@@ -1,84 +1,113 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Admin Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- Bootstrap CDN -->
+  <meta charset="UTF-8" />
+  <title>Edit Category – baeboo Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Bootstrap 5 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Icons -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
   <style>
     body {
-      overflow-x: hidden;
+      display: flex;
+      min-height: 100vh;
+      background: #f4f6f9;
+      font-family: "Segoe UI", sans-serif;
     }
     .sidebar {
-      height: 100vh;
+      width: 220px;
       background-color: #343a40;
       color: white;
+      flex-shrink: 0;
+    }
+    .sidebar h4 {
+      padding: 1rem;
+      text-align: center;
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      border-bottom: 1px solid #495057;
     }
     .sidebar a {
+      display: block;
+      padding: 0.75rem 1rem;
       color: white;
       text-decoration: none;
-      display: block;
-      padding: 15px;
-      font-size: 16px;
+      transition: background 0.2s;
     }
     .sidebar a:hover {
-      background-color: #495057;
+      background: #495057;
     }
     .content {
-      margin-left: 200px;
-      padding: 20px;
+      flex-grow: 1;
+      padding: 2rem;
     }
-    .topbar {
-      background-color: #f8f9fa;
-      padding: 10px 20px;
-      display: flex;
-      justify-content: flex-end;
-      align-items: center;
-      border-bottom: 1px solid #dee2e6;
+    .card {
+      max-width: 600px;
+      margin: auto;
+      border: none;
+      box-shadow: 0 0 15px rgba(0,0,0,0.05);
+    }
+    .btn-primary {
+      background-color: #1e918b;
+      border: none;
+    }
+    .btn-primary:hover {
+      background-color: #166f6d;
     }
   </style>
 </head>
 <body>
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <h4>baeboo</h4>
+    <a href="/admin/dashboard"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a>
+    <a href="/admin/users"><i class="bi bi-people me-2"></i>Customers</a>
+    <a href="/admin/addCategory"><i class="bi bi-tags me-2"></i>Category</a>
+    <a href="/admin/brands"><i class="bi bi-list-ul me-2"></i>Brands</a>
+    <a href="/admin/addProducts"><i class="bi bi-plus-square me-2"></i>Add Product</a>
+    <a href="/admin/products"><i class="bi bi-box-seam me-2"></i>Products</a>
+    <a href="/admin/adminOrders"><i class="bi bi-cart me-2"></i>Orders</a>
+    <a href="/admin/coupon"><i class="bi bi-ticket-perforated me-2"></i>Coupons</a>
+    <a href="/admin/salesReport"><i class="bi bi-bar-chart-line me-2"></i>Sales Report</a>
+  </div>
 
-  <div class="d-flex">
-    <!-- Sidebar -->
-    <div class="sidebar d-flex flex-column position-fixed p-3" style="width: 200px;">
-      <h4>baeboo</h4>
-      <a href="/admin/dashboard"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a>
-      <a href="/admin/users"><i class="bi bi-people me-2"></i>Customers</a>
-      <a href="/admin/addCategory"><i class="bi bi-tags me-2"></i>Category</a>
-      <a href="/admin/brands"><i class="bi bi-list-ul me-2"></i>Brands</a>
-      <a href="/admin/addProducts"><i class="bi bi-plus-square me-2"></i>Add Product</a>
-      <a href="/admin/products"><i class="bi bi-box-seam me-2"></i>Products</a>
-      <a href="/admin/adminOrders"><i class="bi bi-cart me-2"></i>Orders</a>
-      <a href="/admin/coupon"><i class="bi bi-ticket-perforated me-2"></i>Coupons</a>
-      <a href="/admin/salesReport"><i class="bi bi-bar-chart-line me-2"></i>Sales Report</a>
-      
-</div>
-
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-6 mt-60">
-            <form method="post" action="/admin/editCategory/<%=category._id%>">
-                <div class="d-grid text-end mt-30 col-md-5">
-                    <button class="btn btn-primary" type="submit">Update category</button>
-                </div>
-                <div class="mb-4 mt-30">
-                    <label for="product_name" class="form-label">Name</label>
-                    <input type="text" name="categoryName" value="<%=category.name%>" class="form-control border" />
-                </div>
-               
-                <div class="mb-4">
-                    <label class="form-label">Description</label>
-                    <textarea name="description" class="form-control border"><%=category.description%></textarea>
-                </div>
-            </form>
+  <!-- Main content -->
+  <div class="content">
+    <div class="card p-4">
+      <h3 class="card-title mb-4">Edit Category</h3>
+      <form method="post" action="/admin/editCategory/<%= category._id %>">
+        <div class="mb-3">
+          <label for="categoryName" class="form-label">Category Name</label>
+          <input
+            type="text"
+            id="categoryName"
+            name="categoryName"
+            value="<%= category.name %>"
+            class="form-control form-control-lg"
+            required
+          />
         </div>
+
+        <div class="mb-3">
+          <label for="description" class="form-label">Description</label>
+          <textarea
+            id="description"
+            name="categoryDescription"
+            rows="4"
+            class="form-control"
+            required
+          ><%= category.description %></textarea>
+        </div>
+
+        <div class="d-flex justify-content-end">
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-check2 me-1"></i>Update Category
+          </button>
+        </div>
+      </form>
     </div>
-</div>
- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  </div>
+
+  <!-- Bootstrap JS Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

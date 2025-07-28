@@ -105,6 +105,7 @@
               <th>Quantity</th>
               <th>Action</th>
               <th>Edit</th>
+              <th>Delete</th>
             </tr>
           </thead>
           <tbody>
@@ -150,6 +151,14 @@
                   <a href="/admin/editProduct?id=<%=data[i]._id%>" class="text-white text-decoration-none">Edit</a>
                 </button>
               </td>
+<td>
+  <button type="button"
+          class="btn btn-danger btn-sm delete-product"
+          data-id="<%= data[i]._id %>">
+    Delete
+  </button>
+</td>
+
             </tr>
             <%}%>
           </tbody>
@@ -242,5 +251,41 @@
       }
     }
   </script>
+  <script>
+  $(function() {
+    $('.delete-product').click(function() {
+      const id = $(this).data('id');
+
+      Swal.fire({
+        title: 'Are you sure?',
+        text: "This action cannot be undone!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          fetch(`/admin/product/${id}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' }
+          })
+          .then(res => {
+            if (res.ok) {
+              Swal.fire('Deleted!', 'Product has been removed.', 'success')
+                .then(() => location.reload());
+            } else {
+              return res.json().then(err => { throw err; });
+            }
+          })
+          .catch(err => {
+            Swal.fire('Error', err.message || 'Deletion failed!', 'error');
+          });
+        }
+      });
+    });
+  });
+</script>
+
 </body>
 </html>

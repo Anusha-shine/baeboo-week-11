@@ -340,14 +340,15 @@
               <table class="table">
                 <thead>
                   <tr class="text-center">
-                    <th width="25%">Product</th>
+                    <th width="20%">Product</th>
                     <th width="15%">Name</th>
                     <th width="10%">Unit Price</th>
                     <th width="10%">Quantity</th>
                     <th width="10%">Total</th>
                     <th width="10%">Discount</th>
                     <th width="10%">Offer Price</th>
-                    <th width="10%">Action</th>
+                    <th width="10%">Payment Method</th>
+                    <th width="15%">Action</th>
                   </tr>
                 </thead>
 
@@ -373,12 +374,15 @@
 
                       <td class="text-center">₹<%= (item.finalAmount).toFixed(2) %>
                       </td>
+                      <td class="text-center "><%= order.paymentMethod || 'N/A' %> </td>
                       <td class="text-center">
                         <% if (item.cancelStatus==='cancelled' ) { %>
                           <span class="text-danger"><i>Cancelled</i></span>
                           <% } else if (item.returnStatus==='requested' ) { %>
                             <span class="badge bg-warning">Return Request Submitted</span>
-                            <% } else { %>
+                            <% } else if (item.returnStatus === "approved") { %>
+                              <span class="badge bg-success">Return Approved</span>
+                               <% } else { %>
                               <div class="d-flex justify-content-center flex-column gap-1">
                                 <% if (['placed', 'shipped' ].includes(order.status)) { %>
                                   <button class="btn btn-sm btn-outline-danger"

@@ -212,9 +212,31 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <script>
+    const selectedImages = [];
 
     document.getElementById('productForm')
       .addEventListener('submit', validateAndSubmit);
+      
+    document.querySelector('form').addEventListener('submit', (e) => {
+      const inputs = document.querySelectorAll('input[type="file"][name="images"]');
+      console.log("---- Images being submitted ----");
+      inputs.forEach((input, i) => {
+        if (input.files.length > 0) {
+          console.log(`Image ${i + 1}:`, input.files[0].name);
+        } else {
+          console.log(`Image ${i + 1}: No file selected`);
+        }
+      });
+    });
+    function clearErrorMessages() {
+      const errorElements = document.getElementsByClassName('error-message');
+      Array.from(errorElements).forEach(element => {
+        element.innerText = '';
+      });
+      const errorMessage = document.getElementById('errorMessage');
+
+
+    }
 
     async function validateAndSubmit(e) {
       e.preventDefault();
@@ -334,45 +356,7 @@
       };
       reader.readAsDataURL(input.files[0]);
     }
-
-    const selectedImages = [];
-    document.getElementById('imageview1').addEventListener("change", handleFileSelect);
-    document.getElementById('imageview2').addEventListener("change", handleFileSelect);
-    document.getElementById('imageview3').addEventListener("change", handleFileSelect);
-    document.getElementById('imageview4').addEventListener("change", handleFileSelect);
-
-    function handleFileSelect(event) {
-      const addedImagesContainer = document.getElementById('addedImagesContainer');
-      addedImagesContainer.innerHTML = "";
-      const files = event.target.files;
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        selectedImages.push(file);
-        const thumbnail = document.createElement("div");
-        thumbnail.classList.add("thumbnail");
-
-        const img = document.createElement("img");
-        img.src = URL.createObjectURL(file);
-        img.alt = 'thumbnail';
-        img.style.width = "50px";
-        img.style.height = "auto";
-        const removeIcon = document.createElement("span");
-        removeIcon.classList.add("remove-icon");
-        removeIcon.innerHTML = "&times;";
-        removeIcon.addEventListener("click", function () {
-          const index = selectedImages.indexOf(file);
-          if (index !== -1) {
-            selectedImages.splice(index, 1);
-          }
-          thumbnail.remove();
-        });
-        thumbnail.appendChild(img);
-        thumbnail.appendChild(removeIcon);
-        addedImagesContainer.appendChild(thumbnail);
-      }
-    }
-
-    function validateForm() {
+   function validateForm() {
       const name = document.getElementById('productName').value.trim();
       const description = document.getElementById('descriptionid').value.trim();
       const brand = document.getElementById('brand').value;
@@ -478,6 +462,38 @@
       return true;
     }
 
+    function handleFileSelect(event) {
+      const addedImagesContainer = document.getElementById('addedImagesContainer');
+      addedImagesContainer.innerHTML = "";
+      const files = event.target.files;
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        selectedImages.push(file);
+        const thumbnail = document.createElement("div");
+        thumbnail.classList.add("thumbnail");
+
+        const img = document.createElement("img");
+        img.src = URL.createObjectURL(file);
+        img.alt = 'thumbnail';
+        img.style.width = "50px";
+        img.style.height = "auto";
+        const removeIcon = document.createElement("span");
+        removeIcon.classList.add("remove-icon");
+        removeIcon.innerHTML = "&times;";
+        removeIcon.addEventListener("click", function () {
+          const index = selectedImages.indexOf(file);
+          if (index !== -1) {
+            selectedImages.splice(index, 1);
+          }
+          thumbnail.remove();
+        });
+        thumbnail.appendChild(img);
+        thumbnail.appendChild(removeIcon);
+        addedImagesContainer.appendChild(thumbnail);
+      }
+    }
+
+    
     function displayErrorMessage(elementId, message) {
       var errorElement = document.getElementById(elementId);
       errorElement.innerText = message;
@@ -485,28 +501,9 @@
     }
 
 
-    function clearErrorMessages() {
-      const errorElements = document.getElementsByClassName('error-message');
-      Array.from(errorElements).forEach(element => {
-        element.innerText = '';
-      });
-      const errorMessage = document.getElementById('errorMessage');
+    
 
-
-    }
-
-    document.querySelector('form').addEventListener('submit', (e) => {
-      const inputs = document.querySelectorAll('input[type="file"][name="images"]');
-      console.log("---- Images being submitted ----");
-      inputs.forEach((input, i) => {
-        if (input.files.length > 0) {
-          console.log(`Image ${i + 1}:`, input.files[0].name);
-        } else {
-          console.log(`Image ${i + 1}: No file selected`);
-        }
-      });
-    });
-
+    
 
   </script>
 </body>

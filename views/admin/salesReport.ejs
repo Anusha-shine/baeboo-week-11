@@ -165,14 +165,15 @@
       <div class="table-responsive bg-white rounded shadow-sm p-3">
         <table class="table table-bordered align-middle">
           <thead class="table-dark">
-            <tr>
-              <th>Date</th>
-              <th>Order ID</th>
-              <th>Customer</th>
-              <th>Total</th>
-              <th>Discount</th>
-              <th>Final</th>
-              <th>Payment</th>
+            <tr class="text-center">
+              <th width="10%">Date</th>
+              <th width="25%">Order ID</th>
+              <th width="15%">Customer</th>
+              <th width="10%">Total</th>
+              <th width="10%">Discount</th>
+              <th width="10%">Delivery Charge</th>
+              <th width="10%">Final</th>
+              <th width="10%">Payment</th>
             </tr>
           </thead>
           <tbody>
@@ -183,22 +184,23 @@
               <% } else { %>
                 <% orders.forEach(order=> { %>
                   <tr>
-                    <td>
+                    <td class="text-center">
                       <%= order.createdAt.toLocaleDateString() %>
                     </td>
-                    <td>
+                    <td class="text-center">
                       <%= order._id %>
                     </td>
-                    <td>
+                    <td class="text-center">
                       <%= order.user?.name || 'Unknown' %>
                     </td>
-                    <td>₹ <%= order.totalAmount.toFixed(2) || 0 %>
+                    <td class="text-center">₹ <%= order.totalAmount.toFixed(2) || 0 %>
                     </td>
-                    <td>₹ <%= (order.totalAmount - order.finalAmount).toFixed(2) || 0 %>
+                    <td class="text-center">₹ <%= order.discount.toFixed(2) || 0 %>
                     </td>
-                    <td>₹ <%= order.finalAmount?.toFixed(2) || 0 %>
+                    <td class="text-center">₹ <%= order.deliveryCharge || 0 %></td>
+                    <td class="text-center">₹ <%= order.finalAmount?.toFixed(2) || 0 %>
                     </td>
-                    <td>
+                    <td class="text-center">
                       <%= order.paymentMethod || 'N/A' %>
                     </td>
                   </tr>

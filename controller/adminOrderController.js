@@ -1,5 +1,4 @@
 const Order = require("../models/orderSchema");
-const mongoose = require("mongoose");
 const Product = require("../models/productSchema");
 const Wallet = require("../models/walletSchema");
 
@@ -10,7 +9,7 @@ const listOrders = async (req, res) => {
     const search = req.query.search ? req.query.search.trim() : '';
 
     // Build the match filter for search
-    const match = {status: {$in:["placed","delivered","returned","cancelled","out for delivery"]}};
+    const match = {status: {$in:["placed","delivered","returned","cancelled","out for delivery","return requested"]}};
 
     if (search) {
       match.$or = [
@@ -21,41 +20,118 @@ const listOrders = async (req, res) => {
     }
 
     // Aggregation pipeline to get orders with user info, filtered, sorted, paginated
-    const pipeline = [
-      {
-        $lookup: {
-          from: 'users',           // users collection name
-          localField: 'user',
-          foreignField: '_id',
-          as: 'user'
-        }
-      },
-      { $unwind: '$user' },
-      { $match: match },
-      { $sort: { createdAt: -1 } },
-      { $skip: perPage * (page - 1) },
-      { $limit: perPage },
-      {
-        $project: {
-          orderId: 1,
-          createdAt: 1,
-          status: 1,
-          totalAmount: 1,
-          couponDiscount: 1,
-          "coupon.code": 1,
-          finalAmount: {
-            $cond: {
-              if: { $and: [{ $isNumber: "$couponDiscount" }, { $gt: ["$couponDiscount", 0] }] },
-              then: { $subtract: ["$totalAmount", "$couponDiscount"] },
-              else: "$totalAmount"
+const pipeline = [
+  {
+    $lookup: {
+      from: 'users',
+      localField: 'user',
+      foreignField: '_id',
+      as: 'user'
+    }
+  },
+  { $unwind: '$user' },
+  { $match: match },
+
+  // Step 1: Compute returnRequested BEFORE unwinding
+  {
+    $addFields: {
+      returnRequested: {
+        $gt: [
+          {
+            $size: {
+              $filter: {
+                input: "$orderedItems",
+                as: "item",
+                cond: { $eq: ["$$item.returnStatus", "requested"] }
+              }
             }
           },
-          'user.name': 1,
-          'user.email': 1,
-          'user.phone': 1
+          0
+        ]
+      }
+    }
+  },
+
+  // Optional: Still unwind for other calculations (discount etc.)
+  { $unwind: { path: '$orderedItems', preserveNullAndEmptyArrays: true } },
+
+  // Group by order ID
+  {
+    $group: {
+      _id: '$_id',
+      orderId: { $first: '$orderId' },
+      user: { $first: '$user' },
+      createdAt: { $first: '$createdAt' },
+      status: { $first: '$status' },
+      returnRequested: { $first: '$returnRequested' }, // include here!
+      totalAmount: { $first: '$totalAmount' },
+      deliveryCharge: { $first: '$deliveryCharge' },
+      couponDiscount: { $first: '$couponDiscount' },
+      discount: { $sum: '$orderedItems.discount' },
+      coupon: { $first: '$couponCode' }
+    }
+  },
+
+  // Ensure numeric fields
+  {
+    $addFields: {
+      totalAmount: { $toDouble: { $ifNull: ['$totalAmount', 0] } },
+      couponDiscount: { $toDouble: { $ifNull: ['$couponDiscount', 0] } },
+      deliveryCharge: { $toDouble: { $ifNull: ['$deliveryCharge', 0] } },
+      discount: { $toDouble: { $ifNull: ['$discount', 0] } }
+    }
+  },
+
+  // Conditionally apply delivery charge
+  {
+    $addFields: {
+      effectiveDeliveryCharge: {
+        $cond: {
+          if: { $lt: ['$totalAmount', 500] },
+          then: '$deliveryCharge',
+          else: 0
         }
       }
-    ];
+    }
+  },
+
+  // Final price calculation
+  {
+    $addFields: {
+      finalAmount: {
+        $subtract: [
+          { $add: ['$totalAmount', '$effectiveDeliveryCharge'] },
+          { $add: ['$discount', '$couponDiscount'] }
+        ]
+      }
+    }
+  },
+
+  // Pagination
+  { $sort: { createdAt: -1 } },
+  { $skip: perPage * (page - 1) },
+  { $limit: perPage },
+
+  // Final projection
+  {
+    $project: {
+      orderId: 1,
+      createdAt: 1,
+      status: 1,
+      returnRequested: 1,
+      totalAmount: 1,
+      discount: 1,
+      couponDiscount: 1,
+      deliveryCharge: 1,
+      effectiveDeliveryCharge: 1,
+      finalAmount: 1,
+      'user.name': 1,
+      'user.email': 1,
+      'user.phone': 1,
+      coupon: 1
+    }
+  }
+];
 
     const orders = await Order.aggregate(pipeline);
 
@@ -103,6 +179,7 @@ const getOrderDetails = async (req, res) => {
     }
     res.render('admin/orderDetails', { order });
   } catch (err) {
+    console.log('Error fetching order details:', err);
     res.status(500).send('Server error');
   }
 };

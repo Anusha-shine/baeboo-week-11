@@ -1,18 +1,13 @@
 const User = require('../models/userSchema');
-const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const Order = require('../models/orderSchema');
 const ExcelJS = require('exceljs');
 const PDFDocument = require('pdfkit');
 const { getFilteredOrders } = require('../helpers/salesReportHelper');
-const Brand = require('../models/brandSchema');
-const Product = require('../models/productSchema');
-const Category = require('../models/categorySchema');
 
-const pageError = async (req, res) => [
+const pageError = async (req, res) => {
   res.render('admin/pageError')
-]
-
+}
 
 const loadLogin = (req, res) => {
   if (req.session.admin) {
@@ -74,7 +69,7 @@ const loadDashboard = async (req, res) => {
     const netRevenue = Math.round(orders.reduce((sum,o) => sum + o.finalAmount, 0));
     const totalDiscount = Math.round(totalSales - netRevenue);
 
-    // 🟦 Sales Chart Data (group by day/month)
+    // Sales Chart Data (group by day/month)
     const salesData = await Order.aggregate([
       { $match: match },
       {
@@ -96,7 +91,7 @@ const loadDashboard = async (req, res) => {
       data: salesData.map(d => d.total)
     };
 
-    // 🟨 Category Pie Chart
+    // Category Pie Chart
     const categoryChartAgg = await Order.aggregate([
       { $match: match },
       { $unwind: "$orderedItems" },
@@ -207,7 +202,7 @@ const loadDashboard = async (req, res) => {
   { $limit: 10 }
 ]);
 
-    // 🟪 Top 10 Categories
+    //  Top 10 Categories
     const topCategoriesAgg = await Order.aggregate([
       { $match: match },
       { $unwind: "$orderedItems" },
@@ -298,8 +293,7 @@ const Logout = async (req, res) => {
 
 const getSalesReport = async (req, res) => {
   const filters = req.query;
-
-  // 1. Construct match condition for both orders and summary
+  //  match condition for both orders and summary
   const match = { status: "delivered" };
 
   if (filters.filter === 'daily') {
@@ -323,21 +317,22 @@ const getSalesReport = async (req, res) => {
     match.createdAt = { $gte: from, $lte: to };
   }
 
-  // 2. Get paginated filtered orders using the match
+  //Get paginated filtered orders using the match
   const { orders, totalOrders, page, limit } = await getFilteredOrders(match, req.query.page);
 
-  // 3. Fetch unpaginated orders for summary
+  // Fetch unpaginated orders for summary
   const allOrders = await Order.find(match);
 
   let totalAmount = 0;
+  let totalDiscount = 0;
   let finalAmount = 0;
 
   allOrders.forEach(order => {
     totalAmount += order.totalAmount || 0;
     finalAmount += Math.round(order.finalAmount || 0);
+    totalDiscount += order.discount || 0;
   });
-
-  const totalDiscount = Math.round(totalAmount - finalAmount);
+  
   const summary = {
     totalOrderCount: allOrders.length,
     totalAmount,
@@ -361,7 +356,6 @@ const getSalesReport = async (req, res) => {
 const downloadSalesReport = async (req, res) => {
   try {
     const { type } = req.params;
-    // Reconstruct same filter logic as in getSalesReport (without pagination)
     const filters = req.query;
     const match = {status : "delivered"};
 
@@ -385,10 +379,7 @@ const downloadSalesReport = async (req, res) => {
         $lte: new Date(filters.toDate),
       };
     }
-
-    // Fetch all matching orders (no pagination)
     const orders = await Order.find(match).populate('user');
-
 
     // Summary
     const totalOrders = orders.length;
@@ -517,8 +508,6 @@ const downloadSalesReport = async (req, res) => {
     res.status(500).send('Internal Server Error');
   }
 };
-
-
 
 module.exports = {
   loadLogin, Login, loadDashboard, pageError, Logout, getSalesReport,

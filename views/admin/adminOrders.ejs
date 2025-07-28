@@ -120,26 +120,21 @@
       <h2 class="mb-4">Admin Orders</h2>
 
       <!-- Search form -->
-<form method="GET" action="/admin/adminOrders" role="search" class="mb-4 d-flex flex-wrap align-items-center gap-2">
-  <input 
-    type="text" 
-    name="search" 
-    placeholder="Search orders by ID, status or name"
-    value="<%= typeof search !== 'undefined' ? search : '' %>" 
-    class="form-control" 
-    style="max-width: 300px;"
-  />
+      <form method="GET" action="/admin/adminOrders" role="search"
+        class="mb-4 d-flex flex-wrap align-items-center gap-2">
+        <input type="text" name="search" placeholder="Search orders by ID, status or name"
+          value="<%= typeof search !== 'undefined' ? search : '' %>" class="form-control" style="max-width: 300px;" />
 
-  <button type="submit" class="btn btn-outline-primary d-flex align-items-center gap-1">
-    <i class="bi bi-search"></i> <span>Search</span>
-  </button>
+        <button type="submit" class="btn btn-outline-primary d-flex align-items-center gap-1">
+          <i class="bi bi-search"></i> <span>Search</span>
+        </button>
 
-  <% if (search && search.trim().length > 0) { %>
-    <a href="/admin/adminOrders" class="btn btn-outline-danger d-flex align-items-center gap-1">
-      <i class="bi bi-x-circle"></i> <span>Clear</span>
-    </a>
-  <% } %>
-</form>
+        <% if (search && search.trim().length> 0) { %>
+          <a href="/admin/adminOrders" class="btn btn-outline-danger d-flex align-items-center gap-1">
+            <i class="bi bi-x-circle"></i> <span>Clear</span>
+          </a>
+          <% } %>
+      </form>
 
 
 
@@ -171,18 +166,24 @@
                       <%= order.createdAt.toLocaleDateString() %>
                     </td>
                     <td>
-                      <span class="badge bg-<%= 
-                    order.status === 'pending' ? 'warning' :
-                    order.status === 'placed' ? 'info' :
-                    order.status === 'shipped' ? 'primary' :
-                    order.status === 'delivered' ? 'success' :
-                    order.status === 'cancelled' ? 'danger' :
-                    order.status === 'returned' ? 'danger' : 'secondary' 
-                  %>">
-                        <%= order.status %>
-                      </span>
+                      <% if(order.returnRequested) { %>
+  <span class="badge bg-warning text-dark">Return Requested</span>
+                        <% } else { %>
+                          <span class="badge bg-<%= 
+      order.status === 'pending' ? 'warning' :
+      order.status === 'placed' ? 'info' :
+      order.status === 'shipped' ? 'primary' :
+      order.status === 'delivered' ? 'success' :
+      order.status === 'cancelled' ? 'danger' :
+      order.status === 'returned' ? 'danger' :
+      'secondary'
+    %>">
+                            <%= order.status %>
+                          </span>
+                          <% } %>
                     </td>
-                    <td>₹<%= order.finalAmount.toFixed(2) %>
+
+                    <td>₹<%= (order.finalAmount ?? 0).toFixed(2) %>
                     </td>
                     <td>
                       <a href="/admin/order/<%= order.orderId %>" class="btn btn-sm btn-primary">

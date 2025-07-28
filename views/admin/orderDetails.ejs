@@ -226,12 +226,14 @@
               <table class="table">
                 <thead>
                   <tr class="text-center">
-                    <th width="30%">Product</th>
-                    <th width="20%">Name</th>
+                    <th width="25%">Product</th>
+                    <th width="15%">Name</th>
                     <th width="10%">Unit Price</th>
                     <th width="10%">Quantity</th>
                     <th width="10%">Total</th>
-                    <th width="10%">Final Price</th>
+                    <th width="10%">Offer Price</th>
+                    <th width="10%">Payment Method</th>
+                    <th width="10%">Return Status</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -252,6 +254,7 @@
                       </td>
                       <td class="text-center">₹<%= item.finalAmount %>
                       </td>
+                      <td class="text-center"><%= order.paymentMethod %></td>
                       <td class="text-center">
                         <% if (item.returnStatus==='requested' ) { %>
                           <!-- Buttons to approve/reject per item -->
@@ -268,21 +271,25 @@
                             <span class="badge bg-success">Return Approved</span>
                             <% } else if (item.returnStatus==='rejected' ) { %>
                               <span class="badge bg-danger">Return Rejected</span>
-                              <% } %>
+                              <% } else if(item.returnStatus === 'none') { %>
+                                <span class="badge bg-secondary">No Return Request</span>
+                                <% } %>
                       </td>
                     </tr>
                     <% }); %>
                 </tbody>
               </table>
               <div class="text-end mt-4">
-                <p><strong>Total Amount:</strong> ₹<%= order.totalAmount %>
-                </p>
-                <% if (order.coupenApplied) { %>
-                  <p><strong>Coupon Applied:</strong> -₹<%= order.totalAmount - order.finalAmount %>
+                <% if (order.couponDiscount> 0) { %>
+                  <p><strong>Coupon Discount:</strong> -₹<%= order.couponDiscount.toFixed(2) %>
                   </p>
                   <% } %>
-                    <p><strong>Final Paid Amount:</strong> ₹<%= order.finalAmount %>
-                    </p>
+
+                    <% if((order.totalAmount) < 500) { %>
+                      <P><strong>Delivery Charge: ₹50.00</strong></p>
+                      <% } %>
+                        <h5><strong>Final Payable:</strong> ₹<%= (order.finalAmount).toFixed(2) %>
+                        </h5>
               </div>
             </div>
           </div>
