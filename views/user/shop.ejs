@@ -560,9 +560,18 @@
         </main>
       </div>
       <!-- Pagination -->
-      <div id="pagination-container" class="pagination">
-        <%- include("../../views/partials/user/pagination.ejs", { totalPages, currentPage }) %>
-      </div>
+      <div class="pagination">
+    <%if(currentPage > 1) { %>
+        <a class="btn" href="/shop?page=<%= currentPage - 1 %>">Prev</a>
+    <% } %>
+
+    <% for(let i = 1; i <= totalPages; i++) { %>
+        <a class="btn <%= currentPage === i ? 'active' : '' %>" href="/shop?page=<%= i %>"><%= i %></a>
+    <% } %>
+    <% if(currentPage < totalPages) { %>
+        <a class="btn" href="/shop?page=<%= currentPage + 1 %>">Next</a>
+    <% } %>
+   </div>
 
     </section>
   </div>
@@ -579,8 +588,7 @@
             Swal.fire({
               title: "Added to wishlist",
               text: "The product has been added to your wishlist",
-              icon: "success",
-              timer: 2000
+              icon: "success",              timer: 2000
             })
           } else {
             Swal.fire({
@@ -632,7 +640,6 @@
       const searchForm = document.getElementById("search-form");
       const searchInput = document.getElementById("search-input");
       const productContainer = document.getElementById("product-container");
-      const paginationContainer = document.getElementById("pagination-container");
 
       // Handle Search Submit
       searchForm.addEventListener("submit", async function (e) {
@@ -651,22 +658,6 @@
         searchInput.value = "";
         searchForm.dispatchEvent(new Event("submit"));
       };
-
-      // Pagination Click
-      document.addEventListener("click", async function (e) {
-        if (e.target.classList.contains("page-link")) {
-          e.preventDefault();
-          const page = e.target.dataset.page;
-          const query = searchInput.value.trim();
-          const sort = document.getElementById("sort-select")?.value || "";
-
-          const url = `/shop/ajax?query=${encodeURIComponent(query)}&sort=${encodeURIComponent(sort)}&page=${page}`;
-          const res = await fetch(url);
-          const data = await res.json();
-          productContainer.innerHTML = data.productsHTML;
-          paginationContainer.innerHTML = data.paginationHTML;
-        }
-      });
 
       // Handle Category Filter
       document.querySelectorAll(".category-filter").forEach(el => {

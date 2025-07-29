@@ -342,12 +342,12 @@ const loadShoppingPage = async (req, res) => {
             filter.category = selectedCategory;
         }
 
-        let sortOption = { createdOn: -1 }; // Default: newest first
+        let sortOption = { createdOn: -1,_id:1 }; // Default: newest first
 
         if (selectedSort === 'priceLowToHigh') {
-            sortOption = { salesPrice: 1 };
+            sortOption = { salesPrice: 1,_id:1 };
         } else if (selectedSort === 'priceHighToLow') {
-            sortOption = { salesPrice: -1 };
+            sortOption = { salesPrice: -1,_id:1 };
         }
 
         const products = await Product.find(filter)
