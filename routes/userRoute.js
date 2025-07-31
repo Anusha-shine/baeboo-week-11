@@ -68,7 +68,6 @@ router.post("/editAddress",userAuth,userProfileController.postEditAddress);
 router.get("/deleteAddress",userAuth,userProfileController.deleteAddress);
 //product Management
 router.get("/productDetails",userAuth,userProductController.productDetails);
-router.get("/product/:id",userAuth,userProductController.relatedProducts);
 
 //wishlist Management
 router.get("/wishlist",userAuth,wishlistController.loadWishlist);

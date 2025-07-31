@@ -113,8 +113,20 @@ const removeFromCart = async (req, res) => {
     );
 
     await cart.save(); // Save the updated cart
-    if(req.xhr) {
-      return res.json({success:true});
+    if (req.xhr) {
+  // Recalculate grand total after item removal
+  let grandTotal = 0;
+  let quantity = 0;
+  cart.items.forEach(item => {
+    quantity += item.quantity;
+    grandTotal += item.quantity * item.price;
+  });
+
+  return res.json({
+    success: true,
+    grandTotal,
+    quantity
+  });
     }else {
       return res.redirect("/cart");
     }

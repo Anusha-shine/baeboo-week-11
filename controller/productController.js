@@ -25,67 +25,71 @@ const getProductAddPage = async (req, res) => {
     }
 }
 const addProducts = async (req, res) => {
-    try {
-        const products = req.body;
-const name = products.productName.trim();
-const escaped = name.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');  // escape special chars
-const regex = new RegExp(`^${escaped}$`, 'i');
+  try {
+    const products = req.body;
+    const name = products.productName.trim();
+    const normalizedName = name.replace(/\s+/g, '').toLowerCase();
 
-const productExists = await Product.findOne({ productName: regex });
+    const productExists = await Product.findOne({
+      $expr: {
+        $eq: [
+          { $replaceAll: { input: { $toLower: "$productName" }, find: " ", replacement: "" } },
+          normalizedName
+        ]
+      }
+    });
 
-        if(productExists) {
-            return res.status(400).json({message: "Product already exists. Please try another name"});
-        }
-
-        if (!productExists) {
-            const images = [];
-
-            if (req.files && req.files.length > 0) {
-                for (let i = 0; i < req.files.length; i++) {
-                    const file = req.files[i];
-                    const originalImagePath = file.path;
-                    const resizedImageName = file.filename;
-                    const resizedImagePath = path.join("public", "uploads", "product-images", resizedImageName);
-
-                    await sharp(originalImagePath)
-                        .resize({ width: 440, height: 440 })
-                        .toFile(resizedImagePath);
-
-                    images.push(resizedImageName);
-                }
-            }
-
-            const categoryId = await Category.findOne({ name: products.category });
-
-            if (!categoryId) {
-                return res.status(400).json({ message: "Category not found" });
-            }
-
-            const newProduct = new Product({
-                productName: products.productName,
-                description: products.description,
-                brand: products.brand,
-                category: categoryId._id,
-                regularPrice: products.regularPrice,
-                salesPrice: products.salesPrice,
-                createdOn: new Date(),
-                quantity: products.quantity,
-                size: products.size,
-                color: products.color,
-                productImage: images,
-                status: "Available"
-            });
-
-            await newProduct.save();
-            return res.json({ success: true, redirect: "/admin/addProducts" });
-        } else {
-            return res.status(400).json({ message: "Product already exists. Please try another name" });
-        }
-    } catch (error) {
-        console.error("Error saving product:", error);
-        return res.json({success: false,message: 'Internal server error'});
+    if (productExists) {
+      return res.status(400).json({ message: "Product with a similar name already exists (spacing ignored)." });
     }
+
+    const images = [];
+
+    if (req.files && req.files.length > 0) {
+      for (let i = 0; i < req.files.length; i++) {
+        const file = req.files[i];
+        const originalImagePath = file.path;
+        const resizedImageName = file.filename;
+        const resizedImagePath = path.join("public", "uploads", "product-images", resizedImageName);
+
+        await sharp(originalImagePath)
+          .resize({ width: 440, height: 440 })
+          .toFile(resizedImagePath);
+
+        images.push(resizedImageName);
+      }
+    }
+
+    const categoryId = await Category.findOne({ name: products.category });
+
+    if (!categoryId) {
+      return res.status(400).json({ message: "Category not found" });
+    }
+
+    const newProduct = new Product({
+      productName: products.productName,
+      description: products.description,
+      brand: products.brand,
+      category: categoryId._id,
+      regularPrice: products.regularPrice,
+      salesPrice: products.salesPrice,
+      createdOn: new Date(),
+      quantity: products.quantity,
+      size: products.size,
+      color: products.color,
+      productImage: images,
+      status: "Available"
+    });
+
+    await newProduct.save();
+    return res.json({ success: true, redirect: "/admin/addProducts" });
+
+  } catch (error) {
+    console.error("Error saving product:", error);
+    return res.status(500).json({ success: false, message: 'Internal server error' });
+  }
 };
+
 const getAllProducts = async (req, res) => {
     try {
         const search = req.query.search || "";

@@ -40,28 +40,44 @@ const categoryInfo = async (req, res) => {
 
 
 const addCategory = async (req, res) => {
-    const { name, description } = req.body;
-    try {
+  try {
+    let { name, description } = req.body;
 
-        const existingCategory = await Category.findOne({ 
-            name:{$regex: `^${name}$`,$options: 'i'}});
-        if (existingCategory) {
-            return res.status(400).json({ error: 'Category already exists',
-                name: await Category.find()
-             });
-        }
-        const newCategory = new Category({
-            name,
-            description
-        })
-        await newCategory.save();
-        return res.json({ message: 'Category added successfully' });
+    // Normalize input by removing spaces and lowercasing
+    const normalize = str => str.replace(/\s+/g, '').toLowerCase();
+    const normalizedInputName = normalize(name);
 
-    } catch (error) {
-        console.error("Error adding category:", error);
-        return res.status(500).json({ error: 'Internal server error' });
+    // Fetch all categories and check manually
+    const categories = await Category.find();
+
+    const duplicate = categories.find(cat => normalize(cat.name) === normalizedInputName);
+
+    if (duplicate) {
+      return res.status(400).json({
+        error: 'Category already exists',
+        name: await Category.find()
+      });
     }
-}
+
+    // Format for storing (optional: Title Case)
+    const formattedName = name.trim().replace(/\s+/g, ' ')
+      .toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
+
+    const newCategory = new Category({
+      name: formattedName,
+      description
+    });
+
+    await newCategory.save();
+
+    return res.json({ message: 'Category added successfully' });
+
+  } catch (error) {
+    console.error("Error adding category:", error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 const addCategoryOffer = async (req, res) => {
   try {
     const percentage = parseInt(req.body.percentage);
@@ -148,24 +164,58 @@ const getEditCategory = async (req, res) => {
     }
 }
 const editCategory = async (req, res) => {
-    try {
-        const id = req.params.id;
-        const { categoryName, categoryDescription } = req.body;
-        const updateCategory = await Category.findByIdAndUpdate(id, {
-            name: categoryName,
-            description: categoryDescription
-        }, { new: true });
-        if (updateCategory) {
-            res.redirect("/admin/addCategory");
-        } else {
-            res.status(404).json({ error: 'Category not found' });
-        }
+  try {
+    const id = req.params.id;
+    const { categoryName, categoryDescription } = req.body;
 
-    } catch (error) {
-        console.error("Error editing category:", error);
-        res.status(500).json({ error: 'Internal server error' });
+    // Normalization function (remove all spaces + lowercase)
+    const normalize = str => str.replace(/\s+/g, '').toLowerCase();
+    const normalizedInput = normalize(categoryName);
+
+    // Get all other categories
+    const allCategories = await Category.find({ _id: { $ne: id } });
+
+    // Check for duplicates using normalized form
+    const duplicate = allCategories.find(cat => normalize(cat.name) === normalizedInput);
+
+    if (duplicate) {
+      const category = await Category.findById(id);
+      return res.render("admin/editCategory", {
+        category,
+        error: "Category name already exists"
+      });
     }
-}
+
+    // Optional: Format saved name to "Title Case" or trimmed spacing
+    const formattedName = categoryName.trim().replace(/\s+/g, ' ')
+      .toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
+
+    const updatedCategory = await Category.findByIdAndUpdate(
+      id,
+      {
+        name: formattedName,
+        description: categoryDescription
+      },
+      { new: true }
+    );
+
+    if (updatedCategory) {
+      res.redirect("/admin/addCategory");
+    } else {
+      const category = await Category.findById(id);
+      return res.render("admin/editCategory", {
+        category,
+        error: "Category not found"
+      });
+    }
+
+  } catch (error) {
+    console.error("Error editing category:", error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+
 module.exports = {
     categoryInfo,
     addCategory,

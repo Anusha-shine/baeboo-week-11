@@ -324,7 +324,7 @@
                   <% if (order.address.name) { %>
                     <%= order.address.name %>,
                       <% } %>
-                        <%= order.address.city %>, <%= order.address.state %> - <%= order.address.pincode %>
+                        <%= order.address.landMark %>,<%= order.address.city %>, <%= order.address.state %> - <%= order.address.pincode %>
                 </p>
                 <a href="/invoice/<%= order._id %>" class="btn btn-sm btn-outline-primary mt-2">Download Invoice</a>
               </div>

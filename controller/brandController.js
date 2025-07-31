@@ -23,13 +23,18 @@ const getBrandPage = async (req, res) => {
 }
 const addBrand = async (req, res) => {
   try {
-    const brand = req.body.name.trim();
+    const rawBrandName = req.body.name;
+    const trimmedBrand = rawBrandName.trim();
 
-    const existingBrand = await Brand.findOne({
-      brandName: { $regex: `^${brand}$`, $options: "i" },
-    });
+    // Normalization function: remove all spaces + lowercase
+    const normalize = str => str.replace(/\s+/g, '').toLowerCase();
+    const normalizedInput = normalize(trimmedBrand);
 
-    if (existingBrand) {
+    // Get all existing brands
+    const existingBrands = await Brand.find();
+    const duplicate = existingBrands.find(b => normalize(b.brandName) === normalizedInput);
+
+    if (duplicate) {
       return res.redirect("/admin/brands?error=Brand already exists");
     }
 
@@ -39,8 +44,13 @@ const addBrand = async (req, res) => {
 
     const image = req.file.filename;
 
+    // Optionally format brand name: Capitalize each word
+    const formattedBrandName = trimmedBrand
+      .toLowerCase()
+      .replace(/\b\w/g, char => char.toUpperCase());
+
     const newBrand = new Brand({
-      brandName: brand,
+      brandName: formattedBrandName,
       brandImage: image,
     });
 

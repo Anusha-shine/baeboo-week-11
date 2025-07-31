@@ -202,7 +202,7 @@
               <div class="text">
                 <h6 class="mb-1">Deliver To</h6>
                 <p class="mb-1">
-                  <%= order.address.street %>, <%= order.address.city %>, <%= order.address.state %> -
+                  <%= order.address.landMark %>, <%= order.address.city %>, <%= order.address.state %> -
                         <%= order.address.pincode %>
                 </p>
                 <a href="/invoice/<%= order._id %>" class="btn btn-sm">Download Invoice</a>
