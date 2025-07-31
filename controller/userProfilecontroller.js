@@ -251,7 +251,10 @@ const updateEmail = async (req,res) => {
 }
 const changePassword = async (req,res) => {
     try{
-        res.render("user/change-password");
+        const userId = req.session.user;
+        const userData = await User.findById(userId);
+        res.render("user/change-password", {
+            user : userData});
     }catch(error){
         console.error("Error in getting change password page", error);
         res.redirect("/user/pageNotFound");

@@ -1,191 +1,800 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Signup</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body, html {
-            height: 100%;
-            margin: 0;
-        }
-        .main-div {
-            background: #f8f9fa;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 30px;
-        }
-        .login-box {
-            width: 100%;
-            max-width: 350px;
-        }
-        .mb-6 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            text-align: center;
-            margin-bottom: 20px;
-            font-family: 'Georgia', serif;
-        }
-        .error-message{
-            color: red;
-            font-size: 0.75rem;
-            display: none;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="description" content="Baeboo - Join Premium Baby Products Community" />
+  <meta name="keywords" content="Baeboo, signup, baby products, premium baby care, register" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <title>Baeboo - Sign Up | Join Our Baby Care Community</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fredoka:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+
+  <style>
+    :root {
+      --primary-color: #ff6b9d;
+      --primary-light: #ffb3d1;
+      --primary-dark: #e55a89;
+      --secondary-color: #4ecdc4;
+      --accent-color: #ffe66d;
+      --text-dark: #2c3e50;
+      --text-light: #6c757d;
+      --background: #fef9f6;
+      --white: #ffffff;
+      --error: #e74c3c;
+      --success: #27ae60;
+      --border-light: #e9ecef;
+      --shadow-light: 0 2px 15px rgba(255, 107, 157, 0.08);
+      --shadow-medium: 0 8px 30px rgba(255, 107, 157, 0.12);
+      --border-radius: 16px;
+      --border-radius-small: 12px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body, html {
+      min-height: 100%;
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, var(--background) 0%, #f8f4ff 100%);
+      color: var(--text-dark);
+      line-height: 1.6;
+    }
+
+    .main-container {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Decorative background elements */
+    .main-container::before {
+      content: '';
+      position: absolute;
+      top: -30%;
+      right: -30%;
+      width: 60%;
+      height: 60%;
+      background: radial-gradient(circle, rgba(255, 107, 157, 0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .main-container::after {
+      content: '';
+      position: absolute;
+      bottom: -30%;
+      left: -30%;
+      width: 60%;
+      height: 60%;
+      background: radial-gradient(circle, rgba(78, 205, 196, 0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .signup-container {
+      background: var(--white);
+      padding: 40px 35px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-medium);
+      width: 100%;
+      max-width: 480px;
+      position: relative;
+      border: 1px solid rgba(255, 107, 157, 0.1);
+    }
+
+    .brand-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .brand-logo {
+      font-family: 'Fredoka', sans-serif;
+      font-size: 2.2rem;
+      font-weight: 600;
+      color: var(--primary-color);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .brand-logo::before {
+      content: '🍼';
+      font-size: 1.8rem;
+    }
+
+    .brand-subtitle {
+      color: var(--text-light);
+      font-size: 0.9rem;
+      font-weight: 400;
+    }
+
+    .welcome-text {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .welcome-text h2 {
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: var(--text-dark);
+      margin-bottom: 6px;
+    }
+
+    .welcome-text p {
+      color: var(--text-light);
+      font-size: 0.85rem;
+    }
+
+    .social-signup {
+      margin-bottom: 24px;
+    }
+
+    .google-signup {
+      width: 100%;
+      padding: 14px 20px;
+      border: 2px solid var(--border-light);
+      background: var(--white);
+      border-radius: var(--border-radius-small);
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text-dark);
+    }
+
+    .google-signup:hover {
+      border-color: var(--primary-light);
+      background: #fafafa;
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-light);
+      text-decoration: none;
+      color: var(--text-dark);
+    }
+
+    .google-icon {
+      width: 18px;
+      height: 18px;
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      margin: 24px 0;
+      color: var(--text-light);
+      font-size: 0.85rem;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border-light);
+    }
+
+    .divider span {
+      margin: 0 16px;
+      font-weight: 500;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 500;
+      color: var(--text-dark);
+      font-size: 0.85rem;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 14px 18px;
+      border: 2px solid var(--border-light);
+      border-radius: var(--border-radius-small);
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+      background: var(--white);
+      color: var(--text-dark);
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(255, 107, 157, 0.1);
+    }
+
+    .form-input::placeholder {
+      color: #a0a0a0;
+      font-size: 0.9rem;
+    }
+
+    .password-wrapper {
+      position: relative;
+    }
+
+    .password-toggle {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: var(--text-light);
+      font-size: 1rem;
+      transition: color 0.3s ease;
+    }
+
+    .password-toggle:hover {
+      color: var(--primary-color);
+    }
+
+    .error-message {
+      color: var(--error);
+      font-size: 0.8rem;
+      margin-top: 6px;
+      display: none;
+      font-weight: 500;
+      padding-left: 4px;
+    }
+
+    .signup-button {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+      color: var(--white);
+      border: none;
+      border-radius: var(--border-radius-small);
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .signup-button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 25px rgba(255, 107, 157, 0.3);
+    }
+
+    .signup-button:active {
+      transform: translateY(0);
+    }
+
+    .form-links {
+      text-align: center;
+      margin-top: 24px;
+    }
+
+    .form-link {
+      color: var(--primary-color);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.9rem;
+      transition: color 0.3s ease;
+    }
+
+    .form-link:hover {
+      color: var(--primary-dark);
+      text-decoration: none;
+    }
+
+    .alert-danger {
+      background: linear-gradient(135deg, #ffe6e6, #ffd6d6);
+      border: 1px solid #ffb3b3;
+      color: var(--error);
+      padding: 12px 18px;
+      border-radius: var(--border-radius-small);
+      margin: 16px 0;
+      font-size: 0.85rem;
+      font-weight: 500;
+      text-align: center;
+    }
+
+    /* Form row for smaller fields */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    /* Success states */
+    .form-input.success {
+      border-color: var(--success);
+      background: rgba(39, 174, 96, 0.02);
+    }
+
+    .form-input.error {
+      border-color: var(--error);
+      background: rgba(231, 76, 60, 0.02);
+    }
+
+    /* Loading state */
+    .signup-button.loading {
+      pointer-events: none;
+      opacity: 0.8;
+    }
+
+    .signup-button.loading::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 18px;
+      height: 18px;
+      margin: -9px 0 0 -9px;
+      border: 2px solid transparent;
+      border-top: 2px solid var(--white);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Input icons */
+    .input-with-icon {
+      position: relative;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-light);
+      font-size: 0.9rem;
+    }
+
+    .input-with-icon .form-input {
+      padding-left: 40px;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 480px) {
+      .main-container {
+        padding: 20px 16px;
+      }
+
+      .signup-container {
+        padding: 32px 24px;
+      }
+
+      .brand-logo {
+        font-size: 1.9rem;
+      }
+
+      .welcome-text h2 {
+        font-size: 1.2rem;
+      }
+
+      .form-input {
+        padding: 12px 16px;
+      }
+
+      .signup-button {
+        padding: 13px;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+    }
+
+    /* Progress indicator */
+    .password-strength {
+      margin-top: 8px;
+      height: 4px;
+      background: var(--border-light);
+      border-radius: 2px;
+      overflow: hidden;
+      display: none;
+    }
+
+    .password-strength-bar {
+      height: 100%;
+      width: 0%;
+      transition: all 0.3s ease;
+      border-radius: 2px;
+    }
+
+    .strength-weak { background: var(--error); }
+    .strength-medium { background: var(--accent-color); }
+    .strength-strong { background: var(--success); }
+  </style>
 </head>
-<body>       
-    <div class="container-fluid h-100">
-        <div class="row h-100">
-            <div class="col-md-12 main-div">
-                <div class="login-box">
-                    <h2 class="mb-6">Baeboo</h2>
-                    <div class="btn btn-google mb-3" >
-                    <a href="/auth/google">
-                        <img src="https://img.icons8.com/color/16/000000/google-logo.png" alt="Google icon" /> Signup with Google
-                    </a>
-                    </div>
-                    <form id="signform" action="/signup" method="POST">
-                        <input type="text" id="message" name="message" value="<%= message %>" hidden>
-                        <div class="mb-3">
-                            <input type="text" name="name" id="name" class="form-control" placeholder="Name">
-                            <div id="error1" class="error-message"></div>
-                        </div>
-                        <div class="mb-3">
-                            <input type="email" name="email" id="email" class="form-control" placeholder="Email">
-                            <div id="error2" class="error-message"></div>
-                        </div>
-                        <div class="mb-3">
-                            <input type="phone" name="phone" id="phone" class="form-control" placeholder="Enter Phone no.">
-                            <div id="error3" class="error-message"></div>
-                        </div>
-                        <div class="mb-3">
-                            <input type="password" name="password" id="password" class="form-control" placeholder="Password">
-                            <div id="error4" class="error-message"></div>
-                        </div>
-                        <div class="mb-3">
-                            <input type="password" name="confirmPassword" id="confirmPassword" class="form-control" placeholder="Confirm Password">
-                            <div id="error5" class="error-message"></div>
-                        </div>
-                        <div class="mb-3">
-                            <input type="text" name="referralCode" id="referralCode" class="form-control" value="<%= referralCode || '' %>" placeholder="Referral code">
-                        </div>
-                        <%if(locals.message && message.length>0){%>
-                            <div class="alert alert-danger text-center">
-                              <%=message%>
-                            </div>
-                            <%}%>
-                        <button type="submit" name="signup" id="signup" class="btn btn-primary w-100">Signup</button>
-                    </form>
-                </div>
-            </div>
+
+<body>
+  <div class="main-container">
+    <form id="signform" action="/signup" method="POST" class="signup-container">
+      <input type="text" id="message" name="message" value="<%= message %>" hidden>
+      
+      <div class="brand-header">
+        <div class="brand-logo">Baeboo</div>
+        <p class="brand-subtitle">Premium Baby Products & Care</p>
+      </div>
+
+      <div class="welcome-text">
+        <h2>Join Our Community</h2>
+        <p>Create your account and start your baby care journey with us</p>
+      </div>
+
+      <div class="social-signup">
+        <a href="/auth/google" class="google-signup">
+          <img src="https://img.icons8.com/color/18/000000/google-logo.png" alt="Google" class="google-icon" />
+          Sign up with Google
+        </a>
+      </div>
+
+      <div class="divider">
+        <span>or sign up with email</span>
+      </div>
+
+      <div class="form-group">
+        <label for="name" class="form-label">Full Name</label>
+        <div class="input-wrapper input-with-icon">
+          <i class="fas fa-user input-icon"></i>
+          <input type="text" name="name" id="name" class="form-input" placeholder="Enter your full name" />
         </div>
-    </div>
+        <div id="error1" class="error-message"></div>
+      </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
+      <div class="form-group">
+        <label for="email" class="form-label">Email Address</label>
+        <div class="input-wrapper input-with-icon">
+          <i class="fas fa-envelope input-icon"></i>
+          <input type="email" name="email" id="email" class="form-input" placeholder="Enter your email address" />
+        </div>
+        <div id="error2" class="error-message"></div>
+      </div>
 
-    const nameid = document.getElementById("name");
-    const emailid = document.getElementById("email");
-    const phoneid = document.getElementById("phone");
-    const passid = document.getElementById("password");
-    const cpassid = document.getElementById("confirmPassword");
+      <div class="form-group">
+        <label for="phone" class="form-label">Phone Number</label>
+        <div class="input-wrapper input-with-icon">
+          <i class="fas fa-phone input-icon"></i>
+          <input type="tel" name="phone" id="phone" class="form-input" placeholder="Enter your 10-digit phone number" />
+        </div>
+        <div id="error3" class="error-message"></div>
+      </div>
+
+      <div class="form-group">
+        <label for="password" class="form-label">Password</label>
+        <div class="input-wrapper password-wrapper input-with-icon">
+          <i class="fas fa-lock input-icon"></i>
+          <input type="password" name="password" id="password" class="form-input" placeholder="Create a strong password" />
+          <i class="fas fa-eye-slash password-toggle" id="togglePassword"></i>
+        </div>
+        <div class="password-strength" id="passwordStrength">
+          <div class="password-strength-bar" id="strengthBar"></div>
+        </div>
+        <div id="error4" class="error-message"></div>
+      </div>
+
+      <div class="form-group">
+        <label for="confirmPassword" class="form-label">Confirm Password</label>
+        <div class="input-wrapper password-wrapper input-with-icon">
+          <i class="fas fa-lock input-icon"></i>
+          <input type="password" name="confirmPassword" id="confirmPassword" class="form-input" placeholder="Confirm your password" />
+          <i class="fas fa-eye-slash password-toggle" id="toggleConfirmPassword"></i>
+        </div>
+        <div id="error5" class="error-message"></div>
+      </div>
+
+      <div class="form-group">
+        <label for="referralCode" class="form-label">Referral Code (Optional)</label>
+        <div class="input-wrapper input-with-icon">
+          <i class="fas fa-gift input-icon"></i>
+          <input type="text" name="referralCode" id="referralCode" class="form-input" value="<%= referralCode || '' %>" placeholder="Enter referral code for special offers" />
+        </div>
+      </div>
+
+      <% if (locals.message && message.length > 0) { %>
+        <div class="alert-danger">
+          <%= message %>
+        </div>
+      <% } %>
+
+      <button type="submit" name="signup" id="signup" class="signup-button">
+        <span>Create Account</span>
+      </button>
+
+      <div class="form-links">
+        <p>Already have an account? <a href="/login" class="form-link">Sign in here</a></p>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    const nameInput = document.getElementById("name");
+    const emailInput = document.getElementById("email");
+    const phoneInput = document.getElementById("phone");
+    const passwordInput = document.getElementById("password");
+    const confirmPasswordInput = document.getElementById("confirmPassword");
     const error1 = document.getElementById("error1");
     const error2 = document.getElementById("error2");
     const error3 = document.getElementById("error3");
     const error4 = document.getElementById("error4");
     const error5 = document.getElementById("error5");
-    const signform = document.getElementById("signform");
+    const signForm = document.getElementById("signform");
+    const signupBtn = document.getElementById("signup");
+    const togglePassword = document.getElementById("togglePassword");
+    const toggleConfirmPassword = document.getElementById("toggleConfirmPassword");
+    const passwordStrength = document.getElementById("passwordStrength");
+    const strengthBar = document.getElementById("strengthBar");
 
-    function nameValidateChecking(e) {
-        const nameVal = nameid.value;
-        const namepattern = /^[A-Za-z\s'-]{2,50}$/;
+    function validateName() {
+      const name = nameInput.value.trim();
+      const namePattern = /^[A-Za-z\s'-]{2,50}$/;
 
-        if (nameVal.trim() === "") {
-            error1.style.display = "block";
-            error1.innerHTML = "Please enter a valid name";
-        } else if (!namepattern.test(nameVal)) {
-            error1.style.display = "block";
-            error1.innerHTML = "Name can only contain alphabets and spaces";
-        } else {
-            error1.style.display = "none";
-            error1.innerHTML = "";
-        }
+      if (!name) {
+        showError(error1, "Please enter your full name");
+        nameInput.classList.add('error');
+        nameInput.classList.remove('success');
+        return false;
+      } else if (!namePattern.test(name)) {
+        showError(error1, "Name can only contain letters, spaces, hyphens and apostrophes");
+        nameInput.classList.add('error');
+        nameInput.classList.remove('success');
+        return false;
+      } else if (name.length < 2) {
+        showError(error1, "Name must be at least 2 characters long");
+        nameInput.classList.add('error');
+        nameInput.classList.remove('success');
+        return false;
+      } else {
+        hideError(error1);
+        nameInput.classList.remove('error');
+        nameInput.classList.add('success');
+        return true;
+      }
     }
 
-    function emailValidateChecking(e) {
-        const emailVal = emailid.value;
-        const emailpattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-        if (!emailpattern.test(emailVal)) {
-            error2.style.display = "block";
-            error2.innerHTML = "Invalid format";
-        } else {
-            error2.style.display = "none";
-            error2.innerHTML = "";
-        }
+    function validateEmail() {
+      const email = emailInput.value.trim();
+      const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      
+      if (!email) {
+        showError(error2, "Email address is required");
+        emailInput.classList.add('error');
+        emailInput.classList.remove('success');
+        return false;
+      } else if (!emailPattern.test(email)) {
+        showError(error2, "Please enter a valid email address");
+        emailInput.classList.add('error');
+        emailInput.classList.remove('success');
+        return false;
+      } else {
+        hideError(error2);
+        emailInput.classList.remove('error');
+        emailInput.classList.add('success');
+        return true;
+      }
     }
 
-    function phoneValidateChecking(e) {
-        const phoneVal = phoneid.value;
-        if (phoneVal.trim() === "") {
-            error3.style.display = "block";
-            error3.innerHTML = "Enter a valid phone number";
-        } else if (phoneVal.length < 10 || phoneVal.length > 10) {
-            error3.style.display = "block";
-            error3.innerHTML = "Enter 10 digits";
-        } else {
-            error3.style.display = "none";
-            error3.innerHTML = "";
-        }
+    function validatePhone() {
+      const phone = phoneInput.value.trim();
+      const phonePattern = /^[0-9]{10}$/;
+      
+      if (!phone) {
+        showError(error3, "Phone number is required");
+        phoneInput.classList.add('error');
+        phoneInput.classList.remove('success');
+        return false;
+      } else if (!phonePattern.test(phone)) {
+        showError(error3, "Please enter a valid 10-digit phone number");
+        phoneInput.classList.add('error');
+        phoneInput.classList.remove('success');
+        return false;
+      } else {
+        hideError(error3);
+        phoneInput.classList.remove('error');
+        phoneInput.classList.add('success');
+        return true;
+      }
     }
 
-    function passValidateChecking(e) {
-        const passVal = passid.value;
-        const cpassVal = cpassid.value;
-        const alpha = /[a-zA-Z]/;
-        const digit = /\d/;
+    function validatePassword() {
+      const password = passwordInput.value;
+      const confirmPassword = confirmPasswordInput.value;
+      const alpha = /[a-zA-Z]/;
+      const digit = /\d/;
+      const special = /[!@#$%^&*(),.?":{}|<>]/;
 
-        if (passVal.length < 8) {
-            error4.style.display = "block";
-            error4.innerHTML = "Should contain at least 8 characters";
-        } else if (!alpha.test(passVal) || !digit.test(passVal)) {
-            error4.style.display = "block";
-            error4.innerHTML = "Should contain numbers and alphabets";
-        } else {
-            error4.style.display = "none";
-            error4.innerHTML = "";
+      if (!password) {
+        showError(error4, "Password is required");
+        passwordInput.classList.add('error');
+        passwordInput.classList.remove('success');
+        return false;
+      } else if (password.length < 8) {
+        showError(error4, "Password must be at least 8 characters long");
+        passwordInput.classList.add('error');
+        passwordInput.classList.remove('success');
+        return false;
+      } else if (!alpha.test(password) || !digit.test(password)) {
+        showError(error4, "Password must contain both letters and numbers");
+        passwordInput.classList.add('error');
+        passwordInput.classList.remove('success');
+        return false;
+      } else {
+        hideError(error4);
+        passwordInput.classList.remove('error');
+        passwordInput.classList.add('success');
+        
+        // Validate confirm password if it has value
+        if (confirmPassword) {
+          validateConfirmPassword();
         }
-
-        if (passVal !== cpassVal) {
-            error5.style.display = "block";
-            error5.innerHTML = "Passwords do not match";
-        } else {
-            error5.style.display = "none";
-            error5.innerHTML = "";
-        }
+        return true;
+      }
     }
 
-    document.addEventListener("DOMContentLoaded", function () {
-        signform.addEventListener("submit", function (e) {
-            // Call all validation functions
-            nameValidateChecking();
-            emailValidateChecking();
-            phoneValidateChecking();
-            passValidateChecking();
+    function validateConfirmPassword() {
+      const password = passwordInput.value;
+      const confirmPassword = confirmPasswordInput.value;
+      
+      if (!confirmPassword) {
+        showError(error5, "Please confirm your password");
+        confirmPasswordInput.classList.add('error');
+        confirmPasswordInput.classList.remove('success');
+        return false;
+      } else if (password !== confirmPassword) {
+        showError(error5, "Passwords do not match");
+        confirmPasswordInput.classList.add('error');
+        confirmPasswordInput.classList.remove('success');
+        return false;
+      } else {
+        hideError(error5);
+        confirmPasswordInput.classList.remove('error');
+        confirmPasswordInput.classList.add('success');
+        return true;
+      }
+    }
 
-            // Check if any error messages exist
-            if (
-                error1.innerHTML ||
-                error2.innerHTML ||
-                error3.innerHTML ||
-                error4.innerHTML ||
-                error5.innerHTML
-            ) {
-                e.preventDefault(); // Prevent form submission if errors are present
-            }
-        });
+    function updatePasswordStrength(password) {
+      if (!password) {
+        passwordStrength.style.display = 'none';
+        return;
+      }
+
+      passwordStrength.style.display = 'block';
+      let strength = 0;
+      let width = 0;
+      let className = '';
+
+      // Check various criteria
+      if (password.length >= 8) strength++;
+      if (/[a-z]/.test(password)) strength++;
+      if (/[A-Z]/.test(password)) strength++;
+      if (/[0-9]/.test(password)) strength++;
+      if (/[^A-Za-z0-9]/.test(password)) strength++;
+
+      if (strength <= 2) {
+        width = 33;
+        className = 'strength-weak';
+      } else if (strength <= 4) {
+        width = 66;
+        className = 'strength-medium';
+      } else {
+        width = 100;
+        className = 'strength-strong';
+      }
+
+      strengthBar.style.width = width + '%';
+      strengthBar.className = 'password-strength-bar ' + className;
+    }
+
+    function showError(element, message) {
+      element.textContent = message;
+      element.style.display = "block";
+    }
+
+    function hideError(element) {
+      element.style.display = "none";
+      element.textContent = "";
+    }
+
+    // Real-time validation
+    nameInput.addEventListener('blur', validateName);
+    emailInput.addEventListener('blur', validateEmail);
+    phoneInput.addEventListener('blur', validatePhone);
+    passwordInput.addEventListener('blur', validatePassword);
+    confirmPasswordInput.addEventListener('blur', validateConfirmPassword);
+
+    // Password strength indicator
+    passwordInput.addEventListener('input', function() {
+      updatePasswordStrength(this.value);
+      if (this.classList.contains('error')) {
+        this.classList.remove('error');
+        hideError(error4);
+      }
     });
-</script>
+
+    // Clear error states on input
+    [nameInput, emailInput, phoneInput, passwordInput, confirmPasswordInput].forEach(input => {
+      input.addEventListener('input', function() {
+        if (this.classList.contains('error')) {
+          this.classList.remove('error');
+          const errorElement = this.closest('.form-group').querySelector('.error-message');
+          if (errorElement) hideError(errorElement);
+        }
+      });
+    });
+
+    // Password toggles
+    togglePassword.addEventListener("click", function() {
+      const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
+      passwordInput.setAttribute("type", type);
+      this.classList.toggle("fa-eye");
+      this.classList.toggle("fa-eye-slash");
+    });
+
+    toggleConfirmPassword.addEventListener("click", function() {
+      const type = confirmPasswordInput.getAttribute("type") === "password" ? "text" : "password";
+      confirmPasswordInput.setAttribute("type", type);
+      this.classList.toggle("fa-eye");
+      this.classList.toggle("fa-eye-slash");
+    });
+
+    // Form submission
+    signForm.addEventListener("submit", function(e) {
+      const isNameValid = validateName();
+      const isEmailValid = validateEmail();
+      const isPhoneValid = validatePhone();
+      const isPasswordValid = validatePassword();
+      const isConfirmPasswordValid = validateConfirmPassword();
+
+      if (!isNameValid || !isEmailValid || !isPhoneValid || !isPasswordValid || !isConfirmPasswordValid) {
+        e.preventDefault();
+        return;
+      }
+
+      // Add loading state
+      signupBtn.classList.add('loading');
+      signupBtn.querySelector('span').style.opacity = '0';
+    });
+
+    // Enhanced UX: Focus states and animations
+    document.querySelectorAll('.form-input').forEach(input => {
+      input.addEventListener('focus', function() {
+        this.closest('.input-wrapper').style.transform = 'translateY(-1px)';
+      });
+      
+      input.addEventListener('blur', function() {
+        this.closest('.input-wrapper').style.transform = 'translateY(0)';
+      });
+    });
+
+    // Phone number formatting
+    phoneInput.addEventListener('input', function() {
+      this.value = this.value.replace(/\D/g, '').substring(0, 10);
+    });
+  </script>
 </body>
+
 </html>

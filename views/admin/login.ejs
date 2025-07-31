@@ -1,79 +1,528 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Login</title>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800;900&display=swap"
-    rel="stylesheet"
-  />
-  <link rel="stylesheet" href="/css/bootstrap.min.css" />
-  <link rel="stylesheet" href="/css/style.css" />
+  <title>Baeboo Admin - Secure Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+
   <style>
-    body,
-    html {
-      height: 100%;
+    :root {
+      --primary-color: #2563eb;
+      --primary-dark: #1d4ed8;
+      --primary-light: #3b82f6;
+      --secondary-color: #64748b;
+      --accent-color: #f59e0b;
+      --success-color: #10b981;
+      --error-color: #ef4444;
+      --warning-color: #f59e0b;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-light: #64748b;
+      --background: #f8fafc;
+      --surface: #ffffff;
+      --border: #e2e8f0;
+      --border-light: #f1f5f9;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+      --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+      --border-radius: 12px;
+      --border-radius-lg: 16px;
+    }
+
+    * {
       margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body, html {
+      height: 100%;
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: var(--text-primary);
+      line-height: 1.6;
+      overflow: hidden;
+    }
+
+    /* Animated background */
+    .background-animation {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .background-animation::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+      animation: float 20s ease-in-out infinite;
+    }
+
+    .background-animation::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+      background-size: 50px 50px;
+      animation: drift 30s linear infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-20px); }
+    }
+
+    @keyframes drift {
+      0% { transform: rotate(0deg) translateX(0px); }
+      100% { transform: rotate(360deg) translateX(20px); }
+    }
+
+    .main-container {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      position: relative;
+    }
+
+    .login-container {
+      background: var(--surface);
+      padding: 48px 40px;
+      border-radius: var(--border-radius-lg);
+      box-shadow: var(--shadow-xl);
+      width: 100%;
+      max-width: 450px;
+      position: relative;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+    }
+
+    .admin-header {
+      text-align: center;
+      margin-bottom: 40px;
+      position: relative;
+    }
+
+    .admin-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+      color: white;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .brand-logo {
+      font-family: 'Inter', sans-serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .brand-logo::before {
+      content: '🛡️';
+      font-size: 1.5rem;
+    }
+
+    .admin-subtitle {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    .security-notice {
+      background: linear-gradient(135deg, #fef3c7, #fde68a);
+      border: 1px solid #f59e0b;
+      border-radius: var(--border-radius);
+      padding: 12px 16px;
+      margin-bottom: 32px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.85rem;
+      color: #92400e;
+    }
+
+    .security-notice i {
+      color: var(--warning-color);
+      font-size: 1rem;
+    }
+
+    .form-group {
+      margin-bottom: 24px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: var(--text-primary);
+      font-size: 0.9rem;
+      letter-spacing: 0.3px;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 16px 20px 16px 50px;
+      border: 2px solid var(--border);
+      border-radius: var(--border-radius);
+      font-size: 1rem;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      background: var(--surface);
+      color: var(--text-primary);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      background: var(--background);
+    }
+
+    .form-control::placeholder {
+      color: var(--text-light);
+      font-family: 'Inter', sans-serif;
+      font-weight: 400;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-light);
+      font-size: 1.1rem;
+      transition: color 0.3s ease;
+    }
+
+    .form-control:focus + .input-icon {
+      color: var(--primary-color);
+    }
+
+    .password-wrapper {
+      position: relative;
+    }
+
+    .password-toggle {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: var(--text-light);
+      font-size: 1rem;
+      transition: color 0.3s ease;
+      z-index: 10;
+    }
+
+    .password-toggle:hover {
+      color: var(--primary-color);
+    }
+
+    .error-message {
+      color: var(--error-color);
+      font-size: 0.8rem;
+      margin-top: 6px;
+      font-weight: 500;
+      padding-left: 4px;
+      display: none;
+    }
+
+    .login-button {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+      color: white;
+      border: none;
+      border-radius: var(--border-radius);
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 8px;
+      position: relative;
+      overflow: hidden;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .login-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 20px rgba(37, 99, 235, 0.3);
+    }
+
+    .login-button:active {
+      transform: translateY(0);
+    }
+
+    .alert-danger {
+      background: linear-gradient(135deg, #fef2f2, #fee2e2);
+      border: 1px solid #fca5a5;
+      color: var(--error-color);
+      padding: 14px 20px;
+      border-radius: var(--border-radius);
+      margin: 20px 0;
+      font-size: 0.9rem;
+      font-weight: 500;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .alert-danger::before {
+      content: '⚠️';
+      font-size: 1rem;
+    }
+
+    /* Success states */
+    .form-control.success {
+      border-color: var(--success-color);
+      background: rgba(16, 185, 129, 0.02);
+    }
+
+    .form-control.error {
+      border-color: var(--error-color);
+      background: rgba(239, 68, 68, 0.02);
+    }
+
+    /* Loading state */
+    .login-button.loading {
+      pointer-events: none;
+      opacity: 0.8;
+    }
+
+    .login-button.loading::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 20px;
+      height: 20px;
+      margin: -10px 0 0 -10px;
+      border: 2px solid transparent;
+      border-top: 2px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .footer-info {
+      text-align: center;
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border-light);
+    }
+
+    .footer-info p {
+      color: var(--text-light);
+      font-size: 0.8rem;
+      margin-bottom: 8px;
+    }
+
+    .security-features {
       display: flex;
       justify-content: center;
+      gap: 16px;
+      margin-top: 12px;
+    }
+
+    .security-feature {
+      display: flex;
       align-items: center;
-      background-size: cover;
-      background-position: center;
-      font-family: 'Nunito Sans', sans-serif;
-       color: white;
+      gap: 4px;
+      color: var(--text-light);
+      font-size: 0.75rem;
     }
-    .login-container {
-      width: 100%;
-      max-width: 500px;
-      padding: 20px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      background-color: hsl(193, 80%, 17%);
-      border-radius: 8px;
+
+    .security-feature i {
+      color: var(--success-color);
+      font-size: 0.8rem;
     }
-    .error-message {
-      color: red;
-      font-size: 0.875rem;
+
+    /* Responsive Design */
+    @media (max-width: 480px) {
+      .main-container {
+        padding: 16px;
+      }
+
+      .login-container {
+        padding: 32px 24px;
+      }
+
+      .brand-logo {
+        font-size: 1.7rem;
+      }
+
+      .form-control {
+        padding: 14px 18px 14px 46px;
+      }
+
+      .login-button {
+        padding: 14px;
+      }
+
+      .security-features {
+        flex-direction: column;
+        gap: 8px;
+      }
     }
-    .text-center{
-      color: white;
+
+    /* Enhanced visual effects */
+    .login-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary-color), var(--primary-light), var(--primary-color));
+      border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+    }
+
+    /* Pulse animation for security badge */
+    .admin-badge::after {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+      border-radius: 22px;
+      z-index: -1;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.5; transform: scale(1); }
+      50% { opacity: 0.8; transform: scale(1.05); }
     }
   </style>
 </head>
+
 <body>
-  <div class="login-container">
-    <h2 class="text-center">Admin Login</h2>
-    <% if (message) { %>
-    <div class="alert alert-danger text-center"><%= message %></div>
-    <% } %>
-    <form id="adminLoginForm" method="post" action="/admin/login">
-      <div class="form-group">
-        <label for="adminEmail">Email address</label>
-        <input
-          type="email"
-          class="form-control"
-          id="adminEmail"
-          name="email"
-          required
-        />
-        <div id="emailError" class="error-message"></div>
+  <div class="background-animation"></div>
+  
+  <div class="main-container">
+    <div class="login-container">
+      <div class="admin-header">
+        <div class="admin-badge">
+          <i class="fas fa-shield-alt"></i>
+          Admin Access
+        </div>
+        <div class="brand-logo">Baeboo Admin</div>
+        <p class="admin-subtitle">Secure Administrative Portal</p>
       </div>
-      <div class="form-group">
-        <label for="adminPassword">Password</label>
-        <input
-          type="password"
-          class="form-control"
-          id="adminPassword"
-          name="password"
-          required
-        />
-        <div id="passwordError" class="error-message"></div>
+
+      <div class="security-notice">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span>This is a restricted area. All access attempts are logged and monitored.</span>
       </div>
-      <button type="submit" class="btn btn-primary btn-block">Log In</button>
-    </form>
+
+      <% if (message) { %>
+        <div class="alert-danger">
+          <%= message %>
+        </div>
+      <% } %>
+
+      <form id="adminLoginForm" method="post" action="/admin/login">
+        <div class="form-group">
+          <label for="adminEmail" class="form-label">Administrator Email</label>
+          <div class="input-wrapper">
+            <input
+              type="email"
+              class="form-control"
+              id="adminEmail"
+              name="email"
+              placeholder="Enter your admin email address"
+              required
+            />
+            <i class="fas fa-user-shield input-icon"></i>
+          </div>
+          <div id="emailError" class="error-message"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="adminPassword" class="form-label">Secure Password</label>
+          <div class="input-wrapper password-wrapper">
+            <input
+              type="password"
+              class="form-control"
+              id="adminPassword"
+              name="password"
+              placeholder="Enter your secure password"
+              required
+            />
+            <i class="fas fa-lock input-icon"></i>
+            <i class="fas fa-eye-slash password-toggle" id="togglePassword"></i>
+          </div>
+          <div id="passwordError" class="error-message"></div>
+        </div>
+
+        <button type="submit" class="login-button" id="loginBtn">
+          <span>Secure Login</span>
+        </button>
+      </form>
+
+      <div class="footer-info">
+        <p>Authorized personnel only</p>
+        <div class="security-features">
+          <div class="security-feature">
+            <i class="fas fa-check"></i>
+            <span>SSL Encrypted</span>
+          </div>
+          <div class="security-feature">
+            <i class="fas fa-check"></i>
+            <span>2FA Ready</span>
+          </div>
+          <div class="security-feature">
+            <i class="fas fa-check"></i>
+            <span>Audit Logged</span>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
-  <script src="/js/jquery.min.js"></script>
-  <script src="/js/bootstrap.bundle.min.js"></script>
+
   <script>
     document.addEventListener("DOMContentLoaded", function () {
       const adminLoginForm = document.getElementById("adminLoginForm");
@@ -81,27 +530,118 @@
       const passwordField = document.getElementById("adminPassword");
       const emailError = document.getElementById("emailError");
       const passwordError = document.getElementById("passwordError");
-      adminLoginForm.addEventListener("submit", function (event) {
-        let isValid = true;
+      const loginBtn = document.getElementById("loginBtn");
+      const togglePassword = document.getElementById("togglePassword");
+
+      function validateEmail() {
+        const email = emailField.value.trim();
         const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-        if (!emailPattern.test(emailField.value)) {
-          emailError.textContent = "Invalid email format";
-          isValid = false;
+        
+        if (!email) {
+          showError(emailError, "Email address is required");
+          emailField.classList.add('error');
+          emailField.classList.remove('success');
+          return false;
+        } else if (!emailPattern.test(email)) {
+          showError(emailError, "Please enter a valid email address");
+          emailField.classList.add('error');
+          emailField.classList.remove('success');
+          return false;
         } else {
-          emailError.textContent = "";
+          hideError(emailError);
+          emailField.classList.remove('error');
+          emailField.classList.add('success');
+          return true;
         }
-        if (passwordField.value.length < 8) {
-          passwordError.textContent =
-            "Password should contain at least 8 characters";
-          isValid = false;
+      }
+
+      function validatePassword() {
+        const password = passwordField.value;
+        
+        if (!password) {
+          showError(passwordError, "Password is required");
+          passwordField.classList.add('error');
+          passwordField.classList.remove('success');
+          return false;
+        } else if (password.length < 8) {
+          showError(passwordError, "Password must be at least 8 characters long");
+          passwordField.classList.add('error');
+          passwordField.classList.remove('success');
+          return false;
         } else {
-          passwordError.textContent = "";
+          hideError(passwordError);
+          passwordField.classList.remove('error');
+          passwordField.classList.add('success');
+          return true;
         }
-        if (!isValid) {
-          event.preventDefault();
+      }
+
+      function showError(element, message) {
+        element.textContent = message;
+        element.style.display = "block";
+      }
+
+      function hideError(element) {
+        element.style.display = "none";
+        element.textContent = "";
+      }
+
+      // Real-time validation
+      emailField.addEventListener('blur', validateEmail);
+      passwordField.addEventListener('blur', validatePassword);
+
+      // Clear error states on input
+      emailField.addEventListener('input', function() {
+        if (this.classList.contains('error')) {
+          this.classList.remove('error');
+          hideError(emailError);
         }
       });
+
+      passwordField.addEventListener('input', function() {
+        if (this.classList.contains('error')) {
+          this.classList.remove('error');
+          hideError(passwordError);
+        }
+      });
+
+      // Password toggle
+      togglePassword.addEventListener("click", function() {
+        const type = passwordField.getAttribute("type") === "password" ? "text" : "password";
+        passwordField.setAttribute("type", type);
+        this.classList.toggle("fa-eye");
+        this.classList.toggle("fa-eye-slash");
+      });
+
+      // Form submission
+      adminLoginForm.addEventListener("submit", function (event) {
+        const isEmailValid = validateEmail();
+        const isPasswordValid = validatePassword();
+
+        if (!isEmailValid || !isPasswordValid) {
+          event.preventDefault();
+          return;
+        }
+
+        // Add loading state
+        loginBtn.classList.add('loading');
+        loginBtn.querySelector('span').style.opacity = '0';
+      });
+
+      // Enhanced UX: Focus states
+      [emailField, passwordField].forEach(field => {
+        field.addEventListener('focus', function() {
+          this.closest('.input-wrapper').style.transform = 'translateY(-1px)';
+        });
+        
+        field.addEventListener('blur', function() {
+          this.closest('.input-wrapper').style.transform = 'translateY(0)';
+        });
+      });
+
+    
     });
   </script>
 </body>
+
 </html>

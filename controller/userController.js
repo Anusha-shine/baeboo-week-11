@@ -286,21 +286,29 @@ const Login = async (req, res) => {
     try {
         const { email, password } = req.body;
         const findUser = await User.findOne({ email });
+
         if (!findUser) {
-            return res.render('user/login', { msg: "User not found" })
+            return res.render('user/login', { msg: "User not found" });
         }
+
+        // Check if user is blocked
+        if (findUser.isBlocked) {
+            return res.render('user/login', { msg: "Your account has been blocked. Please contact support." });
+        }
+
         const passwordMatch = await bcrypt.compare(password, findUser.password);
         if (!passwordMatch) {
-            return res.render('user/login', { msg: "Invalid password" })
+            return res.render('user/login', { msg: "Invalid password" });
         }
+
         req.session.user = findUser._id;
         res.redirect('/');
     } catch (error) {
         console.error("Error during login:", error);
-        res.render('user/login', { msg: "login failed.Please try again later" })
-
+        res.render('user/login', { msg: "Login failed. Please try again later." });
     }
-}
+};
+
 const Logout = async (req, res) => {
     try {
         req.session.destroy((err) => {

@@ -3,7 +3,7 @@ const router = express.Router();
 const passport = require("passport");
 const userController = require('../controller/userController');
 const userProfileController = require("../controller/userProfilecontroller");
-const {userAuth, isUserBlocked} = require("../middlewares/auth");
+const {userAuth,} = require("../middlewares/auth");
 const userProductController = require("../controller/userProductController");
 const multer = require("multer");
 const storage = require("../helpers/multer");
@@ -36,11 +36,11 @@ router.post('/login', userController.Login);
 router.get('/logout', userController.Logout);
 
 //Shopping page
-router.get("/shop",userAuth,isUserBlocked,userController.loadShoppingPage);
-router.get("/filter",userAuth,isUserBlocked,userController.filterProduct);
-router.get("/filterPrice",userAuth,isUserBlocked,userController.filterByPrice);
-router.post("/search",userAuth,isUserBlocked,userController.searchProducts);
-router.get("/shop/ajax",ajaxShopController.ajaxLoadProducts);
+router.get("/shop",userAuth,userController.loadShoppingPage);
+router.get("/filter",userAuth,userController.filterProduct);
+router.get("/filterPrice",userAuth,userController.filterByPrice);
+router.post("/search",userAuth,userController.searchProducts);
+router.get("/shop/ajax",userAuth,ajaxShopController.ajaxLoadProducts);
 
 //profile Management
 router.get("/forgot-password",userProfileController.getForgotPassPage);
@@ -67,39 +67,39 @@ router.get("/editAddress",userAuth,userProfileController.editAddress);
 router.post("/editAddress",userAuth,userProfileController.postEditAddress);
 router.get("/deleteAddress",userAuth,userProfileController.deleteAddress);
 //product Management
-router.get("/productDetails",userAuth,isUserBlocked,userProductController.productDetails);
+router.get("/productDetails",userAuth,userProductController.productDetails);
 router.get("/product/:id",userAuth,userProductController.relatedProducts);
 
 //wishlist Management
 router.get("/wishlist",userAuth,wishlistController.loadWishlist);
-router.post("/addToWishlist",userAuth,isUserBlocked,wishlistController.addToWishlist);
-router.get("/removeFromWishlist",userAuth,isUserBlocked,wishlistController.removeProduct);
+router.post("/addToWishlist",userAuth,wishlistController.addToWishlist);
+router.get("/removeFromWishlist",userAuth,wishlistController.removeProduct);
 //cart Management
 router.get("/cart",userAuth,cartController.loadCart);
-router.post("/addToCart",userAuth,isUserBlocked,cartController.addToCart);
+router.post("/addToCart",userAuth,cartController.addToCart);
 router.post("/remove-from-cart",userAuth,cartController.removeFromCart);
 router.post("/cart/update-quantity",userAuth,cartController.updateCartQuantity);
-router.post("/wishlist/add-to-cart",userAuth,isUserBlocked,wishlistController.addToCartFromWishlist);
+router.post("/wishlist/add-to-cart",userAuth,wishlistController.addToCartFromWishlist);
 //order Management
-router.get("/check-cart", userAuth,isUserBlocked, orderController.checkCart);
-router.get("/checkout",userAuth,isUserBlocked,orderController.getCheckoutPage);
-router.get("/payment",userAuth,isUserBlocked,orderController.getPaymentPage);
-router.post("/orderPlaced",userAuth,isUserBlocked,orderController.orderPlaced);
-router.post("/createRazorpayOrder",userAuth,isUserBlocked,paymentController.createRazorpayOrder);
+router.get("/check-cart", userAuth,orderController.checkCart);
+router.get("/checkout",userAuth,orderController.getCheckoutPage);
+router.get("/payment",userAuth,orderController.getPaymentPage);
+router.post("/orderPlaced",userAuth,orderController.orderPlaced);
+router.post("/createRazorpayOrder",userAuth,paymentController.createRazorpayOrder);
 router.post("/verifyPayment",userAuth,paymentController.verifyPayment);
 router.post("/paymentConfirm",userAuth,paymentController.paymentConfirm);
 router.get("/orderSuccess",userAuth,paymentController.orderSuccess);
 router.get("/orderFailure/:orderId",userAuth,paymentController.orderFailure);
 router.post("/markOrderFailed",userAuth,paymentController.markOrderFailed);
-router.get("/retry-payment/:orderId",userAuth,isUserBlocked,paymentController.retryPayment);
-router.get("/orders",userAuth,isUserBlocked,orderController.getOrdersPage);
-router.get("/order/:orderId",userAuth,isUserBlocked,orderController.getOrderDetails);
-router.post("/order/:orderId/item/:itemId/cancel",userAuth,isUserBlocked,returnOrderController.cancelOrderItem);
+router.get("/retry-payment/:orderId",userAuth,paymentController.retryPayment);
+router.get("/orders",userAuth,orderController.getOrdersPage);
+router.get("/order/:orderId",userAuth,orderController.getOrderDetails);
+router.post("/order/:orderId/item/:itemId/cancel",userAuth,returnOrderController.cancelOrderItem);
 router.get("/invoice/:orderId",userAuth,invoiceController.generateInvoice);
 router.get("/returnOrder/:orderId",userAuth,returnOrderController.returnOrder);
 router.post("/returnOrder/:orderId",userAuth,returnOrderController.returnOrderRequest);
 //wallet Management
-router.get("/wallet",userAuth,isUserBlocked,userWalletController.viewWallet);
+router.get("/wallet",userAuth,userWalletController.viewWallet);
 
 //coupon Management
 router.post("/applyCoupon",userAuth,orderController.applyCoupon);

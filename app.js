@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const app = express();
 const path = require('path');
@@ -37,7 +38,6 @@ app.use((req, res, next) => {
   res.set('Expires', '0');
   next();
 });
-
 app.use('/', userRoute);
 app.use('/admin',adminRoute);
 
