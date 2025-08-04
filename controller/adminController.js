@@ -353,12 +353,12 @@ const getSalesReport = async (req, res) => {
   });
 };
 
+
 const downloadSalesReport = async (req, res) => {
   try {
     const { type } = req.params;
     const filters = req.query;
 
-    // 0️⃣ Build the same `match` as your UI route
     const match = { status: 'delivered' };
 
     if (filters.filter === 'daily') {
@@ -373,6 +373,7 @@ const downloadSalesReport = async (req, res) => {
     } else if (filters.filter === 'monthly') {
       match.createdAt = { $gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1) };
     }
+
     if (filters.fromDate && filters.toDate) {
       const from = new Date(filters.fromDate);
       const to = new Date(filters.toDate);
@@ -380,19 +381,14 @@ const downloadSalesReport = async (req, res) => {
       match.createdAt = { $gte: from, $lte: to };
     }
 
-    // 1️⃣ Fetch paginated page *exactly like UI*
-    const page = parseInt(filters.page, 10) || 1;
-    const limit = parseInt(filters.limit, 10) || 25;
-    const { orders: pageOrders, totalOrders } = await getFilteredOrders(match, page, limit);
-
-    // 2️⃣ Compute totals *identical* to your UI
+    // Fetch all filtered orders
+    const pageOrders = await Order.find(match).populate('user');
     const totalOrderCount = pageOrders.length;
     const totalAmount = pageOrders.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
     const finalAmount = pageOrders.reduce((sum, o) => sum + Math.round(o.finalAmount || 0), 0);
     const totalDiscount = pageOrders.reduce((sum, o) => sum + (o.discount || 0), 0);
 
-    const totalPages = Math.ceil(totalOrders / limit);
-    const filename = `sales-report-page${page}-of${totalPages}.${type === 'excel' ? 'xlsx' : 'pdf'}`;
+    const filename = `sales-report-${new Date().toISOString().slice(0, 10)}.${type === 'excel' ? 'xlsx' : 'pdf'}`;
 
     if (type === 'excel') {
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -402,8 +398,8 @@ const downloadSalesReport = async (req, res) => {
       const worksheet = workbook.addWorksheet('Sales Report');
 
       worksheet.addRow(['Summary']);
-      worksheet.addRow(['Exported Page', `${page} of ${totalPages}`]);
-      worksheet.addRow(['Total Orders (page)', totalOrderCount]);
+      worksheet.addRow(['Exported Date', new Date().toLocaleDateString()]);
+      worksheet.addRow(['Total Orders', totalOrderCount]);
       worksheet.addRow(['Total Amount', totalAmount.toFixed(2)]);
       worksheet.addRow(['Total Discount', totalDiscount.toFixed(2)]);
       worksheet.addRow(['Final Amount', finalAmount.toFixed(2)]);
@@ -422,13 +418,13 @@ const downloadSalesReport = async (req, res) => {
       pageOrders.forEach(o => {
         worksheet.addRow({
           date: o.createdAt.toLocaleDateString(),
-          orderId: o._id.toString(),
+          orderId: o.orderId.toString(),
           customer: o.user?.name || 'Unknown',
           total: (o.totalAmount || 0).toFixed(2),
           discount: ((o.discount != null)
-                    ? o.discount
-                    : ((o.totalAmount || 0) - (o.finalAmount || 0))
-                   ).toFixed(2),
+            ? o.discount
+            : ((o.totalAmount || 0) - (o.finalAmount || 0))
+          ).toFixed(2),
           final: (o.finalAmount || 0).toFixed(2),
           payment: o.paymentMethod || 'N/A'
         });
@@ -436,18 +432,13 @@ const downloadSalesReport = async (req, res) => {
 
       await workbook.xlsx.write(res);
       res.end();
-    }
-    else if (type === 'pdf') {
-      // ✅ Headers BEFORE streaming
+    } else if (type === 'pdf') {
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
 
       const doc = new PDFDocument({ margin: 40, size: 'A4', bufferPages: true });
-
-      // ✅ Stream before writing
       doc.pipe(res);
 
-      // ✅ Error listener
       doc.on('error', err => {
         console.error('PDF generation error:', err);
         if (!res.headersSent) {
@@ -455,37 +446,38 @@ const downloadSalesReport = async (req, res) => {
         }
       });
 
-      // Title + Summary
+      // Title
       doc
         .fontSize(20)
         .font('Helvetica-Bold')
-        .text(`Sales Report — Page ${page} of ${totalPages}`, { align: 'center' })
+        .text(`Sales Report`, { align: 'center' })
         .moveDown();
 
+      // Summary
       doc
         .fontSize(12)
         .font('Helvetica-Bold')
         .text('Summary:')
         .font('Helvetica')
-        .text(`Total Orders (page): ${totalOrderCount}`)
-        .text(`Total Amount: ₹${totalAmount.toFixed(2)}`)
-        .text(`Total Discount: ₹${totalDiscount.toFixed(2)}`)
+        .text(`Exported Date: ${new Date().toLocaleDateString()}`)
+        .text(`Total Orders: ${totalOrderCount}`)
         .text(`Final Amount: ₹${finalAmount.toFixed(2)}`)
         .moveDown();
 
-      // Table
-      const headers = ['Date','Order ID','Customer','Total','Discount','Final','Payment'];
-      const colW = [70, 90, 100, 60, 60, 60, 80];
+      // Table headers
+      const headers = ['Date', 'Order ID', 'Customer','Amount Paid', 'Payment'];
+      const colW = [60, 200, 120, 80, 70];
       let y = doc.y;
+      const x = doc.x;
 
       doc.font('Helvetica-Bold').fontSize(11);
-      let x = doc.x;
       headers.forEach((h, i) => {
-        doc.text(h, x + (i > 0 ? colW.slice(0,i).reduce((a,b)=>a+b,0) : 0) + 2, y);
+        doc.text(h, x + colW.slice(0, i).reduce((a, b) => a + b, 0) + 2, y);
       });
       doc.moveDown();
       y = doc.y;
 
+      // Table rows
       doc.font('Helvetica').fontSize(10);
       pageOrders.forEach(o => {
         if (y > doc.page.height - doc.page.margins.bottom - 40) {
@@ -493,7 +485,7 @@ const downloadSalesReport = async (req, res) => {
           y = doc.y;
           doc.font('Helvetica-Bold').fontSize(11);
           headers.forEach((h, i) => {
-            doc.text(h, x + colW.slice(0,i).reduce((a,b)=>a+b,0) + 2, y);
+            doc.text(h, x + colW.slice(0, i).reduce((a, b) => a + b, 0) + 2, y);
           });
           y = doc.y + 15;
           doc.font('Helvetica').fontSize(10);
@@ -501,38 +493,30 @@ const downloadSalesReport = async (req, res) => {
 
         const row = [
           o.createdAt.toLocaleDateString(),
-          o._id.toString(),
+          o.orderId.toString(),           //changed
           o.user?.name || 'Unknown',
-          (o.totalAmount || 0).toFixed(2),
-          (((o.discount != null)
-              ? o.discount
-              : ((o.totalAmount || 0) - (o.finalAmount || 0))
-            ).toFixed(2)),
           (o.finalAmount || 0).toFixed(2),
           o.paymentMethod || 'N/A',
         ];
 
         row.forEach((val, i) => {
-          doc.text(val, x + colW.slice(0,i).reduce((a,b)=>a+b,0) + 2, y);
+          doc.text(val, x + colW.slice(0, i).reduce((a, b) => a + b, 0) + 2, y);
         });
         y = doc.y + 15;
       });
 
-      // ✅ Finalize PDF stream
       doc.end();
-    }
-    else {
+    } else {
       res.status(400).send('Invalid format requested: only "excel" or "pdf" allowed.');
     }
-  }
-  catch (err) {
+  } catch (err) {
     console.error('Error in downloadSalesReport:', err);
     if (!res.headersSent) {
       res.status(500).send('Internal Server Error');
     }
-    // No further res.* calls – streaming flow is already underway
   }
 };
+
 
 
 module.exports = {
