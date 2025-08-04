@@ -1,11 +1,17 @@
 <%-include("../../views/partials/user/header.ejs")%>
+  <style>
+    .main {
+      padding-top: 120px;
+      padding-bottom: 150px;
+    }
+  </style>
   <main class="main">
     <div class="page-header breadcrumb-wrap">
       <div class="container">
         <div class="breadcrumb">
-          <a href="index.html" rel="nofollow">Home</a>
-          <span></span> Shop
-          <span></span> Your Cart
+          <a href="/" rel="nofollow">Home</a>
+          <span></span><a href="/shop"> Shop </a>
+          <span></span><a href="/cart">Your Cart</a>
         </div>
       </div>
     </div>
@@ -225,7 +231,19 @@
       document.querySelectorAll('.decrement-button').forEach(button => {
         button.addEventListener('click', async () => {
           const productId = button.getAttribute('data-product-id');
+          const quantityInput = button.parentElement.querySelector('.quantity-input');
+          const currentQuantity = parseInt(quantityInput.value);
 
+          if (currentQuantity <= 1) {
+            // Show SweetAlert warning
+            Swal.fire({
+              icon: 'warning',
+              title: 'Minimum quantity reached',
+              text: 'You must order at least 1 item.',
+              confirmButtonText: 'OK'
+            });
+            return;
+          }
           try {
             const response = await fetch('/cart/update-quantity', {
               method: 'POST',
@@ -246,33 +264,33 @@
 
     </script>
     <script>
-      document.getElementById('checkoutBtn').addEventListener('click', async () => {
-        try {
-          const response = await fetch('/check-cart', {
-            method: 'GET',
-            headers: {
-              'Accept': 'application/json'
-            }
-          });
+  document.getElementById('checkoutBtn').addEventListener('click', async (e) => {
+  e.preventDefault();
 
-          const result = await response.json();
+  const cartItems = [...document.querySelectorAll('.quantity-input')];
 
-          if (result.success) {
-            window.location.href = '/checkout';
-          } else {
-            Swal.fire({
-              icon: 'warning',
-              title: 'Cart is Empty',
-              text: result.message || 'Please add items to your cart before checking out.',
-            });
-          }
-        } catch (err) {
-          console.error(err);
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Unable to check cart. Please try again.'
-          });
-        }
+  for (const input of cartItems) {
+    const productId = input.closest('tr').querySelector('.increment-button').dataset.productId;
+
+    const resp = await fetch('/cart/update-quantity', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ productId, action: 'check' })
+    });
+
+    const result = await resp.json();
+    if (!result.success) {
+      return Swal.fire({
+        icon: 'warning',
+        title: 'Checkout Blocked',
+        text: result.message
       });
-    </script>
+    }
+  }
+
+  // If all checks pass
+  window.location.href = '/checkout';
+});
+
+
+  </script>

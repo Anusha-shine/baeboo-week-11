@@ -217,11 +217,11 @@
     }
 
     .zoom-container {
-  position: relative;
-  width: 100%;
-  max-width: 400px;
-  border-radius: 10px;
-}
+      position: relative;
+      width: 100%;
+      max-width: 400px;
+      border-radius: 10px;
+    }
 
 
     @media (max-width: 768px) {
@@ -324,9 +324,16 @@
                   <% if (order.address.name) { %>
                     <%= order.address.name %>,
                       <% } %>
-                        <%= order.address.landMark %>,<%= order.address.city %>, <%= order.address.state %> - <%= order.address.pincode %>
+                        <%= order.address.landMark %>,<%= order.address.city %>, <%= order.address.state %> - <%=
+                                order.address.pincode %>
                 </p>
-                <a href="/invoice/<%= order._id %>" class="btn btn-sm btn-outline-primary mt-2">Download Invoice</a>
+
+                <% if (order.status !=='cancelled') { %>
+                  <a href="/invoice/<%= order._id %>" class="btn btn-sm btn-outline-primary mt-2">
+                    Download Invoice
+                  </a>
+                  <% } %>
+
               </div>
             </div>
           </div>
@@ -355,10 +362,10 @@
                 <tbody>
                   <% order.orderedItems.forEach(item=> { %>
                     <tr>
-                       <td class="text-center">
-                      <img src="/uploads/re-image/<%= item.product.productImage[0] %>"
-                        style="height: 7rem; width: 7rem;" class="img-xs" alt="Item">
-                    </td>
+                      <td class="text-center">
+                        <img src="/uploads/re-image/<%= item.product.productImage[0] %>"
+                          style="height: 7rem; width: 7rem;" class="img-xs" alt="Item">
+                      </td>
                       <td class="text-center">
                         <%= item.product.productName %>
                       </td>
@@ -374,28 +381,30 @@
 
                       <td class="text-center">₹<%= (item.finalAmount).toFixed(2) %>
                       </td>
-                      <td class="text-center "><%= order.paymentMethod || 'N/A' %> </td>
+                      <td class="text-center ">
+                        <%= order.paymentMethod || 'N/A' %>
+                      </td>
                       <td class="text-center">
                         <% if (item.cancelStatus==='cancelled' ) { %>
                           <span class="text-danger"><i>Cancelled</i></span>
                           <% } else if (item.returnStatus==='requested' ) { %>
                             <span class="badge bg-warning">Return Request Submitted</span>
-                            <% } else if (item.returnStatus === "approved") { %>
+                            <% } else if (item.returnStatus==="approved" ) { %>
                               <span class="badge bg-success">Return Approved</span>
-                               <% } else { %>
-                              <div class="d-flex justify-content-center flex-column gap-1">
-                                <% if (['placed', 'shipped' ].includes(order.status)) { %>
-                                  <button class="btn btn-sm btn-outline-danger"
-                                    onclick="handleOrderAction('cancel', '<%= order._id %>', '<%= item._id %>')">Cancel</button>
-                                  <% } %>
-                                    <% if (order.status==='delivered' ) { %>
-                                      <button class="btn btn-sm btn-outline-warning text-dark"
-                                        onclick="handleOrderAction('returnrequest', '<%= order._id %>', '<%= item._id %>')">Return</button>
-                                      <% } %>
+                              <% } else { %>
+                                <div class="d-flex justify-content-center flex-column gap-1">
+                                  <% if (['placed', 'shipped' ].includes(order.status)) { %>
+                                    <button class="btn btn-sm btn-outline-danger"
+                                      onclick="handleOrderAction('cancel', '<%= order._id %>', '<%= item._id %>')">Cancel</button>
+                                    <% } %>
+                                      <% if (order.status==='delivered' ) { %>
+                                        <button class="btn btn-sm btn-outline-warning text-dark"
+                                          onclick="handleOrderAction('returnrequest', '<%= order._id %>', '<%= item._id %>')">Return</button>
+                                        <% } %>
 
-                              </div>
+                                </div>
 
-                              <% } %>
+                                <% } %>
                       </td>
 
                     </tr>
@@ -603,7 +612,7 @@
   <script src="js/mixitup.min.js"></script>
   <script src="js/owl.carousel.min.js"></script>
   <script src="js/main.js"></script>
-  
+
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10.16.6/dist/sweetalert2.all.min.js"></script>
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   <script src="./user-assets/js/vendor/modernizr-3.6.0.min.js"></script>
@@ -626,9 +635,9 @@
   <script src="./user-assets/js/plugins/jquery.vticker-min.js"></script>
   <script src="./user-assets/js/plugins/jquery.theia.sticky.js"></script>
 
-  
- <!---- <script src="./user-assets/js/maind134.js?v=3.4"></script> -->
- <!---- <script src="./user-assets/js/shopd134.js?v=3.4"></script> -->
+
+  <!---- <script src="./user-assets/js/maind134.js?v=3.4"></script> -->
+  <!---- <script src="./user-assets/js/shopd134.js?v=3.4"></script> -->
 
 </body>
 

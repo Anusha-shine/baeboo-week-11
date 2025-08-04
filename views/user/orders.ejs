@@ -8,7 +8,7 @@
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
-
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
   <style>
   body {
     background: linear-gradient(to right, #e0f7f4, #fdfdfd);
@@ -264,6 +264,85 @@
       font-size: 14px;
     }
   }
+  .logo-baeboo {
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1;
+  text-transform: lowercase;
+  letter-spacing: -0.05em;
+  color: #222;
+}
+
+.logo-baeboo .part-boo {
+  font-family: 'Nunito Sans', serif; /* or pair a serif like Playfair Display */
+  font-weight: 900;
+  font-size: 2.6rem;
+  letter-spacing: 0;
+  color: #ff7f50;
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+}
+.footer {
+  font-family: 'Nunito Sans', sans-serif;
+  color:black;
+}
+.footer-logo {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color:black;
+  margin-bottom: 0.5rem;
+}
+.col-md-3 h6 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 0.75rem;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+.col-md-2 h6 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 0.75rem;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.footer-tagline {
+  font-size: 1rem;
+  color:black;
+}
+.footer-list {
+  list-style: none;
+  padding: 0;
+}
+.footer-list li {
+  margin-bottom: 0.5rem;
+}
+.footer-list a {
+  color:black;
+  text-decoration: none;
+  transition: color .3s;
+}
+.footer-list a:hover {
+  color: #ff7f50;
+}
+.social-icons {
+  display: flex;
+  gap: 0.75rem;
+}
+.social-icons a {
+  color:black;
+  font-size: 1.2rem;
+  transition: color .3s;
+}
+.social-icons a:hover {
+  color: #ff7f50;
+}
+.footer .border-top {
+  border-color: #ddd;
+}
 </style>
 
 </head>
@@ -272,7 +351,9 @@
   <!-- Header -->
   <header class="header">
     <div class="container d-flex justify-content-between align-items-center">
-      <h2>baeboo</h2>
+      <h2 class="logo-baeboo">
+  <span class="part-bae">bae</span><span class="part-boo">boo</span>
+</h2>
 
       <nav class="header__menu">
         <ul class="d-flex gap-4 list-unstyled mb-0">
@@ -405,6 +486,7 @@
           <% } %>
     </div>
   </div>
+   <%-include("../../views/partials/user/footer.ejs")%>
 </body>
 
 </html>

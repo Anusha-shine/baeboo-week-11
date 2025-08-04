@@ -233,7 +233,7 @@
                     <th width="10%">Total</th>
                     <th width="10%">Offer Price</th>
                     <th width="10%">Payment Method</th>
-                    <th width="10%">Return Status</th>
+                    <th width="10%">Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -256,25 +256,30 @@
                       </td>
                       <td class="text-center"><%= order.paymentMethod %></td>
                       <td class="text-center">
-                        <% if (item.returnStatus==='requested' ) { %>
-                          <!-- Buttons to approve/reject per item -->
-                          <form action="/admin/approveReturnItem/<%= order._id %>/<%= index %>" method="POST"
-                            style="display:inline;">
-                            <button type="submit" class="btn btn-success btn-sm">Approve</button>
-                          </form>
-                          <form action="/admin/rejectReturnItem/<%= order._id %>/<%= index %>" method="POST"
-                            style="display:inline;">
-                            <button type="submit" class="btn btn-danger btn-sm">Reject</button>
-                          </form>
-                          <p><small>Reason: <%= item.returnReason %></small></p>
-                          <% } else if (item.returnStatus==='approved' ) { %>
-                            <span class="badge bg-success">Return Approved</span>
-                            <% } else if (item.returnStatus==='rejected' ) { %>
-                              <span class="badge bg-danger">Return Rejected</span>
-                              <% } else if(item.returnStatus === 'none') { %>
-                                <span class="badge bg-secondary">No Return Request</span>
-                                <% } %>
-                      </td>
+  <% if (item.cancelStatus === 'cancelled') { %>
+    <span class="badge bg-dark">Cancelled</span>
+
+  <% } else if (item.returnStatus === 'requested') { %>
+    <!-- Approve/Reject Buttons -->
+    <form action="/admin/approveReturnItem/<%= order._id %>/<%= index %>" method="POST" style="display:inline;">
+      <button type="submit" class="btn btn-success btn-sm">Approve</button>
+    </form>
+    <form action="/admin/rejectReturnItem/<%= order._id %>/<%= index %>" method="POST" style="display:inline;">
+      <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+    </form>
+    <p><small>Reason: <%= item.returnReason %></small></p>
+
+  <% } else if (item.returnStatus === 'approved') { %>
+    <span class="badge bg-success">Return Approved</span>
+
+  <% } else if (item.returnStatus === 'rejected') { %>
+    <span class="badge bg-danger">Return Rejected</span>
+
+  <% } else { %>
+    <span class="badge bg-secondary">No Action</span>
+  <% } %>
+</td>
+
                     </tr>
                     <% }); %>
                 </tbody>

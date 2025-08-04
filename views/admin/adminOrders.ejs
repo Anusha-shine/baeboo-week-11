@@ -445,6 +445,7 @@
               </thead>
               <tbody>
                 <% orders.forEach(order => { %>
+                  
                   <tr>
                     <td><strong><%= order.orderId %></strong></td>
                     <td><%= order.user?.name || 'N/A' %></td>

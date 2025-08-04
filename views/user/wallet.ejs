@@ -33,6 +33,24 @@
         .header__nav__option .sign-in-link:hover {
             color: #ff7f50;
         }
+        .logo-baeboo {
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1;
+  text-transform: lowercase;
+  letter-spacing: -0.05em;
+  color: #222;
+}
+
+.logo-baeboo .part-boo {
+  font-family: 'Nunito Sans', serif; /* or pair a serif like Playfair Display */
+  font-weight: 900;
+  font-size: 2.6rem;
+  letter-spacing: 0;
+  color: #ff7f50;
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+}
 
 
         .dropdown {
@@ -114,6 +132,80 @@
 .wallet-section .text-danger {
     color: #dc3545 !important;
 }
+.footer {
+  font-family: 'Nunito Sans', sans-serif;
+  color:black;
+}
+.footer-logo {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color:black;
+  margin-bottom: 0.5rem;
+}
+.col-md-3 h6 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 0.75rem;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+.col-md-2 h6 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 0.75rem;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.footer-tagline {
+  font-size: 1rem;
+  color:black;
+}
+.footer-list {
+  list-style: none;
+  padding: 0;
+}
+.footer-list li {
+  margin-bottom: 0.5rem;
+}
+.footer-list a {
+  color:black;
+  text-decoration: none;
+  transition: color .3s;
+}
+.footer-list a:hover {
+  color: #ff7f50;
+}
+.social-icons {
+  display: flex;
+  gap: 0.75rem;
+}
+.social-icons a {
+  color:black;
+  font-size: 1.2rem;
+  transition: color .3s;
+}
+.social-icons a:hover {
+  color: #ff7f50;
+}
+.footer .border-top {
+  border-color: #ddd;
+}
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  background-color: white; /* Or your desired background */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+.container-wallet {
+    padding-top:120px;
+}
+
 
     </style>
 </head>
@@ -124,7 +216,9 @@
             <div class="row">
                 <div class="col-lg-3 col-md-3">
                     <div class="header__logo">
-                        <h2>baeboo</h2>
+                        <h2 class="logo-baeboo">
+  <span class="part-bae">bae</span><span class="part-boo">boo</span>
+</h2>
                     </div>
                 </div>
                 <div class="col-lg-6 col-md-6">
@@ -170,7 +264,7 @@
     <!-- Header Section End -->
 
     <section class="wallet-section pt-5 pb-5">
-        <div class="container">
+        <div class="container-wallet">
             <h2 class="mb-4 text-center">My Wallet</h2>
 
             <div class="row justify-content-center">

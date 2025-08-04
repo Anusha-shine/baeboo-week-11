@@ -151,6 +151,15 @@ const updateCartQuantity = async (req, res) => {
 
     const item = cart.items.find(i => i.productId.toString() === productId);
     if (!item) return res.status(404).json({ success: false, message: 'Item not in cart' });
+    if (action === 'check') {
+  if (item.quantity > product.quantity || product.quantity === 0) {
+    return res.status(400).json({
+      success: false,
+      message: `"${product.productName}" is out of stock or only ${product.quantity} left`
+    });
+  }
+  return res.status(200).json({ success: true });
+}
 
     if (action === 'increment') {
 

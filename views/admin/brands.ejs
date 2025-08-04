@@ -7,23 +7,71 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
   <style>
-    body {
-      background-color: #f0f4f3;
+     :root {
+      --primary-color: #6366f1;
+      --primary-dark: #4f46e5;
+      --sidebar-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --sidebar-hover: rgba(255, 255, 255, 0.1);
+      --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --card-shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --border-radius: 12px;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
+    * {
+      transition: var(--transition);
+    }
+
+    body {
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+    }
+
     .sidebar {
       height: 100vh;
-      background-color: #343a40;
-      padding: 20px;
+      background: var(--sidebar-bg);
+      border: none;
+      box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(10px);
       position: fixed;
-      width: 220px;
-      color: white;
+      z-index: 1000;
     }
+
+    .sidebar h4 {
+      color: white;
+      font-weight: 700;
+      font-size: 1.5rem;
+      text-align: center;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      margin-bottom: 1rem;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      backdrop-filter: blur(5px);
+    }
+
     .sidebar a {
-      display: block;
-      color:white;
+      display: flex;
+      align-items: center;
+      padding: 12px 20px;
+      color: rgba(255, 255, 255, 0.9);
       text-decoration: none;
-      padding: 10px;
-      margin-bottom: 10px;
+      font-weight: 500;
+      margin: 2px 8px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+    }
+
+    .sidebar a:hover {
+      background: var(--sidebar-hover);
+      color: white;
+      transform: translateX(5px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .sidebar a i {
+      font-size: 1.1rem;
+      width: 20px;
     }
     .main-content {
       margin-left: 240px;

@@ -1,62 +1,69 @@
 const Coupon = require("../models/couponSchema");
 const mongoose = require("mongoose");
 
-const loadCoupon = async(req,res) => {
-    try {
-        const findCoupons =await Coupon.find({});
-        return res.render("admin/coupon",{coupons:findCoupons});
-    } catch (error) {
-        console.error("Error loading coupons:", error);
-        return res.redirect("/pageNotFound");
-    }
+const loadCoupon = async (req, res) => {
+  try {
+    const findCoupons = await Coupon.find({});
+    return res.render("admin/coupon", { coupons: findCoupons });
+  } catch (error) {
+    console.error("Error loading coupons:", error);
+    return res.redirect("/pageNotFound");
+  }
 }
 
-const createCoupon = async (req,res) => {
-    try {
-       console.log("Request body:", req.body);
-        const data = {
-            couponName : req.body.couponName,
-            startDate : new Date(req.body.startDate + "T00:00:00"),
-            endDate : new Date(req.body.endDate + "T00:00:00"),
-            offerPrice : parseInt(req.body.offerPrice),
-            minimumPrice : parseInt(req.body.minimumPrice)
-        }
+const createCoupon = async (req, res) => {
+  try {
+    const { couponName, startDate, endDate, offerPrice, minimumPrice } = req.body;
 
-        const existingCoupon = await Coupon.findOne({
-          couponName:{$regex: `^${data.couponName}$`, $options: 'i' }});
-        if( existingCoupon) {
-          return res.status(400).render("admin/coupon",
-            {errorMessage: "Coupon already exists", 
-              coupons: await Coupon.find()
-            });
-        }
+    // Normalize function
+    const normalize = str => str.replace(/\s+/g, '').toLowerCase();
+    const normalizedInput = normalize(couponName);
 
-        const newCoupon = new Coupon({
-            couponName: data.couponName,
-            createdAt: data.startDate,
-            expireOn : data.endDate,
-            offerPrice : data.offerPrice,
-            minimumPrice : data.minimumPrice
-        });
-        await newCoupon.save();
-        return res.redirect("/admin/coupon");
-    } catch (error) {
-        console.log("Error creating coupon:", error);
-        return res.status(500).send("Internal server error while creating coupon");
+    // Check against all existing coupons
+    const coupons = await Coupon.find();
+    const duplicate = coupons.find(c => normalize(c.couponName) === normalizedInput);
+
+    if (duplicate) {
+      return res.status(400).render("admin/coupon", {
+        errorMessage: "Coupon already exists",
+        coupons
+      });
     }
-}
 
-const editCoupon = async(req,res) => {
-    try {
-        const id = req.query.id;
-        const findCoupon = await Coupon.findOne({_id:id});
-        res.render("admin/edit-coupon",{
-            findCoupon: findCoupon
-        });
-    } catch (error) {
-        console.error("Error editing coupon:", error);
-        res.redirect("/pageNotFound");
-    }
+    // Format stored name (Title Case with single spacing)
+    const formattedName = couponName.trim().replace(/\s+/g, ' ')
+      .toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+
+    const newCoupon = new Coupon({
+      couponName: formattedName,
+      createdAt: new Date(startDate + "T00:00:00"),
+      expireOn: new Date(endDate + "T00:00:00"),
+      offerPrice: parseInt(offerPrice),
+      minimumPrice: parseInt(minimumPrice)
+    });
+
+    await newCoupon.save();
+    return res.redirect("/admin/coupon");
+
+  } catch (error) {
+    console.error("Error creating coupon:", error);
+    return res.status(500).send("Internal server error while creating coupon");
+  }
+};
+
+
+
+const editCoupon = async (req, res) => {
+  try {
+    const id = req.query.id;
+    const findCoupon = await Coupon.findOne({ _id: id });
+    res.render("admin/edit-coupon", {
+      findCoupon: findCoupon
+    });
+  } catch (error) {
+    console.error("Error editing coupon:", error);
+    res.redirect("/pageNotFound");
+  }
 }
 const updateCoupon = async (req, res) => {
   try {
@@ -94,19 +101,19 @@ const updateCoupon = async (req, res) => {
     res.status(500).send("Internal server error");
   }
 };
-const deleteCoupon = async (req,res) => {
-    try {
-        const id = req.query.id;
-        await Coupon.deleteOne({_id:id});
-        res.status(200).send({success:true,message:"Coupon deleted successfully"});
-    } catch (error) {
-        console.error("Error deleting coupon:",error);
-        res.status(500).send({success:false,message:"Failed to delete coupon"});
-    }
+const deleteCoupon = async (req, res) => {
+  try {
+    const id = req.query.id;
+    await Coupon.deleteOne({ _id: id });
+    res.status(200).send({ success: true, message: "Coupon deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting coupon:", error);
+    res.status(500).send({ success: false, message: "Failed to delete coupon" });
+  }
 }
 
 
 
 
 
-module.exports = {loadCoupon,createCoupon,editCoupon,updateCoupon,deleteCoupon}
+module.exports = { loadCoupon, createCoupon, editCoupon, updateCoupon, deleteCoupon }

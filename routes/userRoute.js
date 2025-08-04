@@ -12,7 +12,6 @@ const wishlistController = require("../controller/wishlistController");
 const cartController = require("../controller/cartController");
 const orderController = require("../controller/orderController");
 const userWalletController = require("../controller/userWalletController");
-const ajaxShopController = require("../controller/ajaxShopController");
 const paymentController = require("../controller/paymentController");
 const invoiceController = require("../controller/invoiceController");
 const returnOrderController = require("../controller/returnOrderController");
@@ -39,8 +38,7 @@ router.get('/logout', userController.Logout);
 router.get("/shop",userAuth,userController.loadShoppingPage);
 router.get("/filter",userAuth,userController.filterProduct);
 router.get("/filterPrice",userAuth,userController.filterByPrice);
-router.post("/search",userAuth,userController.searchProducts);
-router.get("/shop/ajax",userAuth,ajaxShopController.ajaxLoadProducts);
+router.get("/search",userAuth,userController.searchProducts);
 
 //profile Management
 router.get("/forgot-password",userProfileController.getForgotPassPage);

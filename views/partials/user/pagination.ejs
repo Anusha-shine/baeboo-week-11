@@ -1,20 +1,15 @@
 <% if (totalPages > 1) { %>
-  <nav class="pagination">
-    <% if (currentPage > 1) { %>
-      <a href="?page=<%= currentPage - 1 %>" data-page="<%= currentPage - 1 %>" class="page-link">Prev</a>
-    <% } %>
+  <% const queryStr = `search=${query || ''}&sort=${sort || ''}&category=${category || ''}&brand=${brand || ''}&gt=${gt || ''}&lt=${lt || ''}`; %>
 
-    <% for (let i = 1; i <= totalPages; i++) { %>
-      <a href="?page=<%= i %>" 
-         data-page="<%= i %>" 
-         class="page-link <%= currentPage === i ? 'active' : '' %>">
-         <%= i %>
-      </a>
-    <% } %>
+  <% if (currentPage > 1) { %>
+    <a href="?page=<%= currentPage - 1 %>&<%= queryStr %>">Prev</a>
+  <% } %>
 
-    <% if (currentPage < totalPages) { %>
-      <a href="?page=<%= currentPage + 1 %>" data-page="<%= currentPage + 1 %>" class="page-link">Next</a>
-    <% } %>
-  </nav>
+  <% for (let i = 1; i <= totalPages; i++) { %>
+    <a href="?page=<%= i %>&<%= queryStr %>" class="<%= currentPage === i ? 'active' : '' %>"><%= i %></a>
+  <% } %>
+
+  <% if (currentPage < totalPages) { %>
+    <a href="?page=<%= currentPage + 1 %>&<%= queryStr %>">Next</a>
+  <% } %>
 <% } %>
-

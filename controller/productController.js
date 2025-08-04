@@ -218,48 +218,66 @@ const getEditProduct = async (req, res) => {
     }
 }
 const editProduct = async (req, res) => {
-    try{
-        const id = req.params.id;
-        const data = req.body;
-        const existingProduct = await Product.findOne({
-            productName: data.productName,
-            _id: {$ne: id}
-        })
-        if(existingProduct){
-            return res.status(400).json({message:"Product already exists"});
+  try {
+    const id = req.params.id;
+    const data = req.body;
+
+    // Normalize input product name: remove whitespace and lowercase
+    const inputName = data.productName.replace(/\s+/g, '').toLowerCase();
+
+    // Build a case-insensitive regex to match names that look similar
+    new RegExp(`^\\s*${inputName.split('').join('\\s*')}\\s*$`, 'i');
+
+    // Find similar product excluding current ID
+    const existingProduct = await Product.findOne({
+      _id: { $ne: id },
+      $expr: {
+        $regexMatch: {
+          input: { $replaceAll: { input: "$productName", find: " ", replacement: "" } },
+          regex: inputName,
+          options: "i"
         }
-        const images = [];
-        if(req.files && req.files.length > 0) {
-            for(let i= 0; i <req.files.length; i++){
-                images.push(req.files[i].filename);
-            }
-        }
-        const updateFields = {
-    $set: {
-        productName : data.productName,
-        description : data.descriptionData,
-        brand : data.brand,
-        category : data.category,
+      }
+    });
+
+    if (existingProduct) {
+      return res.status(400).json({ message: "Product already exists" });
+    }
+
+    const images = [];
+    if (req.files && req.files.length > 0) {
+      for (let i = 0; i < req.files.length; i++) {
+        images.push(req.files[i].filename);
+      }
+    }
+
+    const updateFields = {
+      $set: {
+        productName: data.productName,
+        description: data.descriptionData,
+        brand: data.brand,
+        category: data.category,
         regularPrice: data.regularPrice,
         salesPrice: data.salesPrice,
         quantity: data.quantity,
         size: data.size,
         color: data.color
+      }
+    };
+
+    if (req.files.length > 0) {
+      updateFields.$push = { productImage: { $each: images } };
     }
+
+    await Product.findByIdAndUpdate(id, updateFields, { new: true });
+    res.redirect("/admin/products");
+
+  } catch (error) {
+    console.error(error);
+    res.redirect("/admin/pageError");
+  }
 };
 
-if (req.files.length > 0) {
-    updateFields.$push = { productImage: { $each: images } };
-}
-
-        await Product.findByIdAndUpdate(id,updateFields,{new:true});
-        res.redirect("/admin/products");
-    }catch(error){
-        console.error(error);
-        res.redirect("/admin/pageError");
-
-    }
-}
 const deleteProduct = async (req, res) => {
     try{
         const id = req.params.id;

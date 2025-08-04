@@ -14,10 +14,14 @@
     }
 
     .main-container {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 20px;
-    }
+  max-width: none ;
+  width: 100vw ;
+  margin: 0 ;
+  padding: 0 20px;
+  padding-top: 120px;
+}
+
+
 
     /* Header Section */
     .shop-topbar {
@@ -380,11 +384,33 @@
       gap: 10px;
     }
 
-    .shop-topbar {
-      position: relative;
-      z-index: 10;
-      /* Make sure it’s above sidebar */
-    }
+    .shop-topbar .topbar-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  /* allow wrapping on small screens */
+  flex-wrap: wrap;
+}
+
+.shop-topbar .search-form {
+  /* allow search to grow and fill remaining space */
+  flex: 1 1 auto;
+  min-width: 0; /* prevent flex item from growing beyond its container */
+  max-width: none !important; /* override any previous max-width */
+}
+
+.shop-topbar .search-input {
+  /* search input takes full width of its form */
+  width: 100%;
+}
+
+.shop-topbar .sort-dropdown {
+  /* keep sort select from shrinking or wrapping under search box */
+  flex: none;
+  margin-left: auto;
+}
+
 
     .sort-dropdown select {
       position: relative;
@@ -481,58 +507,77 @@
       outline: 2px solid #1e918b;
       outline-offset: 2px;
     }
+    .scrollable-list {
+  max-height: 200px; /* or 150px, adjust as needed */
+  overflow-y: auto;
+  border: 1px solid #eaeaea;
+  border-radius: 10px;
+  padding: 10px;
+  background-color: #f9f9f9;
+}
+
+/* Optional scrollbar style */
+.scrollable-list::-webkit-scrollbar {
+  width: 6px;
+}
+.scrollable-list::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 3px;
+}
+
   </style>
   <div class="main-container">
     <section class="shop-page container">
-      <div class="shop-topbar">
-        <div class="sort-dropdown mb-3" id="sort-dropdown">
-          <label for="sort-select">Sort By:</label>
+     <div class="shop-topbar">
+  <div style="flex: 1;">
+    <h2 class="page-title mb-3">Products</h2>
+    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+      <form action="/search" method="GET" class="search-form">
+         <input type="text" name="query" placeholder="Search items..." class="search-input" />
+         <button type="submit" class="search-button">Search</button>
+         <button type="button" class="search-button" onclick="clearSearch()">Clear</button>
+         
+       </form>
+       
 
-          <select id="sort-select" class="form-select">
-            <option value="">-- Select --</option>
-            <option value="price-asc">Price: Low to High</option>
-            <option value="price-desc">Price: High to Low</option>
-            <option value="popularity">Popularity</option>
-            <option value="newest">Newest First</option>
-          </select>
-        </div>
+      <div class="sort-dropdown" id="sort-dropdown">
+        <label for="sort-select">Sort By:</label>
+        <select id="sort-select" class="form-select">
+  <option value="">-- Select --</option>
+  <option value="price-asc" <%= selectedSort === "price-asc" ? "selected" : "" %>>Price: Low to High</option>
+  <option value="price-desc" <%= selectedSort === "price-desc" ? "selected" : "" %>>Price: High to Low</option>
+  <option value="newest" <%= selectedSort === "newest" ? "selected" : "" %>>Newest First</option>
+</select>
 
-        <div class="search-bar">
-          <form id="search-form" class="search-form">
-            <input type="text" name="query" placeholder="Search items..." class="search-input" id="search-input" />
-            <button type="submit" class="search-button">Search</button>
-            <button type="button" class="search-button" onclick="clearSearch()">Clear</button>
-          </form>
-        </div>
       </div>
+    </div>
+  </div>
+</div>
+
       <div class="product-list-container">
         <aside class="sidebar">
           <div class="filter-section">
             <div class="filter-title">Categories</div>
-            <div class="category-brand-container">
+            <div class="scrollable-list">
               <ul>
                 <%for(let i=0; i<category.length; i++) {%>
-                  <li class="filter-item">
-                    <a href="#" class="category-filter" data-category="<%=category[i]._id%>">
-                      <%=category[i].name%>
-                    </a>
-                  </li>
-                  <%}%>
+               <li class="filter-item">
+                 <a href="/filter?category=<%=category[i]._id%>"><%=category[i].name%></a>
+               </li>
+               <%}%>
               </ul>
             </div>
           </div>
 
           <div class="filter-section">
             <div class="filter-title">Brands</div>
-            <div class="category-brand-container">
+            <div class="scrollable-list">
               <ul>
                 <%for(let i=0; i<brand.length; i++) {%>
-                  <li class="filter-item">
-                    <a href="#" class="brand-filter" data-brand="<%=brand[i]._id%>">
-                      <%=brand[i].brandName%>
-                    </a>
-                  </li>
-                  <%}%>
+               <li class="filter-item">
+                 <a href="/filter?brand=<%=brand[i]._id%>"><%=brand[i].brandName%></a>
+               </li>
+               <%}%>
               </ul>
             </div>
           </div>
@@ -540,20 +585,20 @@
             <div class="filter-title">Filter by Price</div>
             <form id="price-filter-form">
               <div class="price-options">
-                <button type="button" class="price-filter price-button" data-gt="0" data-lt="500">Under ₹500</button>
-                <button type="button" class="price-filter price-button" data-gt="500" data-lt="1000">₹500 -
-                  ₹1000</button>
-                <button type="button" class="price-filter price-button" data-gt="1000" data-lt="1500">₹1000 -
-                  ₹1500</button>
-                <button type="button" class="price-filter price-button" data-gt="1500" data-lt="100000">Above
-                  ₹1500</button>
-
-              </div>
+             <a href="/filterPrice?gt=0&lt=500"><button type="button" class="price-button">Under ₹500</button></a>
+             <a href="/filterPrice?gt=500&lt=1000"><button type="button" class="price-button">₹500 - ₹1000</button></a>
+             <a href="/filterPrice?gt=1000&lt=1500"><button type="button" class="price-button">₹1000- ₹1500</button></a>
+             <a href="/filterPrice?gt=1500&lt=100000"><button type="button" class="price-button">Above ₹1500</button></a>
+           </div>
             </form>
           </div>
-          <div class="filter-section" style="margin-top: 20px; text-align:center;">
-            <a href="#" id="clear-filters" class="clear-filter-btn">Clear All Filters</a>
-          </div>
+          <% const anyFilter = filterParams && Object.keys(filterParams).length > 0; %>
+<% if (anyFilter) { %>
+  <div class="filter-section" style="margin-top:20px; text-align:center;">
+    <a href="<%= basePath %>" id="clear-filters" class="clear-filter-btn">Clear All Filters</a>
+  </div>
+<% } %>
+
         </aside>
         <main id="product-container" class="product-grid">
           <%- include("../../views/partials/user/productgrid.ejs", { products }) %>
@@ -561,17 +606,42 @@
       </div>
       <!-- Pagination -->
       <div class="pagination">
-    <%if(currentPage > 1) { %>
-        <a class="btn" href="/shop?page=<%= currentPage - 1 %>">Prev</a>
+<% if (totalPages && totalPages > 1) { %>
+
+  <nav class="pagination">
+    <% 
+      function buildQuery(page) {
+        let query = `page=${page}`;
+        if (selectedSort) query += `&sort=${selectedSort}`;
+        if (selectedCategory) query += `&category=${selectedCategory}`;
+        if (selectedBrand) query += `&brand=${selectedBrand}`;
+        if (minPrice) query += `&minPrice=${minPrice}`;
+        if (maxPrice) query += `&maxPrice=${maxPrice}`;
+        return query;
+      }
+    %>
+
+    <% if (currentPage > 1) { %>
+      <a href="?<%= buildQuery(currentPage - 1) %>" class="page-link">Prev</a>
     <% } %>
 
-    <% for(let i = 1; i <= totalPages; i++) { %>
-        <a class="btn <%= currentPage === i ? 'active' : '' %>" href="/shop?page=<%= i %>"><%= i %></a>
+    <% for (let i = 1; i <= totalPages; i++) { %>
+      <a 
+        href="?<%= buildQuery(i) %>" 
+        class="page-link <%= currentPage === i ? 'active' : '' %>"
+      ><%= i %></a>
     <% } %>
-    <% if(currentPage < totalPages) { %>
-        <a class="btn" href="/shop?page=<%= currentPage + 1 %>">Next</a>
+
+    <% if (currentPage < totalPages) { %>
+      <a href="?<%= buildQuery(currentPage + 1) %>" class="page-link">Next</a>
     <% } %>
+  </nav>
+<% } %>
+
+
+
    </div>
+ 
 
     </section>
   </div>
@@ -632,167 +702,42 @@
         });
     }
   </script>
-
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      console.log("Search script loaded");
-
-      const searchForm = document.getElementById("search-form");
-      const searchInput = document.getElementById("search-input");
-      const productContainer = document.getElementById("product-container");
-
-      // Handle Search Submit
-      searchForm.addEventListener("submit", async function (e) {
-        e.preventDefault();
-        const query = searchInput.value.trim();
-        const url = `/shop/ajax?query=${encodeURIComponent(query)}&page=1`;
-
-        const res = await fetch(url);
-        const data = await res.json();
-        productContainer.innerHTML = data.productsHTML;
-        paginationContainer.innerHTML = data.paginationHTML;
-      });
-
-      // Clear Search
-      window.clearSearch = function () {
-        searchInput.value = "";
-        searchForm.dispatchEvent(new Event("submit"));
-      };
-
-      // Handle Category Filter
-      document.querySelectorAll(".category-filter").forEach(el => {
-        el.addEventListener("click", async function (e) {
-          e.preventDefault();
-          const category = el.dataset.category;
-          const query = searchInput?.value.trim() || "";
-          const sort = document.getElementById("sort-select")?.value || "";
-
-          const url = `/shop/ajax?category=${category}&query=${query}&sort=${sort}&page=1`;
-          const res = await fetch(url);
-          const data = await res.json();
-
-          productContainer.innerHTML = data.productsHTML;
-          paginationContainer.innerHTML = data.paginationHTML;
-          updateURL({ category });
-        });
-      });
-
-      // Handle Brand Filter
-      document.querySelectorAll(".brand-filter").forEach(el => {
-        el.addEventListener("click", async function (e) {
-          e.preventDefault();
-          const brand = el.dataset.brand;
-          const query = searchInput?.value.trim() || "";
-          const sort = document.getElementById("sort-select")?.value || "";
-
-          const url = `/shop/ajax?brand=${brand}&query=${query}&sort=${sort}&page=1`;
-          const res = await fetch(url);
-          const data = await res.json();
-
-          productContainer.innerHTML = data.productsHTML;
-          paginationContainer.innerHTML = data.paginationHTML;
-          updateURL({ brand });
-        });
-      });
-
-      // Handle Price Filter
-      document.querySelectorAll("button.price-filter").forEach(btn => {
-        btn.addEventListener("click", async (e) => {
-          e.preventDefault();
-          const gt = btn.dataset.gt;
-          const lt = btn.dataset.lt;
-          const sort = document.getElementById("sort-select")?.value || "";
-          const query = document.getElementById("search-input")?.value.trim() || "";
-
-          console.log("Clicked:", btn);
-          console.log("data-gt:", gt, "data-lt:", lt);
-
-          const url = `/shop/ajax?gt=${gt}&lt=${lt}&query=${query}&sort=${sort}&page=1`;
-          const res = await fetch(url);
-          const data = await res.json();
-
-          productContainer.innerHTML = data.productsHTML;
-          paginationContainer.innerHTML = data.paginationHTML;
-
-          updateURL({ gt, lt });
-        });
-      });
-
-      // Push new state to browser URL
-      function updateURL(paramsToUpdate) {
-        const params = new URLSearchParams(window.location.search);
-        for (const key in paramsToUpdate) {
-          params.set(key, paramsToUpdate[key]);
-        }
-        history.pushState({}, "", `${window.location.pathname}?${params.toString()}`);
-      }
-    });
-
-    document.getElementById("clear-filters").addEventListener("click", async function (e) {
-      e.preventDefault();
-      const res = await fetch(`/shop/ajax?page=1`);
-      const data = await res.json();
-
-      document.getElementById("product-container").innerHTML = data.productsHTML;
-      document.getElementById("pagination-container").innerHTML = data.paginationHTML;
-      document.getElementById("search-input").value = "";
-      document.getElementById("sort-select").value = "";
-
-      history.pushState({}, "", "/shop");
-    });
-
+<script>
+  document.getElementById("sort-select").addEventListener("change", function () {
+    const selectedSort = this.value;
+    const url = new URL(window.location.href);
+    url.searchParams.set("sort", selectedSort);
+    url.searchParams.set("page", 1); // Reset to page 1 on sort change
+    window.location.href = url.toString();
+  });
 </script>
 <script>
-document.addEventListener("DOMContentLoaded", () => {
-  console.log("DOM fully loaded");
+document.addEventListener('DOMContentLoaded', () => {
+  const clearLink = document.getElementById('clear-filters');
+  if (!clearLink) return;
 
-  const sortSelect = document.getElementById("sort-select");
-
-  if (!sortSelect) {
-    console.error("Sort select not found!");
-    return;
-  }
-
-  sortSelect.addEventListener("change", async (e) => {
-    console.log("Sort select changed:", e.target.value);
-
-    const sort = e.target.value;
-    const query = document.getElementById("search-input")?.value.trim() || "";
-    const urlParams = new URLSearchParams(window.location.search);
-
-    const category = urlParams.get("category") || "";
-    const brand = urlParams.get("brand") || "";
-    const gt = urlParams.get("gt") || "";
-    const lt = urlParams.get("lt") || "";
-
-    const url = `/shop/ajax?sort=${encodeURIComponent(sort)}&query=${encodeURIComponent(query)}&category=${category}&brand=${brand}&gt=${gt}&lt=${lt}&page=1`;
-    console.log("Fetching URL:", url);
-
-    try {
-      const res = await fetch(url);
-      const data = await res.json();
-
-      if (data.productsHTML && data.paginationHTML) {
-        document.getElementById("product-container").innerHTML = data.productsHTML;
-        document.getElementById("pagination-container").innerHTML = data.paginationHTML;
-        history.pushState({}, "", `${window.location.pathname}?${new URLSearchParams({ sort, query, category, brand, gt, lt, page: 1 })}`);
-      } else {
-        console.warn("Unexpected response:", data);
-      }
-    } catch (err) {
-      console.error("Error fetching sorted products:", err);
-    }
+  clearLink.addEventListener('click', e => {
+    e.preventDefault();
+    // This strips the "?…" from the URL using Web API methods
+    const url = new URL(window.location.href);
+    url.search = '';  // removes all query parameters
+    window.location.href = url.pathname;  // reloads route cleanly
   });
 });
 </script>
 <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const s = document.getElementById("sort-select");
-    if (s) {
-      s.style.display = "block"; // Force it visible
-    }
-  });
+function clearSearch() {
+  const searchInput = document.querySelector('.search-input');
+  if (searchInput) {
+    searchInput.value = ''; // Clear the input field
+  }
+
+  // Redirect to default product page (like /shop or /products)
+  window.location.href = '/shop'; // replace with your actual base listing route
+}
+
 </script>
+
 
 
   <!-- Footer Section Begin -->
@@ -861,17 +806,6 @@ document.addEventListener("DOMContentLoaded", () => {
     </div>
 </footer>
 <!-- Footer Section End -->
-
-<!-- Search Begin -->
-<div class="search-model">
-    <div class="h-100 d-flex align-items-center justify-content-center">
-        <div class="search-close-switch">+</div>
-        <form class="search-model-form">
-            <input type="text" id="search-input" placeholder="Search here.....">
-        </form>
-    </div>
-</div>
-<!-- Search End -->
 
 <!-- Js Plugins -->
 <script src="js/jquery-3.3.1.min.js"></script>

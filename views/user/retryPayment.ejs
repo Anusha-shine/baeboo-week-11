@@ -106,7 +106,7 @@
             fetch('/createRazorpayOrder', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ amount: Number('<%= order.finalAmount * 100 %>') })
+                body: JSON.stringify({ amount: Number('<%= order.finalAmount %>') })
             })
                 .then(res => res.json())
                 .then(data => {
