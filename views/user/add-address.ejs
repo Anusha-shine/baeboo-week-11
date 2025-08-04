@@ -1,6 +1,12 @@
 <%-include("../../views/partials/user/header.ejs")%>
+<style>
+  .address.container{
+    padding-top: 140px;
+    padding-bottom: 140px;
+  }
+</style>
 
-<div class="container mt-5">
+<div class="address container mt-5">
     <div class="card shadow rounded-4 p-4">
         <h3 class="mb-4 text-center" style="color: #046963;">Create User Address</h3>
         <form id="addressForm" method="POST" action="/addAddress?redirect=<%= redirect %>">

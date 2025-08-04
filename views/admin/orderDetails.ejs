@@ -205,8 +205,6 @@
                   <%= order.address.landMark %>, <%= order.address.city %>, <%= order.address.state %> -
                         <%= order.address.pincode %>
                 </p>
-                <a href="/invoice/<%= order._id %>" class="btn btn-sm">Download Invoice</a>
-
                 <% if (order.returnStatus==='requested' ) { %>
                   <button type="button" class="btn btn-warning btn-sm mt-2" data-bs-toggle="modal"
                     data-bs-target="#returnModal">
