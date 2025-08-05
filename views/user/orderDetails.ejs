@@ -391,6 +391,8 @@
                             <span class="badge bg-warning">Return Request Submitted</span>
                             <% } else if (item.returnStatus==="approved" ) { %>
                               <span class="badge bg-success">Return Approved</span>
+                              <% } else if (item.returnStatus==="rejected" ) { %>
+                              <span class="text-danger">Return Rejected</span>
                               <% } else { %>
                                 <div class="d-flex justify-content-center flex-column gap-1">
                                   <% if (['placed', 'shipped' ].includes(order.status)) { %>

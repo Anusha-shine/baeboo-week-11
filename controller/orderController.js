@@ -141,8 +141,8 @@ const applyCoupon = async (req, res) => {
     }
 
     // Mark coupon as used
-    coupon.usedBy.push(userId);
-    await coupon.save();
+    //coupon.usedBy.push(userId);
+    //await coupon.save();
 
     // Store in session
     req.session.coupon = {
@@ -301,10 +301,15 @@ const orderPlaced = async (req, res) => {
 
     if (req.session.coupon) {
       couponDiscount = req.session.coupon.Discount || 0;
-      couponCode = req.session.couponCode || null;
+      couponCode = req.session.coupon?.code || null;
       totalFinalAmount -= couponDiscount;
       totalDiscount += couponDiscount;
-    }
+
+      await Coupon.updateOne(
+    { couponName: couponCode },
+    { $addToSet: { usedBy: userId } }
+  );
+  }
 
     let walletCredit = 0;
     let walletDebit = 0;

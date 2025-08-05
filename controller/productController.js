@@ -207,10 +207,14 @@ const getEditProduct = async (req, res) => {
         const product = await Product.findOne({_id:id});
         const category = await Category.find({});
         const brand = await Brand.find({});
+         const error = req.query.error || null;
+    const success = req.query.success || null;
         res.render("admin/editProduct", {
             product: product,
             cat: category,
-            brand: brand
+            brand: brand,
+            error,
+            success
         });
     }catch(error){
         console.log(error);
@@ -241,7 +245,7 @@ const editProduct = async (req, res) => {
     });
 
     if (existingProduct) {
-      return res.status(400).json({ message: "Product already exists" });
+      return res.redirect(`/admin/editProduct?id=${id}&error=exists`);
     }
 
     const images = [];

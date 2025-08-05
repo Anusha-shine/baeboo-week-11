@@ -294,8 +294,9 @@ const Logout = async (req, res) => {
 const getSalesReport = async (req, res) => {
   const filters = req.query;
   //  match condition for both orders and summary
-  const match = { status: "delivered" };
-
+const match = {
+  status: 'delivered',
+};
   if (filters.filter === 'daily') {
     const today = new Date();
     today.setHours(0, 0, 0, 0);

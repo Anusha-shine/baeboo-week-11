@@ -254,6 +254,24 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <% if (error === 'exists') { %>
+  <script>
+    Swal.fire({
+      icon: 'error',
+      title: 'Product Already Exists',
+      text: 'Please use a different product name.'
+    });
+  </script>
+<% } %>
+
+<% if (success === 'updated') { %>
+  <script>
+    Swal.fire({
+      icon: 'success',
+      title: 'Updated Successfully'
+    });
+  </script>
+<% } %>
 
     <script>
         function validateAndSubmit() {
