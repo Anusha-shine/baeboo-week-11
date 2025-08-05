@@ -3,168 +3,145 @@ const Product = require("../models/productSchema");
 const Wallet = require("../models/walletSchema");
 
 const listOrders = async (req, res) => {
-  try {
-    const perPage = 6;
-    const page = parseInt(req.query.page) || 1;
-    const search = req.query.search ? req.query.search.trim() : '';
+  const perPage = 6;
+  const page = parseInt(req.query.page) || 1;
+  const search = req.query.search ? req.query.search.trim() : '';
 
-    // Build the match filter for search
-    const match = {status: {$in:["placed","delivered","returned","cancelled","out for delivery","return requested"]}};
-
-    if (search) {
-      match.$or = [
-        { orderId: { $regex: search, $options: 'i' } },
-        { status: { $regex: search, $options: 'i' } },
-        { 'user.name': { $regex: search, $options: 'i' } }
-      ];
-    }
-
-    // Aggregation pipeline to get orders with user info, filtered, sorted, paginated
-const pipeline = [
-  {
-    $lookup: {
-      from: 'users',
-      localField: 'user',
-      foreignField: '_id',
-      as: 'user'
-    }
-  },
-  { $unwind: '$user' },
-  { $match: match },
-
-  // Step 1: Compute returnRequested BEFORE unwinding
-  {
-    $addFields: {
-      returnRequested: {
-        $gt: [
-          {
-            $size: {
-              $filter: {
-                input: "$orderedItems",
-                as: "item",
-                cond: { $eq: ["$$item.returnStatus", "requested"] }
-              }
-            }
-          },
-          0
-        ]
-      }
-    }
-  },
-
-  // Optional: Still unwind for other calculations (discount etc.)
-  { $unwind: { path: '$orderedItems', preserveNullAndEmptyArrays: true } },
-
-  // Group by order ID
-  {
-    $group: {
-      _id: '$_id',
-      orderId: { $first: '$orderId' },
-      user: { $first: '$user' },
-      createdAt: { $first: '$createdAt' },
-      status: { $first: '$status' },
-      returnRequested: { $first: '$returnRequested' }, // include here!
-      totalAmount: { $first: '$totalAmount' },
-      deliveryCharge: { $first: '$deliveryCharge' },
-      couponDiscount: { $first: '$couponDiscount' },
-      discount: { $sum: '$orderedItems.discount' },
-      coupon: { $first: '$couponCode' }
-    }
-  },
-
-  // Ensure numeric fields
-  {
-    $addFields: {
-      totalAmount: { $toDouble: { $ifNull: ['$totalAmount', 0] } },
-      couponDiscount: { $toDouble: { $ifNull: ['$couponDiscount', 0] } },
-      deliveryCharge: { $toDouble: { $ifNull: ['$deliveryCharge', 0] } },
-      discount: { $toDouble: { $ifNull: ['$discount', 0] } }
-    }
-  },
-
-  // Conditionally apply delivery charge
-  {
-    $addFields: {
-      effectiveDeliveryCharge: {
-        $cond: {
-          if: { $lt: ['$totalAmount', 500] },
-          then: '$deliveryCharge',
-          else: 0
-        }
-      }
-    }
-  },
-
-  // Final price calculation
-  {
-    $addFields: {
-      finalAmount: {
-        $subtract: [
-          { $add: ['$totalAmount', '$effectiveDeliveryCharge'] },
-          { $add: ['$discount', '$couponDiscount'] }
-        ]
-      }
-    }
-  },
-
-  // Pagination
-  { $sort: { createdAt: -1 } },
-  { $skip: perPage * (page - 1) },
-  { $limit: perPage },
-
-  // Final projection
-  {
-    $project: {
-      orderId: 1,
-      createdAt: 1,
-      status: 1,
-      returnRequested: 1,
-      totalAmount: 1,
-      discount: 1,
-      couponDiscount: 1,
-      deliveryCharge: 1,
-      effectiveDeliveryCharge: 1,
-      finalAmount: 1,
-      'user.name': 1,
-      'user.email': 1,
-      'user.phone': 1,
-      coupon: 1
-    }
-  }
-];
-
-    const orders = await Order.aggregate(pipeline);
-
-    // Count total matching documents for pagination
-    const countPipeline = [
-      {
-        $lookup: {
-          from: 'users',
-          localField: 'user',
-          foreignField: '_id',
-          as: 'user'
-        }
-      },
-      { $unwind: '$user' },
-      { $match: match },
-      { $count: 'total' }
+  const match = { status: { $in: ["placed","delivered","returned","cancelled","out for delivery","return requested"] } };
+  if (search) {
+    match.$or = [
+      { orderId: { $regex: search, $options: 'i' } },
+      { status: { $regex: search, $options: 'i' } },
+      { 'user.name': { $regex: search, $options: 'i' } }
     ];
-
-    const countResult = await Order.aggregate(countPipeline);
-    const totalOrders = countResult.length > 0 ? countResult[0].total : 0;
-    const totalPages = Math.ceil(totalOrders / perPage);
-
-    res.render('admin/adminOrders', {
-      orders,
-      currentPage: page,
-      totalPages,
-      search
-    });
-  } catch (err) {
-    console.error('Error fetching orders:', err);
-    res.status(500).send('Server Error');
   }
+
+  const pipeline = [
+    { $match: match },
+    { $lookup: {
+        from: 'users',
+        localField: 'user',
+        foreignField: '_id',
+        as: 'user'
+      }
+    },
+    { $unwind: '$user' },
+
+    // Embed product info into orderedItems
+    { $lookup: {
+        from: 'products',
+        let: { ids: '$orderedItems.product' },
+        pipeline: [
+          { $match: { $expr: { $in: ['$_id', '$$ids'] } } },
+          { $project: { productName: 1, productImage: 1 } }
+        ],
+        as: 'prodInfo'
+      }
+    },
+    { $addFields: {
+        orderedItems: {
+          $map: {
+            input: '$orderedItems',
+            as: 'item',
+            in: {
+              $mergeObjects: [
+                '$$item',
+                {
+                  product: {
+                    $first: {
+                      $filter: {
+                        input: '$prodInfo',
+                        as: 'p',
+                        cond: { $eq: ['$$p._id', '$$item.product'] }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    { $project: { prodInfo: 0 } },
+
+    // Compute order-wide returnRequested if any item is requested
+    { $addFields: {
+        returnRequested: {
+          $gt: [
+            { $size: {
+                $filter: {
+                  input: '$orderedItems',
+                  as: 'it',
+                  cond: { $eq: ['$$it.returnStatus', 'requested'] }
+                }
+              }
+            },
+            0
+          ]
+        }
+      }
+    },
+
+    // Totals and coupon logic (same as before)
+    { $addFields: {
+        totalAmount: { $toDouble: { $ifNull: ['$totalAmount', 0] } },
+        couponDiscount: { $toDouble: { $ifNull: ['$couponDiscount', 0] } },
+        deliveryCharge: { $toDouble: { $ifNull: ['$deliveryCharge', 0] } },
+        discount: { $toDouble: { $ifNull: ['$discount', 0] } }
+      }
+    },
+    { $addFields: {
+        effectiveDeliveryCharge: {
+          $cond: { if: { $lt: ['$totalAmount', 500] }, then: '$deliveryCharge', else: 0 }
+        },
+        finalAmount: {
+          $subtract: [
+            { $add: ['$totalAmount', { $cond: { if: { $lt: ['$totalAmount', 500] }, then: '$deliveryCharge', else: 0 } }] },
+            { $add: ['$discount', '$couponDiscount'] }
+          ]
+        }
+      }
+    },
+
+    // Pagination
+    { $sort: { createdAt: -1 } },
+    { $skip: perPage * (page - 1) },
+    { $limit: perPage },
+
+    // Project everything needed for template
+    { $project: {
+        orderId: 1,
+        createdAt: 1,
+        status: 1,
+        returnRequested: 1,
+        finalAmount: 1,
+        user: { name: 1, email: 1, phone: 1 },
+        orderedItems: 1
+      }
+    }
+  ];
+
+  const orders = await Order.aggregate(pipeline);
+
+  // count for pagination same as before
+  const countPipeline = [
+    { $match: match },
+    { $count: 'total' }
+  ];
+
+  const countRes = await Order.aggregate(countPipeline);
+  const totalOrders = countRes[0]?.total || 0;
+  const totalPages = Math.ceil(totalOrders / perPage);
+
+  res.render('admin/adminOrders', {
+    orders,
+    search,
+    currentPage: page,
+    totalPages
+  });
 };
+
 const getOrderDetails = async (req, res) => {
   try {
     const { orderId } = req.params;
@@ -209,6 +186,10 @@ const updateOrderStatus = async (req, res) => {
     }
 
     order.status = newStatus;
+    // Propagate change to orderedItems
+order.orderedItems.forEach(it => {
+  it.status = newStatus;
+});
     await order.save();
 
     res.redirect(`/admin/order/${orderId}`);

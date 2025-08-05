@@ -405,29 +405,70 @@ const getOrdersPage = async (req, res) => {
     const totalPages = Math.ceil(totalOrders / limit);
 
     // Fetch orders with populated products
-    const orders = await Order.aggregate([
-  { $match: filter },
-  { $unwind: "$orderedItems" },
+const searchRegex = search ? new RegExp(search, 'i') : null;
+
+const orders = await Order.aggregate([
+  { $match: { user: queryUserId } },
+
+  // Add optional filtering by orderId, status, or address.name (customer name)
+  ...(searchRegex ? [{
+    $match: {
+      $or: [
+        { orderId: { $regex: searchRegex } },
+        { status: { $regex: searchRegex } },
+        { 'address.name': { $regex: searchRegex } }
+      ]
+    }
+  }] : []),
+
+  // Lookup product details into prodInfo
   {
     $lookup: {
-      from: "products",
-      localField: "orderedItems.product",
-      foreignField: "_id",
-      as: "orderedItems.product"
+      from: 'products',
+      let: { ids: '$orderedItems.product' },
+      pipeline: [
+        { $match: { $expr: { $in: ['$_id', '$$ids'] } } },
+        { $project: { productName: 1, productImage: 1 } }
+      ],
+      as: 'prodInfo'
     }
   },
-  { $unwind: "$orderedItems.product" },
+
+  // Rebuild orderedItems array and embed product document
   {
-    $group: {
-      _id: "$_id",
-      doc: { $first: "$$ROOT" }
+    $addFields: {
+      orderedItems: {
+        $map: {
+          input: '$orderedItems',
+          as: 'item',
+          in: {
+            $mergeObjects: [
+              '$$item',
+              {
+                product: {
+                  $first: {
+                    $filter: {
+                      input: '$prodInfo',
+                      as: 'p',
+                      cond: { $eq: ['$$p._id', '$$item.product'] }
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
     }
   },
-  { $replaceRoot: { newRoot: "$doc" } },
-  { $sort: { createdAt: -1, _id: -1 } },
+
+  { $project: { prodInfo: 0 } },
+
+  { $sort: { createdAt: -1 } },
   { $skip: (page - 1) * limit },
   { $limit: limit }
 ]);
+
 
     res.render('user/orders', {
       user: userData,
@@ -436,6 +477,7 @@ const getOrdersPage = async (req, res) => {
       currentPage: page,
       totalPages
     });
+
   } catch (err) {
     console.error("Error fetching user orders:", err);
     res.status(500).send("Server Error");

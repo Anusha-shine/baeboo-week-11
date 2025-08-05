@@ -415,8 +415,9 @@
               <thead>
                 <tr>
                   <th>Order ID</th>
-                  <th>Placed On</th>
+                  <th>Items</th>
                   <th>Status</th>
+                  <th>Placed On</th>
                   <th>Total Price (₹)</th>
                   <th>Action</th>
                 </tr>
@@ -427,19 +428,49 @@
                     <td>
                       <%= order.orderId %>
                     </td>
+  <td>
+  <% if (Array.isArray(order.orderedItems)) { %>
+    <% order.orderedItems.forEach(item => { %>
+      <div class="d-flex align-items-center gap-2 mb-2">
+        <div class="text-start">
+          <div><%= item.product?.productName ?? 'Unnamed Product' %></div>
+          <div class="text-muted" style="font-size: 0.9rem;">Qty: <%= item.quantity ?? 0 %></div>
+        </div>
+      </div>
+    <% }) %>
+  <% } else { %>
+    <div>No items</div>
+  <% } %>
+</td>
+   <td>
+  <% if (Array.isArray(order.orderedItems)) { %>
+    <% order.orderedItems.forEach(item => { %>
+      <div class="mb-2">
+        <% if (item.cancelStatus === 'cancelled') { %>
+          <span class="badge bg-danger">Cancelled</span>
+        <% } else if (item.returnStatus === 'requested') { %>
+          <span class="badge bg-warning">Return Requested</span>
+        <% } else if (item.returnStatus === 'approved') { %>
+          <span class="badge bg-danger">Returned</span>
+        <% } else if (item.returnStatus === 'rejected') { %>
+          <span class="badge bg-success">Delivered</span>
+        <% } else if (item.status === 'placed') { %>
+          <span class="badge bg-info">Placed</span>
+        <% } else if (item.status === 'shipped') { %>
+          <span class="badge bg-primary">Shipped</span>
+        <% } else if (item.status === 'delivered') { %>
+          <span class="badge bg-success">Delivered</span>
+        <% } else { %>
+          <span class="badge bg-secondary">placed</span>
+        <% } %>
+      </div>
+    <% }); %>
+  <% } %>
+</td>
+
+
                     <td>
                       <%= order.createdAt.toLocaleDateString() %>
-                    </td>
-                    <td>
-                      <span class="badge bg-<%= 
-                      order.status === 'pending' ? 'warning' :
-                      order.status === 'placed' ? 'info' :
-                      order.status === 'shipped' ? 'primary' :
-                      order.status === 'delivered' ? 'success' :
-                      order.status === 'cancelled' ? 'danger' : 'secondary'
-                    %>">
-                        <%= order.status %>
-                      </span>
                     </td>
                     <td>₹<%= (order.finalAmount ?? 0).toFixed(2) %>
                     </td>

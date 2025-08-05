@@ -9,6 +9,8 @@ const generateInvoice = async (req, res) => {
     if (!order || order.user.toString() !== req.session.user.toString()) {
       return res.status(403).send("Unauthorized or Order not found");
     }
+    // Filter out cancelled items
+order.orderedItems = order.orderedItems.filter(item => item.cancelStatus !== 'cancelled');
 
     const doc = new PDFDocument({ margin: 50 });
 

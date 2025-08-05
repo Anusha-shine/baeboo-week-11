@@ -24,6 +24,11 @@ const orderSchema = new Schema({
             type: Number,
             default: 1
         },
+        status: {
+            type: String,
+            enum: ['placed', 'shipped', 'delivered', 'cancelled','returned'],
+            default: 'placed'
+        },
         price: {
             type: Number,
             default: 0,

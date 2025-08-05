@@ -437,8 +437,9 @@
                 <tr>
                   <th>Order ID</th>
                   <th>User Name</th>
-                  <th>Placed On</th>
+                  <th>Items</th>
                   <th>Status</th>
+                  <th>Placed On</th>
                   <th>Final Price (₹)</th>
                   <th>Action</th>
                 </tr>
@@ -449,24 +450,46 @@
                   <tr>
                     <td><strong><%= order.orderId %></strong></td>
                     <td><%= order.user?.name || 'N/A' %></td>
-                    <td><%= order.createdAt.toLocaleDateString() %></td>
                     <td>
-                      <% if(order.returnRequested) { %>
-                        <span class="badge bg-warning text-dark">Return Requested</span>
-                      <% } else { %>
-                        <span class="badge bg-<%= 
-                          order.status === 'pending' ? 'warning' :
-                          order.status === 'placed' ? 'info' :
-                          order.status === 'shipped' ? 'primary' :
-                          order.status === 'delivered' ? 'success' :
-                          order.status === 'cancelled' ? 'danger' :
-                          order.status === 'returned' ? 'danger' :
-                          'secondary'
-                        %>">
-                          <%= order.status %>
-                        </span>
-                      <% } %>
-                    </td>
+  <% if (Array.isArray(order.orderedItems)) { %>
+    <% order.orderedItems.forEach(item => { %>
+      <div class="d-flex align-items-center gap-2 mb-2">
+        <div class="text-start">
+          <div><%= item.product?.productName ?? 'Unnamed Product' %></div>
+          <div class="text-muted" style="font-size: 0.9rem;">Qty: <%= item.quantity ?? 0 %></div>
+        </div>
+      </div>
+    <% }) %>
+  <% } else { %>
+    <div>No items</div>
+  <% } %>
+</td>
+                    <td>
+ <% order.orderedItems.forEach(item => { %>
+  <div class="d-flex align-items-center gap-2 mb-2">
+  <% if (item.cancelStatus === 'cancelled') { %>
+    <span class="badge bg-danger">Cancelled</span>
+  <% } else if (item.returnStatus === 'requested') { %>
+    <span class="badge bg-warning text-dark">Return Requested</span>
+  <% } else if (item.returnStatus === 'approved') { %>
+    <span class="badge bg-warning text-dark">Returned</span>
+  <% } else if (item.returnStatus === 'rejected') { %>
+    <span class="badge bg-warning text-dark">Delivered</span>
+  <% } else if (item.status === 'placed') { %>
+    <span class="badge bg-info">Placed</span>
+  <% } else if (item.status === 'shipped') { %>
+    <span class="badge bg-primary">Shipped</span>
+  <% } else if (item.status === 'delivered') { %>
+    <span class="badge bg-success">Delivered</span>
+  <% } else { %>
+    <span class="badge bg-secondary">In Progress</span>
+  <% } %>
+  </div>
+<% }) %>
+
+</td>
+
+                    <td><%= order.createdAt.toLocaleDateString() %></td>
                     <td><strong>₹<%= (order.finalAmount ?? 0).toFixed(2) %></strong></td>
                     <td>
                       <a href="/admin/order/<%= order.orderId %>" class="btn btn-sm btn-primary">
