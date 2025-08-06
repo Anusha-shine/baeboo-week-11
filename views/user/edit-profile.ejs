@@ -33,32 +33,39 @@
 
 
 <script>
-   document.getElementById('submitButton').addEventListener('click', function (event) {
-       if (!validateForm()) {
-           event.preventDefault();
-       }
-   });
+document.getElementById('submitButton').addEventListener('click', function (event) {
+  if (!validateForm()) {
+    event.preventDefault();
+  }
+});
 
+function validateForm() {
+  const name = document.getElementById('name').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  const phonePattern = /^[6-9]\d{9}$/;
+  
+  if (!name || !phone) {
+    Swal.fire({
+      title: 'Error',
+      text: 'Please fill all the fields.',
+      icon: 'error'
+    });
+    return false;
+  }
 
-   function validateForm() {
-       let isValid = true;
-       const requiredFields = ["name","phone"];
-       requiredFields.forEach(function (field) {
-           const input = document.getElementById(field);
-           if (input.value.trim() === "") {
-               Swal.fire({
-                   title: 'Error',
-                   text: `Please fill all the field.`,
-                   icon: 'error'
-               });
-               isValid = false;
-           }
-       });
+  if (!phonePattern.test(phone)) {
+    Swal.fire({
+      title: 'Invalid',
+      text: 'Please enter a valid 10‑digit mobile number.',
+      icon: 'warning'
+    });
+    return false;
+  }
 
-
-       return isValid;
-   }
+  return true;
+}
 </script>
+
 
 
 <%-include("../../views/partials/user/footer.ejs")%>

@@ -204,14 +204,13 @@
                             <%= user.name %>
                           </h5>
                         </div>
-                        <!--upload form-->
                         <!-- Upload Form -->
                         <form action="/upload-profile-pic" method="POST" enctype="multipart/form-data">
                           <div class="form-group">
                             <label for="profileImage">Upload New Profile Picture</label>
-                            <input type="file" name="profileImage" class="form-control" accept="image/*" required>
+                            <input type="file" name="profileImage" id="profileImage" class="form-control" accept="image/jpeg,image/png" required>
                           </div>
-                          <button type="submit" class="btn btn-primary mt-2">Upload</button>
+                          <button type="submit" id="uploadBtn" class="btn btn-primary mt-2">Upload</button>
                         </form>
                         <p class="card-text">
                           <strong>Phone:</strong>
@@ -360,3 +359,26 @@
         });
       }
     </script>
+    <script>
+  document.getElementById('uploadBtn').addEventListener('click', function(e) {
+    const input = document.getElementById('profileImage');
+    const file = input.files[0];
+    if (!file) {
+      Swal.fire('Error', 'Please select an image file.', 'error');
+      e.preventDefault();
+      return;
+    }
+
+    const allowedTypes = ['image/jpeg', 'image/png'];
+    if (!allowedTypes.includes(file.type)) {
+      Swal.fire('Invalid Format', 'Only JPEG or PNG images are allowed.', 'warning');
+      e.preventDefault();
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => img.src = reader.result;
+    reader.readAsDataURL(file);
+
+    e.preventDefault();
+  });
+</script>

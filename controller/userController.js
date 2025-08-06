@@ -224,17 +224,14 @@ const verifyOtp = async (req, res) => {
                     );
                 }
             }
-            req.session.user = {
-                _id: newUser._id,
-                name: newUser.name,
-                email: newUser.email,
-            };
+           req.session.userId = newUser._id.toString();
+
 
             //Clear session and redirect
             req.session.userOtp = null;
             req.session.userData = null;
 
-            return res.json({ success: true, redirectUrl: '/' });
+            return res.json({ success: true, redirectUrl: '/login' });
 
 
         } else {
